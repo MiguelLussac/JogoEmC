@@ -1,0 +1,26 @@
+# Compiled files
+*.o
+*.a
+*.so
+*.exe
+*.out
+
+# Build directories
+build/
+dist/
+bin/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
+
+# Dependencies
+node_modules/
