@@ -1,4 +1,11 @@
-README - Projeto Ilha do Conhecimento (Nome Sugerido)
+# Jogo de Adivinhação 
+
+![C](https://img.shields.io/badge/Language-C-blue?style=for-the-badge&logo=c)
+![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=for-the-badge)
+![Disciplina](https://img.shields.io/badge/Disciplina-FDS-orange?style=for-the-badge)
+![Universidade](https://img.shields.io/badge/Projeto-Faculdade-purple?style=for-the-badge)
+
+Projeto Ilha do Conhecimento
 🏝️ Descrição do Projeto
 
 O projeto consiste em um jogo de perguntas e respostas desenvolvido na linguagem C. A narrativa coloca o jogador em uma ilha deserta, onde ele deve interagir com o ambiente e personagens para escapar. O objetivo central é acertar as perguntas propostas para coletar componentes essenciais (madeira, cordas, velas, etc.) para a construção de uma canoa.
