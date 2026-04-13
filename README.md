@@ -11,17 +11,14 @@ Projeto Ilha do Conhecimento
 O projeto consiste em um jogo de perguntas e respostas desenvolvido na linguagem C. A narrativa coloca o jogador em uma ilha deserta, onde ele deve interagir com o ambiente e personagens para escapar. O objetivo central é acertar as perguntas propostas para coletar componentes essenciais (madeira, cordas, velas, etc.) para a construção de uma canoa.
 👥 Integrantes e Papéis
 
-    Miguel Lussac: Tech Lead & Desenvolvedor Core
-
-    Pedro Augusto: Desenvolvedor Front-end (Raylib)
-
-    Boniek Araujo: Product Owner & Designer de Narrativa
-
-    Caio Cesar: Desenvolvedor Back-end (Lógica de Perguntas)
-
-    Luan Ventura: QA Tester & Documentação
-
-    Allan Max: Desenvolvedor de Assets & UI/UX
+| Integrante | Papel | Histórias de Usuário |
+|---|---|---|
+| **Miguel Victor Lussac Barboza** |  |  |
+| **Boniek Araujo dos Santos Junior** |  |  |
+| **Luan Ventura Ferreira de Moura** |  |  |
+| **Pedro Augusto Carvalho Araujo** |  |  |
+| **Allan Max de Jesus Rodrigues de Lima** |  |  |
+| **Caio Cesar Leandro Amorim** |  |  |
 
 🛠️ Ferramentas Utilizadas
 
