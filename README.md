@@ -5,11 +5,69 @@
 ![Disciplina](https://img.shields.io/badge/Disciplina-FDS-orange?style=for-the-badge)
 ![Universidade](https://img.shields.io/badge/Projeto-Faculdade-purple?style=for-the-badge)
 
-Projeto Ilha do Conhecimento
-🏝️ Descrição do Projeto
+---
 
-O projeto consiste em um jogo de perguntas e respostas desenvolvido na linguagem C. A narrativa coloca o jogador em uma ilha deserta, onde ele deve interagir com o ambiente e personagens para escapar. O objetivo central é acertar as perguntas propostas para coletar componentes essenciais (madeira, cordas, velas, etc.) para a construção de uma canoa.
-👥 Integrantes e Papéis
+## Nome do Jogo
+
+Esta aplicação consiste em um Jogo de Adivinhação Numérica elaborado em linguagem C, integrando as competências de diversas disciplinas do curso. O objetivo é descobrir um valor aleatório estipulado pelo sistema dentro de um limite pré-estabelecido. Durante a partida, o usuário é orientado com dicas sobre a magnitude do seu palpite em relação ao número oculto, prosseguindo até a conclusão do acerto ou o término das chances permitidas.
+
+---
+
+## 🎮 Funcionalidades Principais
+
+- Menu interativo com opções de jogo
+- Geração de número aleatório
+- Feedback a cada tentativa (maior/menor)
+- Limite de tentativas configurável
+- Registro de recordes (High Score)
+- Estatísticas de desempenho
+- Persistência de dados entre sessões
+- Tratamento robusto de erros de entrada
+- Reinicialização de partida
+
+---
+
+## 🛠️ Ferramentas Utilizadas
+
+- **Linguagem:** C
+
+- **Gráficos/Interface:** Raylib
+
+- **Prototipagem:** Figma
+
+- **Editor de Código:** VS Code
+
+- **Gestão de Tarefas:** Trello
+
+- **Controle de Versão:** Git & GitHub
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+jogo-adivinhacao/
+├── src/
+│   ├── main.c           # Ponto de entrada e menu principal
+│   ├── game.c           # Lógica central do jogo
+│   ├── score.c          # Sistema de pontuação e recordes
+│   ├── stats.c          # Estatísticas agregadas
+│   ├── utils.c          # Funções utilitárias e recursão
+│   └── io.c             # Tratamento de entrada/saída
+├── include/
+│   ├── game.h
+│   ├── score.h
+│   ├── stats.h
+│   └── utils.h
+├── data/
+│   └── scores.dat       # Arquivo de persistência
+├── Makefile
+└── README.md
+```
+
+---
+
+## Integrantes e Papéis
 
 | Integrante | Papel | Histórias de Usuário |
 |---|---|---|
@@ -20,19 +78,7 @@ O projeto consiste em um jogo de perguntas e respostas desenvolvido na linguagem
 | **Allan Max de Jesus Rodrigues de Lima** |  |  |
 | **Caio Cesar Leandro Amorim** |  |  |
 
-🛠️ Ferramentas Utilizadas
-
-    Linguagem: C
-
-    Gráficos/Interface: Raylib
-
-    Prototipagem: Figma
-
-    Editor de Código: VS Code
-
-    Gestão de Tarefas: Trello
-
-    Controle de Versão: Git & GitHub
+---
 
 📝 Histórias de Usuário (User Stories)
 
@@ -58,6 +104,7 @@ O projeto consiste em um jogo de perguntas e respostas desenvolvido na linguagem
 
     Condição de Vitória: Eu, como jogador, quero uma tela de conclusão ao finalizar a canoa e conseguir escapar da ilha.
 
+---
 
 📊 Board e Backlog
 
