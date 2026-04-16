@@ -69,14 +69,14 @@ jogo-adivinhacao/
 
 ## Integrantes e Papéis
 
-| Integrante | Papel | Histórias de Usuário |
-|---|---|---|
-| **Miguel Victor Lussac Barboza** |  |  |
-| **Boniek Araujo dos Santos Junior** |  |  |
-| **Luan Ventura Ferreira de Moura** |  |  |
-| **Pedro Augusto Carvalho Araujo** |  |  |
-| **Allan Max de Jesus Rodrigues de Lima** |  |  |
-| **Caio Cesar Leandro Amorim** |  |  |
+| Integrante | Contato | Papel | Histórias de Usuário |
+|---|---|---|---|
+| **Miguel Victor Lussac Barboza** | www.linkedin.com/in/miguellussac | ScrumMaster/Desenvolvedor |  |
+| **Boniek Araujo dos Santos Junior** | www.linkedin.com/in/boniek-junior-561448281 | Desenvovedor |  |
+| **Luan Ventura Ferreira de Moura** | www.linkedin.com/in/luanven | Desenvolvedor/ QA |  |
+| **Pedro Augusto Carvalho Araujo** | www.linkedin.com/in/pedro-carvalho-429945257 | Desenvolvedor/ QA |  |
+| **Allan Max de Jesus Rodrigues de Lima** | www.linkedin.com/in/allan-max-jrl | Desenvolvedor |  |
+| **Caio Cesar Leandro Amorim** | www.linkedin.com/in/caio-cesar-b11b3b373 | Desenvolvedor/ Analista |  |
 
 ---
 
