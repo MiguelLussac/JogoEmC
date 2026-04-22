@@ -71,38 +71,12 @@ jogo-adivinhacao/
 
 | Integrante | Contato | Papel | Histórias de Usuário |
 |---|---|---|---|
-| **Miguel Victor Lussac Barboza** | www.linkedin.com/in/miguellussac | ScrumMaster/Desenvolvedor |  |
-| **Boniek Araujo dos Santos Junior** | www.linkedin.com/in/boniek-junior-561448281 | Desenvovedor |  |
-| **Luan Ventura Ferreira de Moura** | www.linkedin.com/in/luanven | Desenvolvedor/ QA |  |
-| **Pedro Augusto Carvalho Araujo** | www.linkedin.com/in/pedro-carvalho-429945257 | Desenvolvedor/ QA |  |
-| **Allan Max de Jesus Rodrigues de Lima** | www.linkedin.com/in/allan-max-jrl | Desenvolvedor |  |
-| **Caio Cesar Leandro Amorim** | www.linkedin.com/in/caio-cesar-b11b3b373 | Desenvolvedor/ Analista |  |
-
----
-
-📝 Histórias de Usuário (User Stories)
-
-    10 histórias de usuário focadas no valor para o jogador:
-
-    Movimentação: Eu, como jogador, quero conseguir movimentar o personagem pela ilha para explorar o cenário.
-
-    Interação: Eu, como jogador, quero interagir com NPCs ou objetos para iniciar uma rodada de perguntas.
-
-    Desafio de Perguntas: Eu, como jogador, quero visualizar uma pergunta e múltiplas escolhas para testar meus conhecimentos.
-
-    Feedback de Erro/Acerto: Eu, como jogador, quero receber um feedback visual imediato se acertei ou errei a questão.
-
-    Coleta de Itens: Eu, como jogador, quero que, ao acertar uma sequência de perguntas, um componente da canoa seja adicionado ao meu inventário.
-
-    Visualização de Progresso: Eu, como jogador, quero ver o status da construção da canoa para saber quanto falta para terminar.
-
-    Sistema de Vidas/Tentativas: Eu, como jogador, quero ter um limite de erros para que o jogo tenha um desafio real.
-
-    Menu Principal: Eu, como jogador, quero um menu inicial para começar o jogo ou ver as instruções.
-
-    Salvar Progresso (Opcional): Eu, como jogador, gostaria de ter meu progresso salvo para não perder os itens já coletados.
-
-    Condição de Vitória: Eu, como jogador, quero uma tela de conclusão ao finalizar a canoa e conseguir escapar da ilha.
+| **Miguel Victor Lussac Barboza** | www.linkedin.com/in/miguellussac | ScrumMaster/Desenvolvedor | **UH1** - Movimentação (Base essencial) |
+| **Boniek Araujo dos Santos Junior** | www.linkedin.com/in/boniek-junior-561448281 | Desenvovedor | **UH2** - Disparo de Projéteis (Interação principal) & **UH7** - Regras de Tentativa (Controle da mecânica) |
+| **Luan Ventura Ferreira de Moura** | www.linkedin.com/in/luanven | Desenvolvedor/ QA | **UH3** - Sistema de Vidas (Estado do jogador) |
+| **Pedro Augusto Carvalho Araujo** | www.linkedin.com/in/pedro-carvalho-429945257 | Desenvolvedor/ QA | **UH4** - Boss/Vilão Principal & **UH8** - Drop de Atributos (Recompensa/Progressão) |
+| **Allan Max de Jesus Rodrigues de Lima** | www.linkedin.com/in/allan-max-jrl | Desenvolvedor | **UH5** - Sistema de Dano ao Boss (Objetivo de combate) & **UH9** - Aplicação de Buffs (Efeito dos drops)|
+| **Caio Cesar Leandro Amorim** | www.linkedin.com/in/caio-cesar-b11b3b373 | Desenvolvedor/ Analista | **UH6** - Sistema de Advinhação (Mecânica específica) & **UH10** - Sistema de Tempo e Vitória(Contexto da partida)|
 
 ---
 
@@ -111,3 +85,5 @@ jogo-adivinhacao/
 (Espaço reservado para as imagens solicitadas no seu print)
 Quadro Kanban (Print)
 Backlog Priorizado (Print)
+
+<img width="1144" height="567" alt="Captura de tela 2026-04-22 153128" src="https://github.com/user-attachments/assets/af142648-743a-47bd-963a-fe20cb71b9c3" />
