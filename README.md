@@ -80,10 +80,7 @@ jogo-adivinhacao/
 
 ---
 
-📊 Board e Backlog
+## 📊 Board e Backlog (Kanban)
 
-(Espaço reservado para as imagens solicitadas no seu print)
-Quadro Kanban (Print)
-Backlog Priorizado (Print)
 
 <img width="1144" height="567" alt="Captura de tela 2026-04-22 153128" src="https://github.com/user-attachments/assets/af142648-743a-47bd-963a-fe20cb71b9c3" />
