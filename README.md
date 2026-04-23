@@ -82,5 +82,14 @@ jogo-adivinhacao/
 
 ## 📊 Board e Backlog (Kanban)
 
+<img width="1176" height="570" alt="Captura de tela 2026-04-23 155714" src="https://github.com/user-attachments/assets/34e2bb94-0e8c-4dd3-9ce7-a7ef4d2ad1e0" />
 
-<img width="1144" height="567" alt="Captura de tela 2026-04-22 153128" src="https://github.com/user-attachments/assets/af142648-743a-47bd-963a-fe20cb71b9c3" />
+## Protótipo Figma
+
+<p align="center">
+  <img width="45%" height="596" alt="Captura de tela 2026-04-23 155925" src="https://github.com/user-attachments/assets/b8948ca4-215b-4baf-946e-1248f2658c10" />
+  <img width="45%" height="595" alt="Captura de tela 2026-04-23 160136" src="https://github.com/user-attachments/assets/4e3d46f4-ba1e-4ff5-b70f-1b40becc56f5" />
+</p>
+ 
+
+
