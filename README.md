@@ -107,10 +107,12 @@ jogo-adivinhacao/
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/c4a91183-41b3-4137-9076-ef9c826851ad" />
 
 ## UH9 - Aplicação de Buffs (Efeito dos drops)
-[UH9 - Aplicação de Buffs (Efeito dos drops).pdf](https://github.com/user-attachments/files/27028423/UH9.-.Aplicacao.de.Buffs.Efeito.dos.drops.pdf)
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/169fd3b1-faee-48de-b3f6-44f56e77882c" />
 
 ## UH10 - Sistema de Tempo e Vitória(Contexto da partida)
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/78d1854d-160a-405a-9293-1cfc28e22ec9" />
 
+---
 
 # 📊 Board e Backlog (Kanban)
 
