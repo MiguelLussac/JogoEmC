@@ -38,7 +38,7 @@ int main ()
 				DrawRectangleLines(j * cellSize, i * cellSize, cellSize, cellSize, LIGHTGRAY);
 			}
 		}
-
+		/* Inicio do Desenho */
 		DrawCircle(400, 500, 20, WHITE);
 		
 		DrawCircle(380, 500, 5, PINK);
