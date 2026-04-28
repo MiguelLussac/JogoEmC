@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
+#include "player.h"
 
 int main ()
 {
@@ -14,6 +15,10 @@ int main ()
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
 
+	Player jogador;
+	jogador.posicaoX = 400;
+	jogador.velocidade = 5;
+
 	// Load a texture from the resources directory
 	Texture wabbit = LoadTexture("heart.png");
 	
@@ -23,7 +28,7 @@ int main ()
 		// 1. Event Handling
 
 		//2. Updating Positions
-		
+		moverEsquerdaDireita(&jogador);
 		
 		// 3. Drawing
 		BeginDrawing();
@@ -39,7 +44,7 @@ int main ()
 			}
 		}
 		/* Inicio do Desenho */
-		DrawCircle(400, 500, 20, WHITE);
+		drawPlayer(&jogador);
 		
 		DrawCircle(380, 500, 5, PINK);
 		DrawCircle(400, 480, 5, PINK);
