@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "resource_dir.h"	// cabeçalho utilitário para SearchAndSetResourceDir
 #include "player.h"
+#include "boss.h"
 #include <stdbool.h>
 
 #define MAX_BULLETS 10
@@ -17,10 +18,12 @@ int main ()
 	// Função utilitária de resource_dir.h para encontrar a pasta de recursos e defini-la como diretório de trabalho atual para carregar dela
 	SearchAndSetResourceDir("resources");
 
+	// Inicialização do Jogador
 	Player jogador;
 	jogador.posicaoX = 400;
 	jogador.velocidade = 300; // pixels por segundo
 
+	// Inicialização das Balas
 	Bullet bala[MAX_BULLETS];
 	for (int i = 0; i < MAX_BULLETS; i++) {
 		bala[i].posicaoX = 380;
@@ -29,6 +32,10 @@ int main ()
 		bala[i].ativa = false;
 	}
 
+	// Inicialização do Boss
+	Boss boss;
+	inicializarBoss(&boss);
+
 	// Carrega uma textura do diretório de recursos
 	Texture wabbit = LoadTexture("heart.png");
 	
@@ -36,16 +43,20 @@ int main ()
 	while (!WindowShouldClose())
 	{
 		// 1. Tratamento de Eventos e Delta Time
-
-		//2. Atualizando Posições
 		float deltaTime = GetFrameTime(); // Captura o tempo do frame
+		//2. Atualizando Posições
+		
 		moverEsquerdaDireita(&jogador, deltaTime);
 
+		// Atualiza a posição das balas
 		moverBalas(bala, MAX_BULLETS, deltaTime);
+
+		// Verifica se o jogador atirou
 		atirar(&jogador, bala, MAX_BULLETS);
 
+		// Atualiza a posição do boss
+		moverBoss(&boss, deltaTime);
 
-		
 		// 3. Desenho
 		BeginDrawing();
 		ClearBackground(BLACK);
@@ -60,10 +71,17 @@ int main ()
 			}
 		}
 		/* Inicio do Desenho */
+
+		// Desenha o jogador
 		drawPlayer(&jogador);
+
+		// Desenha as balas
 		drawBalas(bala, MAX_BULLETS);
 
-		// Debug
+		// Desenha o boss
+		drawBoss(&boss);
+		
+		/*Debug*/
 		
 		// Mostra se ao menos uma bala está ativa
 		bool algumaAtiva = false;
