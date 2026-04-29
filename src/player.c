@@ -30,7 +30,7 @@ void moverBalas(Bullet bullets[], int count, float deltaTime) {
     }
 }
 
-void drawBalas(Bullet bullets[], int count, float deltaTime) {
+void drawBalas(Bullet bullets[], int count) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
             DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, 5, YELLOW);
@@ -44,7 +44,7 @@ void atirar(Player* player, Bullet bullets[], int count) {
             if (!bullets[i].ativa) {
                 bullets[i].posicaoX = player->posicaoX;
                 bullets[i].posicaoY = 480; // Posição inicial da bala
-                bullets[i].velocidade = 10;
+                bullets[i].velocidade = 500.0f; // Velocidade aumentada para balas mais rápidas
                 bullets[i].ativa = true;
                 break;
             }
