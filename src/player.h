@@ -4,21 +4,21 @@
 #include <stdbool.h>
 
 typedef struct {
-    int posicaoX;
-    int velocidade;
+    float posicaoX;
+    float velocidade;
 } Player;
 
-void moverEsquerdaDireita(Player* player);
+void moverEsquerdaDireita(Player* player, float deltaTime);
 void drawPlayer(Player* player);
 
 typedef struct {
-    int posicaoX;
-    int posicaoY;
-    int velocidade;
+    float posicaoX;
+    float posicaoY;
+    float velocidade;
     bool ativa;
 } Bullet;
 
-void moverBalas(Bullet bullets[], int count);
+void moverBalas(Bullet bullets[], int count, float deltaTime);
 void drawBalas(Bullet bullets[], int count);
 void atirar(Player* player, Bullet bullets[], int count);
 
