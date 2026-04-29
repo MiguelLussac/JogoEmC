@@ -2,10 +2,10 @@
 #include "raylib.h"
 
 void moverEsquerdaDireita(Player* player) {
-    if (IsKeyDown(KEY_LEFT)) {
+    if (IsKeyDown(KEY_LEFT || KEY_A)) {
         player->posicaoX -= player->velocidade;
     }
-    if (IsKeyDown(KEY_RIGHT)) {
+    if (IsKeyDown(KEY_RIGHT || KEY_D)) {
         player->posicaoX += player->velocidade;
     }
     if (player->posicaoX < 20) player->posicaoX = 20;
