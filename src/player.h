@@ -18,8 +18,8 @@ typedef struct {
     bool ativa;
 } Bullet;
 
-void moverBala(Bullet* bullet);
-void drawBullet(Bullet* bullet);
-void atirar(Player* player, Bullet* bullet);
+void moverBalas(Bullet bullets[], int count);
+void drawBalas(Bullet bullets[], int count);
+void atirar(Player* player, Bullet bullets[], int count);
 
 #endif // PLAYER_H

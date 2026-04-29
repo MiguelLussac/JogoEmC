@@ -16,26 +16,36 @@ void drawPlayer(Player* player) {
     DrawCircle(player->posicaoX, 500, 20, WHITE);
 }
 
-void moverBala(Bullet* bullet) {
-    if (bullet->ativa) {
-        bullet->posicaoY -= bullet->velocidade;
-        if (bullet->posicaoY < 0) {
-            bullet->ativa = false;
+void moverBalas(Bullet bullets[], int count) {
+    for (int i = 0; i < count; i++) {
+        if (bullets[i].ativa) {
+            bullets[i].posicaoY -= bullets[i].velocidade;
+            if (bullets[i].posicaoY < 0) {
+                bullets[i].ativa = false;
+            }
         }
     }
 }
 
-void drawBullet(Bullet* bullet) {
-    if (bullet->ativa) {
-        DrawCircle(bullet->posicaoX, bullet->posicaoY, 5, YELLOW);
+void drawBalas(Bullet bullets[], int count) {
+    for (int i = 0; i < count; i++) {
+        if (bullets[i].ativa) {
+            DrawCircle(bullets[i].posicaoX, bullets[i].posicaoY, 5, YELLOW);
+        }
     }
 }
 
-void atirar(Player* player, Bullet* bullet) {
-    if (IsKeyPressed(KEY_SPACE) && !bullet->ativa) {
-        bullet->posicaoX = player->posicaoX;
-        bullet->posicaoY = 480; // Posição inicial da bala
-        bullet->ativa = true;
+void atirar(Player* player, Bullet bullets[], int count) {
+    if (IsKeyPressed(KEY_SPACE)) {
+        for (int i = 0; i < count; i++) {
+            if (!bullets[i].ativa) {
+                bullets[i].posicaoX = player->posicaoX;
+                bullets[i].posicaoY = 480; // Posição inicial da bala
+                bullets[i].velocidade = 10;
+                bullets[i].ativa = true;
+                break;
+            }
+        }
     }
 }
     

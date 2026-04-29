@@ -2,13 +2,14 @@
 #include "resource_dir.h"	// cabeçalho utilitário para SearchAndSetResourceDir
 #include "player.h"
 
+#define MAX_BULLETS 10
 int main ()
 {
 	// Diz à janela para usar vsync e funcionar em displays de alta DPI
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
 	// Cria a Janela do Jogo 
-	InitWindow(800, 600, "Galaga: Show do Milhão");
+	InitWindow(800, 600, "MindDrop");
 	// Define o FPS Maximo que o jogo pode chegar
 	SetTargetFPS(60);
 
@@ -19,11 +20,13 @@ int main ()
 	jogador.posicaoX = 400;
 	jogador.velocidade = 5;
 
-	Bullet bala;
-	bala.posicaoX = 380;
-	bala.posicaoY = 500;
-	bala.velocidade = 10;
-	bala.ativa = false;
+	Bullet bala[MAX_BULLETS];
+	for (int i = 0; i < MAX_BULLETS; i++) {
+		bala[i].posicaoX = 380;
+		bala[i].posicaoY = 500;
+		bala[i].velocidade = 10;
+		bala[i].ativa = false;
+	}
 
 	// Carrega uma textura do diretório de recursos
 	Texture wabbit = LoadTexture("heart.png");
@@ -36,9 +39,8 @@ int main ()
 		//2. Atualizando Posições
 		moverEsquerdaDireita(&jogador);
 
-		moverBala(&bala);
-		
-		atirar(&jogador, &bala);
+		moverBalas(bala, MAX_BULLETS);
+		atirar(&jogador, bala, MAX_BULLETS);
 
 
 		
@@ -57,13 +59,20 @@ int main ()
 		}
 		/* Inicio do Desenho */
 		drawPlayer(&jogador);
-		drawBullet(&bala);
+		drawBalas(bala, MAX_BULLETS);
 
-		// Debug: mostra se a bala está ativa
-		if (bala.ativa) {
-			DrawText("Bala ativa!", 50, 80, 20, GREEN);
+		// Debug: mostra se ao menos uma bala está ativa
+		bool algumaAtiva = false;
+		for (int i = 0; i < MAX_BULLETS; i++) {
+			if (bala[i].ativa) {
+				algumaAtiva = true;
+				break;
+			}
+		}
+		if (algumaAtiva) {
+			DrawText("Balas ativas!", 50, 80, 20, GREEN);
 		} else {
-			DrawText("Bala inativa", 50, 80, 20, RED);
+			DrawText("Nenhuma bala ativa", 50, 80, 20, RED);
 		}
 
 		DrawText("Movimentação Inicial", 50,50,20,WHITE);
