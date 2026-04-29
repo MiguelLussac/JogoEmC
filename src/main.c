@@ -19,6 +19,12 @@ int main ()
 	jogador.posicaoX = 400;
 	jogador.velocidade = 5;
 
+	Bullet bala;
+	bala.posicaoX = 380;
+	bala.posicaoY = 500;
+	bala.velocidade = 10;
+	bala.ativa = false;
+
 	// Carrega uma textura do diretório de recursos
 	Texture wabbit = LoadTexture("heart.png");
 	
@@ -29,6 +35,12 @@ int main ()
 
 		//2. Atualizando Posições
 		moverEsquerdaDireita(&jogador);
+
+		moverBala(&bala);
+		
+		atirar(&jogador, &bala);
+
+
 		
 		// 3. Desenho
 		BeginDrawing();
@@ -45,9 +57,15 @@ int main ()
 		}
 		/* Inicio do Desenho */
 		drawPlayer(&jogador);
-		
-		DrawCircle(380, 500, 5, PINK);
-		DrawCircle(400, 480, 5, PINK);
+		drawBullet(&bala);
+
+		// Debug: mostra se a bala está ativa
+		if (bala.ativa) {
+			DrawText("Bala ativa!", 50, 80, 20, GREEN);
+		} else {
+			DrawText("Bala inativa", 50, 80, 20, RED);
+		}
+
 		DrawText("Movimentação Inicial", 50,50,20,WHITE);
 		
 		DrawTriangle((Vector2){ 380.0f, 520.0f }, // Final do Triangulo
