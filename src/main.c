@@ -1,6 +1,6 @@
 #include "raylib.h"
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
-#include "player.h"
+#include "./player/player.h"
 
 int main ()
 {
@@ -8,7 +8,7 @@ int main ()
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
 	// Cria a Janela do Jogo 
-	InitWindow(800, 600, "Galaga: Show do Milhão");
+	InitWindow(800, 600, "MindDrop");
 	// Define o FPS Maximo que o jogo pode chegar
 	SetTargetFPS(60);
 

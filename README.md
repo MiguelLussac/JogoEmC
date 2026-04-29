@@ -134,20 +134,17 @@ Instalação do compilador GCC/G++
 
 ALERTA: NAO COPIE OS ASTERISCOS!
 
-1. No terminal digite: **winget install MSYS2.MSYS2**
+1. No terminal (powershell do computador) digite: **winget install MSYS2.MSYS2**
 2. Após instalação, abra o **MSYS2 UCRT64**
 3. No MSYS2 UCRT64, digite o comando:  **pacman -S mingw-w64-ucrt-x86_64-gcc** e aceite os termos de instalação digitando **Y**
 4. Inclua o **C:\msys64\ucrt64\bin** no **PATH** do sistema
 5. Feche e abra o Terminal e verifique a instalação digitando: **gcc --version** e depois **g++ --version**
 6. **Se por alguma razão você não consiga instalar o MSYS2 via gerenciador de pacotes winget, baixe o instalador oficial e instale o compilador, depois siga com os passos 2 a 5.**
 
-### macOS
+### macOS e Linux
 
-Dispositivos com macOS já vem de fábrica com o compilador GCC instalado.
+Dispositivos com macOS e Linux já vem de fábrica com o compilador GCC instalado.
 
-### Linux
-
-Dispositivos com distros Linux já vem de fábrica com o compilador GCC instalado.
 # Clonar o repositório já com o nome local do projeto
 git clone https://github.com/MiguelLussac/JogoEmC.git MindDrop
 cd MindDrop
@@ -159,6 +156,8 @@ cd ..
 
 # Compilar o projeto completo em modo debug usando o Makefile raiz
 mingw32-make config=debug_x64
+
+# Aperta `F5` (no vs-code)
 ```
 
 Ou, no Windows, basta executar:
