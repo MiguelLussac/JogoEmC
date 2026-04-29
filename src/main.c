@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "resource_dir.h"	// cabeçalho utilitário para SearchAndSetResourceDir
 #include "player.h"
+#include <stdbool.h>
 
 #define MAX_BULLETS 10
 int main ()
@@ -18,7 +19,7 @@ int main ()
 
 	Player jogador;
 	jogador.posicaoX = 400;
-	jogador.velocidade = 5;
+	jogador.velocidade = 300; // pixels por segundo
 
 	Bullet bala[MAX_BULLETS];
 	for (int i = 0; i < MAX_BULLETS; i++) {
@@ -34,12 +35,13 @@ int main ()
 	// loop do jogo
 	while (!WindowShouldClose())
 	{
-		// 1. Tratamento de Eventos
+		// 1. Tratamento de Eventos e Delta Time
 
 		//2. Atualizando Posições
-		moverEsquerdaDireita(&jogador);
+		float deltaTime = GetFrameTime(); // Captura o tempo do frame
+		moverEsquerdaDireita(&jogador, deltaTime);
 
-		moverBalas(bala, MAX_BULLETS);
+		moverBalas(bala, MAX_BULLETS, deltaTime);
 		atirar(&jogador, bala, MAX_BULLETS);
 
 
@@ -61,7 +63,9 @@ int main ()
 		drawPlayer(&jogador);
 		drawBalas(bala, MAX_BULLETS);
 
-		// Debug: mostra se ao menos uma bala está ativa
+		// Debug
+		
+		// Mostra se ao menos uma bala está ativa
 		bool algumaAtiva = false;
 		for (int i = 0; i < MAX_BULLETS; i++) {
 			if (bala[i].ativa) {
@@ -75,8 +79,10 @@ int main ()
 			DrawText("Nenhuma bala ativa", 50, 80, 20, RED);
 		}
 
+		// Desenha o texto "Movimentação Inicial" no canto superior esquerdo da tela
 		DrawText("Movimentação Inicial", 50,50,20,WHITE);
-		
+
+		//
 		DrawTriangle((Vector2){ 380.0f, 520.0f }, // Final do Triangulo
 				   (Vector2){ 400.0f, 500.0f }, 
 				   (Vector2){ 420.0f, 500.0f }, VIOLET);
@@ -85,7 +91,9 @@ int main ()
 	}
 
 	// limpeza
+
 	// descarrega nossa textura para que possa ser limpa
+
 	// UnloadTexture(wabbit);
 
 	// destrói a janela e limpa o contexto OpenGL
