@@ -5,6 +5,7 @@
 
 typedef struct {
     float posicaoX;
+    float posicaoY;
     float velocidade;
 } Player;
 
