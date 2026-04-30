@@ -60,6 +60,7 @@ int main ()
 
 		// Atualiza a posição do boss
 		moverBoss(&boss, deltaTime);
+		atualizarFeedbackDanoBoss(&boss, deltaTime);
 		verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
 		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
 		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
@@ -87,6 +88,7 @@ int main ()
 
 		// Desenha o boss
 		drawBoss(&boss);
+		drawBarraVidaBoss(&boss);
 		drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
 		
 		/*Debug*/
