@@ -60,6 +60,7 @@ int main ()
 
 		// Atualiza a posição do boss
 		moverBoss(&boss, deltaTime);
+		verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
 		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
 		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
 

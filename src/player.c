@@ -34,7 +34,7 @@ void moverBalas(Bullet bullets[], int count, float deltaTime) {
 void drawBalas(Bullet bullets[], int count) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
-            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, 5, YELLOW);
+            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, PLAYER_BULLET_RADIUS, YELLOW);
         }
     }
 }

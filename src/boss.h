@@ -30,6 +30,7 @@ typedef struct {
 void inicializarBoss(Boss* boss);
 void moverBoss(Boss* boss, float deltaTime);
 void drawBoss(Boss* boss);
+void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count);
 void inicializarBalasBoss(BossBullet bullets[], int count);
 void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player* player, float deltaTime);
 void moverBalasBoss(BossBullet bullets[], int count, float deltaTime);

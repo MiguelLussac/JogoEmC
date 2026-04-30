@@ -6,6 +6,15 @@
 #define SCREEN_HEIGHT 600
 #define BOSS_BULLET_RADIUS 6
 
+static Rectangle getBossRect(const Boss* boss) {
+    return (Rectangle) {
+        boss->posicaoX - (boss->largura / 2.0f),
+        boss->posicaoY - (boss->altura / 2.0f),
+        boss->largura,
+        boss->altura
+    };
+}
+
 void inicializarBoss(Boss* boss) {
     boss->posicaoX = 400.0f;
     boss->posicaoY = 100.0f;
@@ -42,6 +51,19 @@ void drawBoss(Boss* boss) {
             (int)boss->altura,
             RED
         );
+    }
+}
+
+void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count) {
+    if (!boss->ativa) return;
+
+    Rectangle bossRect = getBossRect(boss);
+
+    for (int i = 0; i < count; i++) {
+        if (bullets[i].ativa &&
+            CheckCollisionCircleRec((Vector2){ bullets[i].posicaoX, bullets[i].posicaoY }, PLAYER_BULLET_RADIUS, bossRect)) {
+            bullets[i].ativa = false;
+        }
     }
 }
 
