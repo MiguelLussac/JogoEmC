@@ -3,8 +3,11 @@
 
 #include <stdbool.h>
 
+#define PLAYER_BULLET_RADIUS 5
+
 typedef struct {
     float posicaoX;
+    float posicaoY;
     float velocidade;
 } Player;
 

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define MAX_BULLETS 10
+#define MAX_BOSS_BULLETS 10
 int main ()
 {
 	// Diz à janela para usar vsync e funcionar em displays de alta DPI
@@ -21,6 +22,7 @@ int main ()
 	// Inicialização do Jogador
 	Player jogador;
 	jogador.posicaoX = 400;
+	jogador.posicaoY = 500;
 	jogador.velocidade = 300; // pixels por segundo
 
 	// Inicialização das Balas
@@ -35,6 +37,8 @@ int main ()
 	// Inicialização do Boss
 	Boss boss;
 	inicializarBoss(&boss);
+	BossBullet balasBoss[MAX_BOSS_BULLETS];
+	inicializarBalasBoss(balasBoss, MAX_BOSS_BULLETS);
 
 	// Carrega uma textura do diretório de recursos
 	Texture wabbit = LoadTexture("heart.png");
@@ -56,6 +60,10 @@ int main ()
 
 		// Atualiza a posição do boss
 		moverBoss(&boss, deltaTime);
+		atualizarFeedbackDanoBoss(&boss, deltaTime);
+		verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
+		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
+		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
 
 		// 3. Desenho
 		BeginDrawing();
@@ -80,6 +88,8 @@ int main ()
 
 		// Desenha o boss
 		drawBoss(&boss);
+		drawBarraVidaBoss(&boss);
+		drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
 		
 		/*Debug*/
 		
@@ -112,7 +122,7 @@ int main ()
 
 	// descarrega nossa textura para que possa ser limpa
 
-	// UnloadTexture(wabbit);
+	UnloadTexture(wabbit);
 
 	// destrói a janela e limpa o contexto OpenGL
 	CloseWindow();
