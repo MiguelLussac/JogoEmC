@@ -1,6 +1,6 @@
 #include "raylib.h"
-#include "resource_dir.h"	// cabeçalho utilitário para SearchAndSetResourceDir
-#include "player.h"
+#include "resource_dir.h"  // Utility header for SearchAndSetResourceDir
+#include "./player/player.h"
 #include "boss.h"
 #include <stdbool.h>
 
@@ -8,16 +8,15 @@
 #define MAX_BOSS_BULLETS 10
 int main ()
 {
-	// Diz à janela para usar vsync e funcionar em displays de alta DPI
-	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
+    // Tell the window to use vsync and work on high DPI displays
+    SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
-	// Cria a Janela do Jogo 
-	InitWindow(800, 600, "MindDrop");
-	// Define o FPS Maximo que o jogo pode chegar
-	SetTargetFPS(60);
+    // Create the game window
+    InitWindow(800, 600, "MindDrop");
+    SetTargetFPS(60);
 
-	// Função utilitária de resource_dir.h para encontrar a pasta de recursos e defini-la como diretório de trabalho atual para carregar dela
-	SearchAndSetResourceDir("resources");
+    // Set the resources directory as the working directory
+    SearchAndSetResourceDir("resources");
 
 	// Inicialização do Jogador
 	Player jogador;
@@ -25,14 +24,13 @@ int main ()
 	jogador.posicaoY = 500;
 	jogador.velocidade = 300; // pixels por segundo
 
-	// Inicialização das Balas
-	Bullet bala[MAX_BULLETS];
-	for (int i = 0; i < MAX_BULLETS; i++) {
-		bala[i].posicaoX = 380;
-		bala[i].posicaoY = 500;
-		bala[i].velocidade = 10;
-		bala[i].ativa = false;
-	}
+    Bullet bala[MAX_BULLETS];
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        bala[i].posicaoX = 380;
+        bala[i].posicaoY = 500;
+        bala[i].velocidade = 10;
+        bala[i].ativa = false;
+    }
 
 	// Inicialização do Boss
 	Boss boss;
@@ -40,23 +38,15 @@ int main ()
 	BossBullet balasBoss[MAX_BOSS_BULLETS];
 	inicializarBalasBoss(balasBoss, MAX_BOSS_BULLETS);
 
-	// Carrega uma textura do diretório de recursos
-	Texture wabbit = LoadTexture("heart.png");
-	
-	// loop do jogo
-	while (!WindowShouldClose())
-	{
-		// 1. Tratamento de Eventos e Delta Time
-		float deltaTime = GetFrameTime(); // Captura o tempo do frame
-		//2. Atualizando Posições
-		
-		moverEsquerdaDireita(&jogador, deltaTime);
+    Texture wabbit = LoadTexture("heart.png");
 
-		// Atualiza a posição das balas
-		moverBalas(bala, MAX_BULLETS, deltaTime);
+    while (!WindowShouldClose()) {
+        float deltaTime = GetFrameTime();
 
-		// Verifica se o jogador atirou
-		atirar(&jogador, bala, MAX_BULLETS);
+        moverEsquerdaDireita(&jogador, deltaTime);
+        moverBalas(bala, MAX_BULLETS, deltaTime);
+        atirar(&jogador, bala, MAX_BULLETS);
+        moverBoss(&boss, deltaTime);
 
 		// Atualiza a posição do boss
 		moverBoss(&boss, deltaTime);
@@ -65,26 +55,27 @@ int main ()
 		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
 		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
 
-		// 3. Desenho
-		BeginDrawing();
-		ClearBackground(BLACK);
-		int rows = 60;
-		int cols = 80;
-		int cellSize = 10;
+        int rows = 60;
+        int cols = 80;
+        int cellSize = 10;
 
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				// Desenha linhas para cada célula
-				DrawRectangleLines(j * cellSize, i * cellSize, cellSize, cellSize, LIGHTGRAY);
-			}
-		}
-		/* Inicio do Desenho */
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                DrawRectangleLines(j * cellSize, i * cellSize, cellSize, cellSize, LIGHTGRAY);
+            }
+        }
 
-		// Desenha o jogador
-		drawPlayer(&jogador);
+        drawPlayer(&jogador);
+        drawBalas(bala, MAX_BULLETS);
+        drawBoss(&boss);
 
-		// Desenha as balas
-		drawBalas(bala, MAX_BULLETS);
+        bool algumaAtiva = false;
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            if (bala[i].ativa) {
+                algumaAtiva = true;
+                break;
+            }
+        }
 
 		// Desenha o boss
 		drawBoss(&boss);
@@ -107,13 +98,16 @@ int main ()
 			DrawText("Nenhuma bala ativa", 50, 80, 20, RED);
 		}
 
-		// Desenha o texto "Movimentação Inicial" no canto superior esquerdo da tela
-		DrawText("Movimentação Inicial", 50,50,20,WHITE);
+        DrawText("Movimentacao Inicial", 50, 50, 20, WHITE);
+        DrawTriangle(
+            (Vector2){380.0f, 520.0f},
+            (Vector2){400.0f, 500.0f},
+            (Vector2){420.0f, 500.0f},
+            VIOLET
+        );
 
-		//
-		DrawTriangle((Vector2){ 380.0f, 520.0f }, // Final do Triangulo
-				   (Vector2){ 400.0f, 500.0f }, 
-				   (Vector2){ 420.0f, 500.0f }, VIOLET);
+        EndDrawing();
+    }
 
 		EndDrawing();
 	}

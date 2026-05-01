@@ -78,14 +78,14 @@ MindDrop/
 
 ## 👥 Equipe e Responsabilidades
 
-| Integrante | Papel | Histórias de Usuário |
-|---|---|---|
-| **Allan Max de Jesus Rodrigues de Lima** | Desenvolvedor | [UH1] Movimentação (Base essencial) · [UH7] Regras de Tentativa (Controle da mecânica) |
-| **Boniek Araujo dos Santos Junior** | Desenvolvedor | [UH2] Disparo de Projéteis (Interação principal) · [UH8] Drop de Atributos (Recompensa/Progressão) |
-| **Caio César Leandro Amorim** | Desenvolvedor | [UH3] Sistema de Vidas (Estado do jogador) · [UH9] Aplicação de Buffs (Efeito dos drops) |
-| **Luan Ventura Ferreira de Moura** | Desenvolvedor | [UH4] Boss/Vilão Principal · [UH5] Sistema de Dano ao Boss (Objetivo de combate) |
-| **Miguel Victor Lussac Barboza** | Desenvolvedor | [UH6] Sistema de Advinhação (Mecânica específica) |
-| **Pedro Augusto Carvalho Araujo** | Desenvolvedor | [UH10] Sistema de Tempo e Vitória (Contexto da partida) |
+| Integrante                               | Papel         | Histórias de Usuário                                                                               |
+| ---------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------- |
+| **Allan Max de Jesus Rodrigues de Lima** | Desenvolvedor | [UH1] Movimentação (Base essencial) · [UH7] Regras de Tentativa (Controle da mecânica)             |
+| **Boniek Araujo dos Santos Junior**      | Desenvolvedor | [UH2] Disparo de Projéteis (Interação principal) · [UH8] Drop de Atributos (Recompensa/Progressão) |
+| **Caio César Leandro Amorim**            | Desenvolvedor | [UH3] Sistema de Vidas (Estado do jogador) · [UH9] Aplicação de Buffs (Efeito dos drops)           |
+| **Luan Ventura Ferreira de Moura**       | Desenvolvedor | [UH4] Boss/Vilão Principal · [UH5] Sistema de Dano ao Boss (Objetivo de combate)                   |
+| **Miguel Victor Lussac Barboza**         | Desenvolvedor | [UH6] Sistema de Advinhação (Mecânica específica)                                                  |
+| **Pedro Augusto Carvalho Araujo**        | Desenvolvedor | [UH10] Sistema de Tempo e Vitória (Contexto da partida)                                            |
 
 Todas as histórias de usuário de `UH1` a `UH10` foram incluídas e associadas a um integrante.
 
@@ -97,21 +97,21 @@ Todas as histórias de usuário de `UH1` a `UH10` foram incluídas e associadas 
 
 <img width="1910" height="786" alt="image" src="https://github.com/user-attachments/assets/78fa20ae-4eaa-4425-b599-b8022b91e339" />
 
+## </div>
 
-</div>
----
 ## ✍️ Protótipo de Baixa Fidelidade
+
 <div align="center">
   <img width="543" height="898" alt="image" src="https://github.com/user-attachments/assets/6e439fc7-cb4d-4a33-8126-c64436384351" />
 
-  
 </div>
 
 ---
+
 ## 🎥 Demo
 
-
 ---
+
 ## 🚀 Como Compilar e Executar
 
 ### Pré-requisitos
@@ -131,20 +131,20 @@ Todas as histórias de usuário de `UH1` a `UH10` foram incluídas e associadas 
 # Instale MinGW / Compilador GCC/G++
 
 Instalação do compilador GCC/G++
-1. No terminal digite: **winget install MSYS2.MSYS2**
+
+ALERTA: NAO COPIE OS ASTERISCOS!
+
+1. No terminal (powershell do computador) digite: **winget install MSYS2.MSYS2**
 2. Após instalação, abra o **MSYS2 UCRT64**
 3. No MSYS2 UCRT64, digite o comando:  **pacman -S mingw-w64-ucrt-x86_64-gcc** e aceite os termos de instalação digitando **Y**
 4. Inclua o **C:\msys64\ucrt64\bin** no **PATH** do sistema
 5. Feche e abra o Terminal e verifique a instalação digitando: **gcc --version** e depois **g++ --version**
 6. **Se por alguma razão você não consiga instalar o MSYS2 via gerenciador de pacotes winget, baixe o instalador oficial e instale o compilador, depois siga com os passos 2 a 5.**
 
-### macOS
+### macOS e Linux
 
-Dispositivos com macOS já vem de fábrica com o compilador GCC instalado.
+Dispositivos com macOS e Linux já vem de fábrica com o compilador GCC instalado.
 
-### Linux
-
-Dispositivos com distros Linux já vem de fábrica com o compilador GCC instalado.
 # Clonar o repositório já com o nome local do projeto
 git clone https://github.com/MiguelLussac/JogoEmC.git MindDrop
 cd MindDrop
@@ -156,6 +156,8 @@ cd ..
 
 # Compilar o projeto completo em modo debug usando o Makefile raiz
 mingw32-make config=debug_x64
+
+# Aperta `F5` (no vs-code)
 ```
 
 Ou, no Windows, basta executar:
