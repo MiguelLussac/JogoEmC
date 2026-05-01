@@ -5,8 +5,8 @@
 #include <stdbool.h>
 
 #define MAX_BULLETS 10
-
-int main(void)
+#define MAX_BOSS_BULLETS 10
+int main ()
 {
     // Tell the window to use vsync and work on high DPI displays
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
@@ -18,9 +18,11 @@ int main(void)
     // Set the resources directory as the working directory
     SearchAndSetResourceDir("resources");
 
-    Player jogador;
-    jogador.posicaoX = 400;
-    jogador.velocidade = 300; // pixels per second
+	// Inicialização do Jogador
+	Player jogador;
+	jogador.posicaoX = 400;
+	jogador.posicaoY = 500;
+	jogador.velocidade = 300; // pixels por segundo
 
     Bullet bala[MAX_BULLETS];
     for (int i = 0; i < MAX_BULLETS; i++) {
@@ -30,8 +32,11 @@ int main(void)
         bala[i].ativa = false;
     }
 
-    Boss boss;
-    inicializarBoss(&boss);
+	// Inicialização do Boss
+	Boss boss;
+	inicializarBoss(&boss);
+	BossBullet balasBoss[MAX_BOSS_BULLETS];
+	inicializarBalasBoss(balasBoss, MAX_BOSS_BULLETS);
 
     Texture wabbit = LoadTexture("heart.png");
 
@@ -43,8 +48,12 @@ int main(void)
         atirar(&jogador, bala, MAX_BULLETS);
         moverBoss(&boss, deltaTime);
 
-        BeginDrawing();
-        ClearBackground(BLACK);
+		// Atualiza a posição do boss
+		moverBoss(&boss, deltaTime);
+		atualizarFeedbackDanoBoss(&boss, deltaTime);
+		verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
+		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
+		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
 
         int rows = 60;
         int cols = 80;
@@ -68,11 +77,26 @@ int main(void)
             }
         }
 
-        if (algumaAtiva) {
-            DrawText("Balas ativas!", 50, 80, 20, GREEN);
-        } else {
-            DrawText("Nenhuma bala ativa", 50, 80, 20, RED);
-        }
+		// Desenha o boss
+		drawBoss(&boss);
+		drawBarraVidaBoss(&boss);
+		drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
+		
+		/*Debug*/
+		
+		// Mostra se ao menos uma bala está ativa
+		bool algumaAtiva = false;
+		for (int i = 0; i < MAX_BULLETS; i++) {
+			if (bala[i].ativa) {
+				algumaAtiva = true;
+				break;
+			}
+		}
+		if (algumaAtiva) {
+			DrawText("Balas ativas!", 50, 80, 20, GREEN);
+		} else {
+			DrawText("Nenhuma bala ativa", 50, 80, 20, RED);
+		}
 
         DrawText("Movimentacao Inicial", 50, 50, 20, WHITE);
         DrawTriangle(
@@ -85,7 +109,16 @@ int main(void)
         EndDrawing();
     }
 
-    UnloadTexture(wabbit);
-    CloseWindow();
-    return 0;
+		EndDrawing();
+	}
+
+	// limpeza
+
+	// descarrega nossa textura para que possa ser limpa
+
+	UnloadTexture(wabbit);
+
+	// destrói a janela e limpa o contexto OpenGL
+	CloseWindow();
+	return 0;
 }
