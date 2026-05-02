@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "resource_dir.h"  // Utility header for SearchAndSetResourceDir
-#include "./player/player.h"
-#include "boss.h"
+#include "player/player.h"
+#include "boss/boss.h"
 #include <stdbool.h>
 
 #define MAX_BULLETS 10

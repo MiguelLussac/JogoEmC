@@ -2,7 +2,7 @@
 #define BOSS_H
 
 #include <stdbool.h>
-#include "player/player.h"
+#include "../player/player.h"
 
 #define BOSS_MAX_HP 10
 #define BOSS_BULLET_COOLDOWN 1.0f

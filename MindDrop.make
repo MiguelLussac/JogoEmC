@@ -187,7 +187,7 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/boss.o: src/boss.c
+$(OBJDIR)/boss.o: src/boss/boss.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.c
