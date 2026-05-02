@@ -5,7 +5,6 @@
 ![C](https://img.shields.io/badge/Language-C-blue?style=for-the-badge&logo=c)
 ![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=for-the-badge)
 ![Disciplina](https://img.shields.io/badge/Disciplina-FDS-orange?style=for-the-badge)
-![Universidade](https://img.shields.io/badge/Projeto-Faculdade-purple?style=for-the-badge)
 
 </div>
 
