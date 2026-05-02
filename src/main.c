@@ -9,11 +9,9 @@
 int main () {
     // Tell the window to use vsync and work on high DPI displays
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-
     // Create the game window
     InitWindow(800, 600, "MindDrop");
     SetTargetFPS(60);
-
     // Set the resources directory as the working directory
     SearchAndSetResourceDir("resources");
 
@@ -37,10 +35,10 @@ int main () {
 	BossBullet balasBoss[MAX_BOSS_BULLETS];
 	inicializarBalasBoss(balasBoss, MAX_BOSS_BULLETS);
 
-    Texture wabbit = LoadTexture("heart.png");
-
+    // Loop Principal
     while (!WindowShouldClose()) {
         BeginDrawing();
+        ClearBackground(BLACK);
         float deltaTime = GetFrameTime();
 
         moverEsquerdaDireita(&jogador, deltaTime);
@@ -54,16 +52,18 @@ int main () {
 		verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
 		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
 		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
+        
 
-        int rows = 60;
-        int cols = 80;
-        int cellSize = 10;
+        // Grid de Pixels 60x80
+        // int rows = 60;
+        // int cols = 80;
+        // int cellSize = 10;
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                DrawRectangleLines(j * cellSize, i * cellSize, cellSize, cellSize, LIGHTGRAY);
-            }
-        }
+        // for (int i = 0; i < rows; i++) {
+        //     for (int j = 0; j < cols; j++) {
+        //         DrawRectangleLines(j * cellSize, i * cellSize, cellSize, cellSize, LIGHTGRAY);
+        //     }
+        // }
 
         drawPlayer(&jogador);
         drawBalas(bala, MAX_BULLETS);
