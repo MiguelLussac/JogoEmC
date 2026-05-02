@@ -8,8 +8,6 @@
 
 </div>
 
-![Projeto](https://img.shields.io/badge/MindDrop-red)
-
 ---
 
 ## 📋 Sobre o Projeto
