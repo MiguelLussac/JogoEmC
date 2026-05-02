@@ -6,8 +6,7 @@
 
 #define MAX_BULLETS 10
 #define MAX_BOSS_BULLETS 10
-int main ()
-{
+int main () {
     // Tell the window to use vsync and work on high DPI displays
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
@@ -41,6 +40,7 @@ int main ()
     Texture wabbit = LoadTexture("heart.png");
 
     while (!WindowShouldClose()) {
+        BeginDrawing();
         float deltaTime = GetFrameTime();
 
         moverEsquerdaDireita(&jogador, deltaTime);
@@ -85,7 +85,7 @@ int main ()
 		/*Debug*/
 		
 		// Mostra se ao menos uma bala está ativa
-		bool algumaAtiva = false;
+		algumaAtiva = false;
 		for (int i = 0; i < MAX_BULLETS; i++) {
 			if (bala[i].ativa) {
 				algumaAtiva = true;
@@ -108,17 +108,6 @@ int main ()
 
         EndDrawing();
     }
-
-		EndDrawing();
-	}
-
-	// limpeza
-
-	// descarrega nossa textura para que possa ser limpa
-
-	UnloadTexture(wabbit);
-
-	// destrói a janela e limpa o contexto OpenGL
 	CloseWindow();
 	return 0;
 }
