@@ -36,6 +36,7 @@ void moverBoss(Boss* boss, float deltaTime);
 void drawBoss(Boss* boss);
 void atualizarFeedbackDanoBoss(Boss* boss, float deltaTime);
 void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count);
+void verificarColisaoBalasComPlayer(Player* player, BossBullet bullets[], int count);
 void drawBarraVidaBoss(const Boss* boss);
 void inicializarBalasBoss(BossBullet bullets[], int count);
 void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player* player, float deltaTime);

@@ -17,7 +17,31 @@ void moverEsquerdaDireita(Player* player, float deltaTime) {
 }
 
 void drawPlayer(Player* player) {
-    DrawCircle((int)player->posicaoX, (int)player->posicaoY, PLAYER_RADIUS, WHITE);
+    int framePiscando = (int)(player->tempoPiscandoDano * 20.0f);
+    Color corJogador = (player->tempoPiscandoDano > 0.0f && framePiscando % 2 == 0) ? WHITE : RED;
+    DrawCircle((int)player->posicaoX, (int)player->posicaoY, PLAYER_RADIUS, corJogador);
+}
+
+void drawPlayerHP(const Player* player) {
+    float percentualVida = player->hp > 0 ? (float)player->hp / (float)PLAYER_MAX_HP : 0.0f;
+    int larguraVida = (int)(PLAYER_HEALTH_BAR_WIDTH * percentualVida);
+
+    DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, DARKGRAY);
+    DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, larguraVida, PLAYER_HEALTH_BAR_HEIGHT, RED);
+    DrawRectangleLines(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, WHITE);
+    DrawText(TextFormat("PLAYER HP: %d/%d", player->hp, PLAYER_MAX_HP), PLAYER_HEALTH_BAR_X + 8, PLAYER_HEALTH_BAR_Y + 22, 16, WHITE);
+}
+
+void aplicarDanoPlayer(Player* player, int dano) {
+    player->hp -= dano;
+    if (player->hp < 0) player->hp = 0;
+    player->tempoPiscandoDano = PLAYER_DAMAGE_FLASH_DURATION;
+}
+
+void atualizarFeedbackDanoPlayer(Player* player, float deltaTime) {
+    if (player->tempoPiscandoDano <= 0.0f) return;
+    player->tempoPiscandoDano -= deltaTime;
+    if (player->tempoPiscandoDano < 0.0f) player->tempoPiscandoDano = 0.0f;
 }
 
 void moverBalas(Bullet bullets[], int count, float deltaTime) {

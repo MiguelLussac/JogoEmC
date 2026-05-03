@@ -20,6 +20,8 @@ int main () {
 	jogador.posicaoX = 400;
 	jogador.posicaoY = 500;
 	jogador.velocidade = 300; // pixels por segundo
+	jogador.hp = PLAYER_MAX_HP;
+	jogador.tempoPiscandoDano = 0.0f;
 
     Bullet bala[MAX_BULLETS];
     for (int i = 0; i < MAX_BULLETS; i++) {
@@ -52,22 +54,13 @@ int main () {
 		verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
 		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
 		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
-        
-
-        // Grid de Pixels 60x80
-        // int rows = 60;
-        // int cols = 80;
-        // int cellSize = 10;
-
-        // for (int i = 0; i < rows; i++) {
-        //     for (int j = 0; j < cols; j++) {
-        //         DrawRectangleLines(j * cellSize, i * cellSize, cellSize, cellSize, LIGHTGRAY);
-        //     }
-        // }
+		verificarColisaoBalasComPlayer(&jogador, balasBoss, MAX_BOSS_BULLETS);
+		atualizarFeedbackDanoPlayer(&jogador, deltaTime);
 
         drawPlayer(&jogador);
         drawBalas(bala, MAX_BULLETS);
         drawBoss(&boss);
+        drawPlayerHP(&jogador);
 
         bool algumaAtiva = false;
         for (int i = 0; i < MAX_BULLETS; i++) {
