@@ -7,6 +7,51 @@
 
 #define MAX_BULLETS 10
 #define MAX_BOSS_BULLETS 10
+
+typedef enum {
+    FIM_JOGO_NENHUM,
+    FIM_JOGO_BOSS_DERROTADO,
+    FIM_JOGO_PLAYER_DERROTADO
+} MotivoFimJogo;
+
+// Ponto unico para encerrar a partida e, futuramente, abrir o popup de relatorio.
+static void solicitarFimDeJogo(bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, MotivoFimJogo motivo) {
+    if (*jogoEncerrado) return;
+
+    *motivoFimJogo = motivo;
+    *jogoEncerrado = true;
+}
+
+static const char* textoMotivoFimJogo(MotivoFimJogo motivoFimJogo) {
+    switch (motivoFimJogo) {
+        case FIM_JOGO_BOSS_DERROTADO: return "Boss derrotado";
+        case FIM_JOGO_PLAYER_DERROTADO: return "Player derrotado";
+        case FIM_JOGO_NENHUM:
+        default: return "Fim de jogo";
+    }
+}
+
+// Pop-up temporario do relatorio final; depois deve receber tiros, tentativas e estatisticas.
+static void drawRelatorioFinal(MotivoFimJogo motivoFimJogo) {
+    Rectangle modal = {
+        (GetScreenWidth() - 430) / 2.0f,
+        (GetScreenHeight() - 190) / 2.0f,
+        430,
+        190
+    };
+
+    const char* titulo = "RELATORIO - EM ATUALIZACAO";
+    const char* motivo = textoMotivoFimJogo(motivoFimJogo);
+    const char* sair = "Pressione ESC para sair";
+
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), (Color){0, 0, 0, 165});
+    DrawRectangleRec(modal, (Color){18, 18, 18, 245});
+    DrawRectangleLinesEx(modal, 2.0f, YELLOW);
+    DrawText(titulo, (int)(modal.x + (modal.width - MeasureText(titulo, 22)) / 2), (int)modal.y + 42, 22, YELLOW);
+    DrawText(motivo, (int)(modal.x + (modal.width - MeasureText(motivo, 18)) / 2), (int)modal.y + 90, 18, WHITE);
+    DrawText(sair, (int)(modal.x + (modal.width - MeasureText(sair, 14)) / 2), (int)modal.y + 136, 14, GRAY);
+}
+
 int main () {
     // Tell the window to use vsync and work on high DPI displays
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
@@ -46,6 +91,8 @@ int main () {
 	DesafioPergunta desafio;
 	inicializarDesafio(&desafio);
 	bool perguntaAtiva = false; // true quando o jogador pegou a estrela
+	bool jogoEncerrado = false; // true quando uma condicao de fim de jogo for atingida
+	MotivoFimJogo motivoFimJogo = FIM_JOGO_NENHUM;
 
     // Loop Principal
     while (!WindowShouldClose()) {
@@ -54,7 +101,7 @@ int main () {
         float deltaTime = GetFrameTime();
 
         // ── UPDATE ── só roda quando o jogo não está pausado ──────────────
-        if (!perguntaAtiva) {
+        if (!jogoEncerrado && !perguntaAtiva) {
             moverEsquerdaDireita(&jogador, deltaTime);
             moverBalas(bala, MAX_BULLETS, deltaTime);
             atirar(&jogador, bala, MAX_BULLETS);
@@ -63,20 +110,31 @@ int main () {
             moverBoss(&boss, deltaTime);
             atualizarFeedbackDanoBoss(&boss, deltaTime);
             verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
+            // Quando o boss fica inativo por HP zerado, registra o fim da partida.
+            if (!boss.ativa) {
+                solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_BOSS_DERROTADO);
+            }
             atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
             moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
             verificarColisaoBalasComPlayer(&jogador, balasBoss, MAX_BOSS_BULLETS);
+            // A morte do player usa o mesmo gancho que futuramente abrira o relatorio.
+            if (jogador.hp <= 0) {
+                solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_PLAYER_DERROTADO);
+            }
             atualizarFeedbackDanoPlayer(&jogador, deltaTime);
 
             // Verifica colisão da estrela com o jogador
-            if (atualizarEstrela(&estrela, &boss, &jogador, deltaTime)) {
+            if (!jogoEncerrado && atualizarEstrela(&estrela, &boss, &jogador, deltaTime)) {
                 // Coletar a estrela congela o combate e abre o desafio numerico.
                 iniciarDesafio(&desafio);
                 perguntaAtiva = true;
             }
-        } else {
+        } else if (!jogoEncerrado) {
             // Enquanto o modal esta ativo, so o desafio recebe update.
             perguntaAtiva = atualizarDesafio(&desafio, &jogador, deltaTime);
+            if (jogador.hp <= 0) {
+                solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_PLAYER_DERROTADO);
+            }
         }
 
         // ── DRAW ── sempre desenha (jogo congelado, mas visível) ───────────
@@ -103,6 +161,9 @@ int main () {
         DrawText(algumaAtiva ? "Balas ativas!" : "Nenhuma bala ativa",
                  50, 80, 20, algumaAtiva ? GREEN : RED);
         DrawText("Movimentacao Inicial", 50, 50, 20, WHITE);
+        if (jogoEncerrado) {
+            drawRelatorioFinal(motivoFimJogo);
+        }
 
         EndDrawing();
     }
