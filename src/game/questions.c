@@ -291,6 +291,8 @@ void executaQuestao(Questao *questao, int numeroSecreto, int chute) {
     }
 }
 
+// API publica do modulo de estrela e desafio.
+
 void inicializarEstrela(Estrela* estrela) {
     estrela->x            = 0;
     estrela->y            = 0;
@@ -400,8 +402,10 @@ void drawDesafio(const DesafioPergunta* desafio, const Player* jogador) {
 
 bool atualizarEstrela(Estrela* estrela, const Boss* boss, const Player* jogador, float deltaTime) {
     if (!estrela->ativa) {
+        // Conta o timer ate a proxima aparicao
         estrela->timerAparição += deltaTime;
         if (estrela->timerAparição >= ESTRELA_INTERVALO) {
+            // Spawna no centro do boss
             estrela->x = boss->posicaoX + boss->largura / 2.0f;
             estrela->y = boss->posicaoY + boss->altura / 2.0f;
             estrela->ativa = true;
@@ -410,21 +414,24 @@ bool atualizarEstrela(Estrela* estrela, const Boss* boss, const Player* jogador,
         return false;
     }
 
+    // Move a estrela para baixo
     estrela->y += ESTRELA_VELOCIDADE * deltaTime;
 
+    // Saiu da tela? Desativa e reinicia o timer
     if (estrela->y - ESTRELA_RAIO > GetScreenHeight()) {
         estrela->ativa = false;
         estrela->timerAparição = 0.0f;
         return false;
     }
 
+    // Verifica colisao com o jogador (circulo vs circulo)
     float dx  = estrela->x - jogador->posicaoX;
     float dy  = estrela->y - jogador->posicaoY;
     float dist = sqrtf(dx * dx + dy * dy);
     if (dist < ESTRELA_RAIO + PLAYER_RADIUS) {
         estrela->ativa = false;
         estrela->timerAparição = 0.0f;
-        return true;
+        return true; // colidiu!
     }
 
     return false;
@@ -433,14 +440,17 @@ bool atualizarEstrela(Estrela* estrela, const Boss* boss, const Player* jogador,
 void drawEstrela(const Estrela* estrela) {
     if (!estrela->ativa) return;
 
+    // Brilho externo (halo)
     DrawCircle((int)estrela->x, (int)estrela->y,
                ESTRELA_RAIO + 6, (Color){255, 230, 50, 60});
     DrawCircle((int)estrela->x, (int)estrela->y,
                ESTRELA_RAIO + 3, (Color){255, 220, 80, 100});
 
+    // Corpo da estrela
     desenharEstrelaForma(estrela->x, estrela->y,
                          ESTRELA_RAIO, ESTRELA_RAIO * 0.45f,
                          ESTRELA_PONTAS, YELLOW);
 
+    // Centro brilhante
     DrawCircle((int)estrela->x, (int)estrela->y, 4, WHITE);
 }
