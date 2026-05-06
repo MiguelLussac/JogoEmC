@@ -5,6 +5,7 @@
 #define SCREEN_HEIGHT 600
 #define PLAYER_RADIUS 20
 
+// Move o jogador no eixo X e limita a posicao dentro da largura da tela.
 void moverEsquerdaDireita(Player* player, float deltaTime) {
     if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
         player->posicaoX -= player->velocidade * deltaTime;
@@ -41,12 +42,14 @@ void aplicarDanoPlayer(Player* player, int dano) {
     player->tempoPiscandoDano = PLAYER_DAMAGE_FLASH_DURATION;
 }
 
+// Reduz o timer do pisca de dano ate o player voltar ao desenho normal.
 void atualizarFeedbackDanoPlayer(Player* player, float deltaTime) {
     if (player->tempoPiscandoDano <= 0.0f) return;
     player->tempoPiscandoDano -= deltaTime;
     if (player->tempoPiscandoDano < 0.0f) player->tempoPiscandoDano = 0.0f;
 }
 
+// Atualiza as balas do jogador e desativa as que saem pelo topo da tela.
 void moverBalas(Bullet bullets[], int count, float deltaTime) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
@@ -58,6 +61,7 @@ void moverBalas(Bullet bullets[], int count, float deltaTime) {
     }
 }
 
+// Renderiza somente as balas ativas do pool do jogador.
 void drawBalas(Bullet bullets[], int count) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
@@ -66,6 +70,7 @@ void drawBalas(Bullet bullets[], int count) {
     }
 }
 
+// Procura uma bala livre no pool e dispara a partir da posicao atual do player.
 void atirar(Player* player, Bullet bullets[], int count) {
     if (IsKeyPressed(KEY_SPACE)) {
         for (int i = 0; i < count; i++) {

@@ -8,6 +8,7 @@
 #define BOSS_HEALTH_BAR_WIDTH 240
 #define BOSS_HEALTH_BAR_HEIGHT 18
 
+// Converte o centro/tamanho do boss para um retangulo usado na colisao.
 static Rectangle getBossRect(const Boss* boss) {
     return (Rectangle) {
         boss->posicaoX - (boss->largura / 2.0f),
@@ -17,6 +18,7 @@ static Rectangle getBossRect(const Boss* boss) {
     };
 }
 
+// Aplica dano, aciona feedback visual e desativa o boss quando a vida zera.
 static void aplicarDanoBoss(Boss* boss, int dano) {
     if (!boss->ativa) return;
 
@@ -44,6 +46,7 @@ void verificarColisaoBalasComPlayer(Player* player, BossBullet bullets[], int co
     }
 }
 
+// Define o estado inicial do boss antes do loop principal comecar.
 void inicializarBoss(Boss* boss) {
     boss->posicaoX = 400.0f;
     boss->posicaoY = 100.0f;
@@ -58,6 +61,7 @@ void inicializarBoss(Boss* boss) {
     boss->tempoPiscandoDano = 0.0f;
 }
 
+// Move o boss horizontalmente e inverte a direcao nas bordas da arena.
 void moverBoss(Boss* boss, float deltaTime) {
     if (!boss->ativa) return;
 
@@ -73,6 +77,7 @@ void moverBoss(Boss* boss, float deltaTime) {
     }
 }
 
+// Desenha o boss e alterna a cor durante o feedback de dano.
 void drawBoss(Boss* boss) {
     if (boss->ativa) {
         int framePiscando = (int)(boss->tempoPiscandoDano * 20.0f);
@@ -88,6 +93,7 @@ void drawBoss(Boss* boss) {
     }
 }
 
+// Reduz o timer de pisca ate encerrar o feedback visual de dano.
 void atualizarFeedbackDanoBoss(Boss* boss, float deltaTime) {
     if (boss->tempoPiscandoDano <= 0.0f) return;
 
@@ -97,6 +103,7 @@ void atualizarFeedbackDanoBoss(Boss* boss, float deltaTime) {
     }
 }
 
+// Verifica balas do jogador contra o retangulo do boss e aplica dano.
 void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count) {
     if (!boss->ativa) return;
 
@@ -112,6 +119,7 @@ void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count) {
     }
 }
 
+// Renderiza a barra de vida do boss no topo central da tela.
 void drawBarraVidaBoss(const Boss* boss) {
     int posicaoX = (SCREEN_WIDTH - BOSS_HEALTH_BAR_WIDTH) / 2;
     int posicaoY = 20;
@@ -124,6 +132,7 @@ void drawBarraVidaBoss(const Boss* boss) {
     DrawText(TextFormat("BOSS HP: %d/%d", boss->hp, boss->hpMaximo), posicaoX + 50, posicaoY + 24, 16, WHITE);
 }
 
+// Zera o pool de projeteis do boss para todos iniciarem inativos.
 void inicializarBalasBoss(BossBullet bullets[], int count) {
     for (int i = 0; i < count; i++) {
         bullets[i].posicaoX = 0.0f;
@@ -134,6 +143,7 @@ void inicializarBalasBoss(BossBullet bullets[], int count) {
     }
 }
 
+// Controla cooldown e dispara uma bala do boss mirando na posicao atual do player.
 void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player* player, float deltaTime) {
     if (!boss->ativa) return;
 
@@ -159,6 +169,7 @@ void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player
     }
 }
 
+// Move os projeteis do boss e desativa os que saem dos limites da tela.
 void moverBalasBoss(BossBullet bullets[], int count, float deltaTime) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
@@ -173,6 +184,7 @@ void moverBalasBoss(BossBullet bullets[], int count, float deltaTime) {
     }
 }
 
+// Desenha apenas as balas ativas do boss.
 void drawBalasBoss(BossBullet bullets[], int count) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {

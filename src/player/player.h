@@ -12,6 +12,7 @@
 #define PLAYER_HEALTH_BAR_Y 560
 #define PLAYER_DAMAGE_FLASH_DURATION 0.35f
 
+// Estado principal do jogador usado por movimento, vida e feedback visual.
 typedef struct {
     float posicaoX;
     float posicaoY;
@@ -26,6 +27,7 @@ void drawPlayerHP(const Player* player);
 void aplicarDanoPlayer(Player* player, int dano);
 void atualizarFeedbackDanoPlayer(Player* player, float deltaTime);
 
+// Bala simples do jogador, reaproveitada em um pool fixo.
 typedef struct {
     float posicaoX;
     float posicaoY;

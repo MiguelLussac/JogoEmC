@@ -31,15 +31,18 @@ static void desenharEstrelaForma(float cx, float cy, float rExterno, float rInte
     }
 }
 
+// Limpa o buffer digitado no modal sem alterar o restante do estado do desafio.
 static void limparEntradaDesafio(DesafioPergunta* desafio) {
     desafio->entrada[0] = '\0';
     desafio->tamanhoEntrada = 0;
 }
 
+// Centraliza um texto na largura total da tela.
 static void drawTextoCentralizado(const char* texto, int y, int tamanhoFonte, Color cor) {
     DrawText(texto, (GetScreenWidth() - MeasureText(texto, tamanhoFonte)) / 2, y, tamanhoFonte, cor);
 }
 
+// Centraliza um texto dentro de um retangulo de modal especifico.
 static void drawTextoCentralizadoNoModal(const char* texto, Rectangle modal, int y, int tamanhoFonte, Color cor) {
     DrawText(texto, (int)(modal.x + (modal.width - MeasureText(texto, tamanhoFonte)) / 2), y, tamanhoFonte, cor);
 }
@@ -55,6 +58,7 @@ static Rectangle getModalCentral(float largura, float altura) {
     };
 }
 
+// Desenha o icone triangular usado nos modais de alerta do desafio.
 static void drawAvisoIcone(int x, int y) {
     DrawTriangleLines((Vector2){(float)x, (float)(y - 10)},
                       (Vector2){(float)(x - 8), (float)(y + 6)},
@@ -63,6 +67,7 @@ static void drawAvisoIcone(int x, int y) {
     DrawText("!", x - 2, y - 5, 12, YELLOW);
 }
 
+// Encapsula a regra de clique nos botoes desenhados manualmente com raylib.
 static bool botaoClicado(Rectangle botao) {
     return CheckCollisionPointRec(GetMousePosition(), botao) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 }
@@ -81,6 +86,7 @@ static const char* textoDica(StatusChute status) {
     }
 }
 
+// Agrupa os status considerados proximos para reaproveitar em mensagens finais.
 static bool estaPerto(StatusChute status) {
     return status == muitoPerto || status == perto;
 }
@@ -135,6 +141,7 @@ static void processarPalpite(DesafioPergunta* desafio, Player* jogador) {
     }
 }
 
+// Lida com digitacao, backspace, enter e clique no botao de envio do modal.
 static void atualizarEntradaDesafio(DesafioPergunta* desafio, Player* jogador) {
     Rectangle modal = {(GetScreenWidth() - 360) / 2.0f, 92, 360, 270};
     Rectangle enviar = {modal.x + 27, modal.y + 164, 306, 42};
@@ -160,6 +167,7 @@ static void atualizarEntradaDesafio(DesafioPergunta* desafio, Player* jogador) {
     }
 }
 
+// Desenha os cinco indicadores visuais de tentativas restantes.
 static void drawTentativas(const DesafioPergunta* desafio, Rectangle modal) {
     int inicioX = (int)(modal.x + modal.width - 88);
     int y = (int)(modal.y + 38);
@@ -267,6 +275,7 @@ static void drawTelaContagem(const DesafioPergunta* desafio) {
     drawTextoCentralizadoNoModal(texto, modal, (int)modal.y + 45, 72, RED);
 }
 
+// Sorteia o numero alvo do desafio dentro do intervalo configurado.
 int gerarNumeroSecreto(void) {
     return GetRandomValue(NUMEROMIN, NUMEROMAX);
 }
@@ -293,6 +302,7 @@ void executaQuestao(Questao *questao, int numeroSecreto, int chute) {
 
 // API publica do modulo de estrela e desafio.
 
+// Zera a estrela coletavel para que ela espere o proximo intervalo de spawn.
 void inicializarEstrela(Estrela* estrela) {
     estrela->x            = 0;
     estrela->y            = 0;
@@ -300,6 +310,7 @@ void inicializarEstrela(Estrela* estrela) {
     estrela->timerAparição = 0.0f;
 }
 
+// Retorna o desafio para o estado inativo padrao, limpando entradas e timers.
 void inicializarDesafio(DesafioPergunta* desafio) {
     desafio->estado = DESAFIO_INATIVO;
     desafio->questao.numeroSecreto = 0;
@@ -315,6 +326,7 @@ void inicializarDesafio(DesafioPergunta* desafio) {
     desafio->timerContagem = 0.0f;
 }
 
+// Abre um novo desafio ativo e sorteia o numero secreto da rodada.
 void iniciarDesafio(DesafioPergunta* desafio) {
     inicializarDesafio(desafio);
     desafio->estado = DESAFIO_CHUTANDO;
