@@ -119,11 +119,17 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/boss.o
+GENERATED += $(OBJDIR)/game.o
+GENERATED += $(OBJDIR)/history.o
 GENERATED += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/player.o
+GENERATED += $(OBJDIR)/questions.o
 OBJECTS += $(OBJDIR)/boss.o
+OBJECTS += $(OBJDIR)/game.o
+OBJECTS += $(OBJDIR)/history.o
 OBJECTS += $(OBJDIR)/main.o
 OBJECTS += $(OBJDIR)/player.o
+OBJECTS += $(OBJDIR)/questions.o
 
 # Rules
 # #############################################
@@ -188,6 +194,15 @@ endif
 # #############################################
 
 $(OBJDIR)/boss.o: src/boss/boss.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/game.o: src/game/game.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/history.o: src/game/history.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/questions.o: src/game/questions.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.c

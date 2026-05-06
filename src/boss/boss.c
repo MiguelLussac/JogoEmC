@@ -32,6 +32,7 @@ static void aplicarDanoBoss(Boss* boss, int dano) {
 void verificarColisaoBalasComPlayer(Player* player, BossBullet bullets[], int count) {
     if (player->hp <= 0) return;
 
+    // Balas do boss causam dano real no player e alimentam a regra de vida do desafio.
     for (int i = 0; i < count; i++) {
         if (!bullets[i].ativa) continue;
 

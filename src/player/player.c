@@ -17,12 +17,14 @@ void moverEsquerdaDireita(Player* player, float deltaTime) {
 }
 
 void drawPlayer(Player* player) {
+    // Pisca o player apos dano para comunicar invulnerabilidade/feedback visual.
     int framePiscando = (int)(player->tempoPiscandoDano * 20.0f);
     Color corJogador = (player->tempoPiscandoDano > 0.0f && framePiscando % 2 == 0) ? WHITE : RED;
     DrawCircle((int)player->posicaoX, (int)player->posicaoY, PLAYER_RADIUS, corJogador);
 }
 
 void drawPlayerHP(const Player* player) {
+    // Barra de vida usada pelo desafio para mostrar o custo da ultima tentativa.
     float percentualVida = player->hp > 0 ? (float)player->hp / (float)PLAYER_MAX_HP : 0.0f;
     int larguraVida = (int)(PLAYER_HEALTH_BAR_WIDTH * percentualVida);
 
@@ -33,6 +35,7 @@ void drawPlayerHP(const Player* player) {
 }
 
 void aplicarDanoPlayer(Player* player, int dano) {
+    // Tambem usado pelo desafio quando o player aceita gastar 1 vida.
     player->hp -= dano;
     if (player->hp < 0) player->hp = 0;
     player->tempoPiscandoDano = PLAYER_DAMAGE_FLASH_DURATION;

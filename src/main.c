@@ -41,6 +41,9 @@ int main () {
 	// Inicialização da Estrela (sistema de perguntas)
 	Estrela estrela;
 	inicializarEstrela(&estrela);
+	// O desafio fica separado da estrela para manter o modal pausado ate terminar.
+	DesafioPergunta desafio;
+	inicializarDesafio(&desafio);
 	bool perguntaAtiva = false; // true quando o jogador pegou a estrela
 
     // Loop Principal
@@ -65,7 +68,14 @@ int main () {
             atualizarFeedbackDanoPlayer(&jogador, deltaTime);
 
             // Verifica colisão da estrela com o jogador
-            perguntaAtiva = atualizarEstrela(&estrela, &boss, &jogador, deltaTime);
+            if (atualizarEstrela(&estrela, &boss, &jogador, deltaTime)) {
+                // Coletar a estrela congela o combate e abre o desafio numerico.
+                iniciarDesafio(&desafio);
+                perguntaAtiva = true;
+            }
+        } else {
+            // Enquanto o modal esta ativo, so o desafio recebe update.
+            perguntaAtiva = atualizarDesafio(&desafio, &jogador, deltaTime);
         }
 
         // ── DRAW ── sempre desenha (jogo congelado, mas visível) ───────────
@@ -79,20 +89,8 @@ int main () {
 
         // ── TELA DE PERGUNTA (modal sobre o jogo congelado) ───────────────
         if (perguntaAtiva) {
-            // Fundo semi-transparente sobre toda a tela
-            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
-                          (Color){0, 0, 0, 150});
-            // Modal
-            DrawRectangleRounded((Rectangle){150, 175, 500, 250}, 0.1f, 8,
-                                 (Color){20, 20, 50, 240});
-            DrawRectangleRoundedLines((Rectangle){150, 175, 500, 250}, 0.1f, 8,
-                                      YELLOW);
-            DrawText("Voce pegou a estrela!", 218, 220, 24, YELLOW);
-            DrawText("[Sistema de perguntas em breve]", 185, 275, 18, WHITE);
-            DrawText("Pressione ENTER para continuar", 188, 360, 18, LIGHTGRAY);
-            if (IsKeyPressed(KEY_ENTER)) {
-                perguntaAtiva = false;
-            }
+            // O jogo fica visivel ao fundo; o desafio desenha apenas a camada modal.
+            drawDesafio(&desafio, &jogador);
         }
 
         /*Debug*/
