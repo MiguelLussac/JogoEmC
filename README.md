@@ -136,6 +136,67 @@ docker compose build
 docker compose run --rm minddrop
 ```
 
+### Executar com interface gráfica no Windows (passo a passo completo)
+
+Para a janela do jogo aparecer via Docker no Windows, siga exatamente estes passos:
+
+#### Passo 1) Instalar o VcXsrv
+
+```powershell
+winget install --id marha.VcXsrv -e
+```
+
+#### Passo 2) Iniciar o servidor X
+
+Opção por comando (recomendada):
+
+```powershell
+"C:\Program Files\VcXsrv\vcxsrv.exe" :0 -multiwindow -ac -nowgl -silent-dup-error
+```
+
+Opção por interface (`XLaunch`):
+- `Multiple windows`
+- `Start no client`
+- marcar `Disable access control`
+- finalizar o assistente
+
+#### Passo 3) Liberar no Firewall
+
+Quando o Windows pedir permissão para o VcXsrv, permita em rede **Privada** (e **Pública**, se necessário).
+
+#### Passo 4) Confirmar que o VcXsrv está rodando
+
+No PowerShell:
+
+```powershell
+Get-Process vcxsrv
+```
+
+Se listar processo, está ativo.
+
+#### Passo 5) Rodar o jogo via Docker com GUI
+
+```bash
+docker compose run --rm minddrop
+```
+
+#### Passo 6) Se der erro de display
+
+Se aparecer `Failed to open display host.docker.internal:0.0`:
+- feche e abra o VcXsrv novamente;
+- confirme permissão no firewall;
+- repita o comando de execução.
+
+#### Passo 7) Validação alternativa (sem GUI)
+
+Se quiser validar rapidamente que o jogo iniciou no container:
+
+```bash
+docker compose run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
+```
+
+Procure no log: `INFO: Initializing raylib`.
+
 #### 2.1) Atalho para Windows (build + teste + run)
 
 ```bat

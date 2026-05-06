@@ -7,6 +7,34 @@
 #include "game/history.h"
 #include <stdbool.h>
 #include <math.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+
+#define HIST_LIST_X 40
+#define HIST_LIST_Y 108
+#define HIST_LIST_W 330
+#define HIST_LIST_H 420
+#define HIST_ROW_H 42
+#define HIST_VISIVEIS 10
+#define HIST_DETAIL_X 390
+#define HIST_DETAIL_Y HIST_LIST_Y
+#define HIST_DETAIL_W 370
+#define HIST_DETAIL_H 420
+
+typedef struct {
+    char dataHora[32];
+    char motivo[48];
+    float tempo;
+    int tiros;
+    int acertosBoss;
+    float precisao;
+    int desafiosVencidos;
+    int desafiosTotal;
+    float taxaDesafios;
+    char linhaOriginal[TAMANHO_LINHA_HISTORICO];
+    bool valido;
+} HistoricoRegistro;
 
 // Ponto unico para encerrar a partida.
 static void solicitarFimDeJogo(bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, MotivoFimJogo motivo) {
@@ -22,6 +50,131 @@ static const char* gerarDiagnostico(const EstatisticasPartida* stats) {
     if (stats->desafiosIniciados > 0 && stats->desafiosVencidos == 0) return "DICA: use buscas por intervalo no desafio numerico.";
     if (stats->tempoPartida > 90.0f) return "DICA: pressione o boss com movimentacao agressiva e tiro continuo.";
     return "DICA: bom controle geral! Tente concluir em menos tempo.";
+}
+
+static void trimTexto(char* texto) {
+    int inicio = 0;
+    int fim = (int)strlen(texto) - 1;
+
+    while (texto[inicio] != '\0' && isspace((unsigned char)texto[inicio])) inicio++;
+    while (fim >= inicio && isspace((unsigned char)texto[fim])) {
+        texto[fim] = '\0';
+        fim--;
+    }
+
+    if (inicio > 0) {
+        memmove(texto, texto + inicio, strlen(texto + inicio) + 1);
+    }
+}
+
+static HistoricoRegistro parseLinhaHistorico(const char* linha) {
+    HistoricoRegistro registro = {0};
+    strncpy(registro.linhaOriginal, linha, TAMANHO_LINHA_HISTORICO - 1);
+    registro.linhaOriginal[TAMANHO_LINHA_HISTORICO - 1] = '\0';
+
+    int lidos = sscanf(
+        linha,
+        "[%31[^]]] %47[^|]| tempo: %fs | tiros: %d | acertos boss: %d | precisao: %f%% | desafios: %d/%d (%f%%)",
+        registro.dataHora,
+        registro.motivo,
+        &registro.tempo,
+        &registro.tiros,
+        &registro.acertosBoss,
+        &registro.precisao,
+        &registro.desafiosVencidos,
+        &registro.desafiosTotal,
+        &registro.taxaDesafios
+    );
+
+    if (lidos == 9) {
+        trimTexto(registro.dataHora);
+        trimTexto(registro.motivo);
+        registro.valido = true;
+    } else {
+        registro.valido = false;
+        strcpy(registro.dataHora, "Data nao identificada");
+        strcpy(registro.motivo, "Formato de relatorio legado");
+    }
+
+    return registro;
+}
+
+static void textoComReticencias(const char* origem, char* destino, int tamDestino, int fonte, int larguraMax) {
+    if (tamDestino <= 0) return;
+    destino[0] = '\0';
+    if (origem == NULL) return;
+
+    if (MeasureText(origem, fonte) <= larguraMax) {
+        strncpy(destino, origem, tamDestino - 1);
+        destino[tamDestino - 1] = '\0';
+        return;
+    }
+
+    const char* sufixo = "...";
+    int len = (int)strlen(origem);
+    int i = len;
+    while (i > 0) {
+        char tmp[220];
+        snprintf(tmp, sizeof(tmp), "%.*s%s", i, origem, sufixo);
+        if (MeasureText(tmp, fonte) <= larguraMax) {
+            strncpy(destino, tmp, tamDestino - 1);
+            destino[tamDestino - 1] = '\0';
+            return;
+        }
+        i--;
+    }
+
+    strncpy(destino, sufixo, tamDestino - 1);
+    destino[tamDestino - 1] = '\0';
+}
+
+static int quebrarTexto(const char* texto, char linhas[][120], int maxLinhas, int fonte, int larguraMax) {
+    if (texto == NULL || maxLinhas <= 0) return 0;
+    int total = 0;
+    const char* cursor = texto;
+
+    while (*cursor != '\0' && total < maxLinhas) {
+        int len = (int)strlen(cursor);
+        int corte = len;
+        if (MeasureText(cursor, fonte) > larguraMax) {
+            for (corte = len; corte > 0; corte--) {
+                char tmp[220];
+                snprintf(tmp, sizeof(tmp), "%.*s", corte, cursor);
+                if (MeasureText(tmp, fonte) <= larguraMax) break;
+            }
+            if (corte <= 0) corte = 1;
+            while (corte > 1 && cursor[corte] != '\0' && cursor[corte] != ' ') corte--;
+            if (corte <= 0) corte = 1;
+        }
+
+        snprintf(linhas[total], 120, "%.*s", corte, cursor);
+        trimTexto(linhas[total]);
+        total++;
+        cursor += corte;
+        while (*cursor == ' ') cursor++;
+    }
+
+    return total;
+}
+
+static int quebrarTextoComReticencias(const char* texto, char linhas[][120], int maxLinhas, int fonte, int larguraMax) {
+    int qtd = quebrarTexto(texto, linhas, maxLinhas, fonte, larguraMax);
+    if (texto == NULL || qtd <= 0) return qtd;
+
+    // Se o texto original não coube inteiro, marca a última linha com reticências.
+    char reconstruido[520] = {0};
+    for (int i = 0; i < qtd; i++) {
+        strncat(reconstruido, linhas[i], sizeof(reconstruido) - strlen(reconstruido) - 1);
+        if (i < qtd - 1) strncat(reconstruido, " ", sizeof(reconstruido) - strlen(reconstruido) - 1);
+    }
+
+    if (strlen(reconstruido) < strlen(texto) && qtd > 0) {
+        char ultima[120];
+        snprintf(ultima, sizeof(ultima), "%s...", linhas[qtd - 1]);
+        textoComReticencias(ultima, linhas[qtd - 1], 120, fonte, larguraMax);
+    }
+
+    return qtd;
 }
 
 static void drawFundoArcadeAnimado(float tempo) {
@@ -72,30 +225,113 @@ static void drawMenuInicial(int opcaoSelecionada, float tempo) {
     DrawText(dicas, (GetScreenWidth() - MeasureText(dicas, 18)) / 2, 410, 18, blink);
 }
 
-static void drawTelaHistorico(char linhasHistorico[][180], int totalLinhas, int scroll, float tempo) {
+static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinhas, int scroll, int selecionado, int expandido, float tempo) {
     drawFundoArcadeAnimado(tempo);
     const char* titulo = "HISTORICO DE RELATORIOS";
     DrawText(titulo, (GetScreenWidth() - MeasureText(titulo, 38)) / 2, 40, 38, (Color){255, 220, 75, 255});
 
-    Rectangle painel = {56, 105, (float)GetScreenWidth() - 112.0f, 420};
-    DrawRectangleRec(painel, (Color){12, 12, 20, 220});
-    DrawRectangleLinesEx(painel, 3.0f, (Color){170, 170, 215, 255});
+    Rectangle painelLista = {HIST_LIST_X, HIST_LIST_Y, HIST_LIST_W, HIST_LIST_H};
+    Rectangle painelDetalhes = {HIST_DETAIL_X, HIST_DETAIL_Y, HIST_DETAIL_W, HIST_DETAIL_H};
+    DrawRectangleRec(painelLista, (Color){12, 12, 20, 220});
+    DrawRectangleLinesEx(painelLista, 3.0f, (Color){170, 170, 215, 255});
+    DrawRectangleRec(painelDetalhes, (Color){14, 14, 26, 230});
+    DrawRectangleLinesEx(painelDetalhes, 3.0f, (Color){170, 170, 215, 255});
+    DrawText("RODADAS", (int)painelLista.x + 12, (int)painelLista.y + 10, 22, (Color){255, 220, 75, 255});
+    DrawText("DETALHES", (int)painelDetalhes.x + 12, (int)painelDetalhes.y + 10, 22, (Color){255, 220, 75, 255});
 
     if (totalLinhas == 0) {
         const char* vazio = "Sem relatorios salvos ainda. Jogue uma partida!";
         DrawText(vazio, (GetScreenWidth() - MeasureText(vazio, 24)) / 2, 290, 24, RAYWHITE);
     } else {
         int inicio = scroll;
-        int fim = inicio + 16;
+        int fim = inicio + HIST_VISIVEIS;
         if (fim > totalLinhas) fim = totalLinhas;
-        int y = 130;
+        int y = HIST_LIST_Y + 44;
+        BeginScissorMode((int)painelLista.x + 1, (int)painelLista.y + 40, (int)painelLista.width - 2, (int)painelLista.height - 46);
         for (int i = inicio; i < fim; i++) {
-            DrawText(linhasHistorico[i], 78, y, 18, (Color){235, 235, 235, 245});
-            y += 24;
+            Rectangle item = {HIST_LIST_X + 12, (float)y, HIST_LIST_W - 24, HIST_ROW_H - 6};
+            bool ativo = (i == selecionado);
+            bool aberto = (i == expandido);
+            Color fundo = ativo ? (Color){60, 48, 20, 255} : (Color){20, 20, 34, 220};
+            DrawRectangleRec(item, fundo);
+            DrawRectangleLinesEx(item, 1.5f, aberto ? YELLOW : (Color){110, 110, 145, 255});
+
+            char dataCurta[48];
+            char motivoCurto[64];
+            textoComReticencias(registros[i].dataHora, dataCurta, sizeof(dataCurta), 15, (int)item.width - 130);
+            textoComReticencias(registros[i].motivo, motivoCurto, sizeof(motivoCurto), 14, (int)item.width - 130);
+
+            DrawText(TextFormat("#%d", i + 1), (int)item.x + 10, (int)item.y + 10, 16, (Color){255, 225, 110, 255});
+            DrawText(dataCurta, (int)item.x + 54, (int)item.y + 8, 15, RAYWHITE);
+            DrawText(motivoCurto, (int)item.x + 54, (int)item.y + 24, 14, (Color){208, 208, 230, 255});
+            if (aberto) {
+                DrawText("EXPANDIDO", (int)item.x + (int)item.width - 86, (int)item.y + 12, 12, (Color){255, 225, 110, 255});
+            }
+            y += HIST_ROW_H;
+        }
+        EndScissorMode();
+
+        if (expandido >= 0 && expandido < totalLinhas) {
+            const HistoricoRegistro* r = &registros[expandido];
+            int dy = (int)painelDetalhes.y + 48;
+            int detalheX = (int)painelDetalhes.x + 16;
+            int detalheW = (int)painelDetalhes.width - 32;
+            char linhasWrap[8][120];
+
+            BeginScissorMode((int)painelDetalhes.x + 1, (int)painelDetalhes.y + 40, (int)painelDetalhes.width - 2, (int)painelDetalhes.height - 46);
+            DrawText(TextFormat("Rodada #%d", expandido + 1), detalheX, dy, 24, WHITE);
+            dy += 36;
+
+            int qtd = quebrarTextoComReticencias(TextFormat("Data/Hora: %s", r->dataHora), linhasWrap, 2, 17, detalheW);
+            for (int i = 0; i < qtd; i++) {
+                DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
+                dy += 22;
+            }
+
+            qtd = quebrarTextoComReticencias(TextFormat("Resultado: %s", r->motivo), linhasWrap, 2, 17, detalheW);
+            for (int i = 0; i < qtd; i++) {
+                DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
+                dy += 22;
+            }
+            dy += 6;
+
+            if (r->valido) {
+                DrawText(TextFormat("Tempo de partida: %.1f s", r->tempo), detalheX, dy, 17, RAYWHITE);
+                dy += 24;
+                qtd = quebrarTextoComReticencias(
+                    TextFormat("Acertos no boss: %d/%d (%.1f%%)", r->acertosBoss, r->tiros, r->precisao),
+                    linhasWrap, 2, 17, detalheW
+                );
+                for (int i = 0; i < qtd; i++) {
+                    DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
+                    dy += 22;
+                }
+                qtd = quebrarTextoComReticencias(
+                    TextFormat("Desafios vencidos: %d/%d (%.1f%%)", r->desafiosVencidos, r->desafiosTotal, r->taxaDesafios),
+                    linhasWrap, 2, 17, detalheW
+                );
+                for (int i = 0; i < qtd; i++) {
+                    DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
+                    dy += 22;
+                }
+            } else {
+                DrawText("Relatorio em formato legado:", detalheX, dy, 16, RAYWHITE);
+                dy += 22;
+                char linhas[4][120];
+                int qtdLinhas = quebrarTextoComReticencias(r->linhaOriginal, linhas, 6, 15, detalheW);
+                for (int l = 0; l < qtdLinhas; l++) {
+                    DrawText(linhas[l], detalheX, dy, 15, (Color){210, 210, 230, 255});
+                    dy += 18;
+                }
+            }
+            EndScissorMode();
+        } else {
+            const char* dica = "Clique em uma rodada para expandir.";
+            DrawText(dica, (int)painelDetalhes.x + 16, (int)painelDetalhes.y + 52, 19, (Color){220, 220, 235, 240});
         }
     }
 
-    const char* rodape = "ESC para voltar | PgUp/PgDn para rolar";
+    const char* rodape = "ESC voltar | W/S navega | ENTER ou clique expande";
     DrawText(rodape, (GetScreenWidth() - MeasureText(rodape, 18)) / 2, 546, 18, (Color){220, 220, 220, 210});
 }
 
@@ -156,6 +392,9 @@ int main () {
     char linhasHistorico[MAX_HISTORICO_LINHAS][TAMANHO_LINHA_HISTORICO];
     int totalHistorico = 0;
     int scrollHistorico = 0;
+    int historicoSelecionado = -1;
+    int historicoExpandido = -1;
+    HistoricoRegistro registrosHistorico[MAX_HISTORICO_LINHAS];
     bool relatorioSalvo = false;
 
     inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
@@ -178,12 +417,53 @@ int main () {
                 } else {
                     totalHistorico = carregarHistoricoRelatorios(linhasHistorico, MAX_HISTORICO_LINHAS);
                     scrollHistorico = 0;
+                    historicoSelecionado = totalHistorico > 0 ? 0 : -1;
+                    historicoExpandido = -1;
+                    for (int i = 0; i < totalHistorico; i++) {
+                        registrosHistorico[i] = parseLinhaHistorico(linhasHistorico[i]);
+                    }
                     telaAtual = TELA_HISTORICO;
                 }
             }
         } else if (telaAtual == TELA_HISTORICO) {
-            if (IsKeyPressed(KEY_PAGE_DOWN) && scrollHistorico + 16 < totalHistorico) scrollHistorico++;
-            if (IsKeyPressed(KEY_PAGE_UP) && scrollHistorico > 0) scrollHistorico--;
+            if (totalHistorico > 0) {
+                if ((IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) && historicoSelecionado < totalHistorico - 1) {
+                    historicoSelecionado++;
+                }
+                if ((IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) && historicoSelecionado > 0) {
+                    historicoSelecionado--;
+                }
+                if (IsKeyPressed(KEY_ENTER)) {
+                    historicoExpandido = (historicoExpandido == historicoSelecionado) ? -1 : historicoSelecionado;
+                }
+
+                if (historicoSelecionado < scrollHistorico) scrollHistorico = historicoSelecionado;
+                if (historicoSelecionado >= scrollHistorico + HIST_VISIVEIS) {
+                    scrollHistorico = historicoSelecionado - HIST_VISIVEIS + 1;
+                }
+                if (scrollHistorico < 0) scrollHistorico = 0;
+
+                float rodaMouse = GetMouseWheelMove();
+                if (rodaMouse != 0.0f) {
+                    scrollHistorico -= (int)rodaMouse;
+                }
+                int maxScroll = totalHistorico - HIST_VISIVEIS;
+                if (maxScroll < 0) maxScroll = 0;
+                if (scrollHistorico > maxScroll) scrollHistorico = maxScroll;
+
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    Vector2 mouse = GetMousePosition();
+                    Rectangle areaLista = {HIST_LIST_X + 12, HIST_LIST_Y + 44, HIST_LIST_W - 24, HIST_VISIVEIS * HIST_ROW_H};
+                    if (CheckCollisionPointRec(mouse, areaLista)) {
+                        int idxLocal = (int)((mouse.y - areaLista.y) / HIST_ROW_H);
+                        int idxReal = scrollHistorico + idxLocal;
+                        if (idxReal >= 0 && idxReal < totalHistorico) {
+                            historicoSelecionado = idxReal;
+                            historicoExpandido = (historicoExpandido == idxReal) ? -1 : idxReal;
+                        }
+                    }
+                }
+            }
             if (IsKeyPressed(KEY_ESCAPE)) telaAtual = TELA_MENU;
         } else if (telaAtual == TELA_JOGO) {
             stats.tempoPartida += deltaTime;
@@ -263,7 +543,7 @@ int main () {
         if (telaAtual == TELA_MENU) {
             drawMenuInicial(opcaoMenu, tempo);
         } else if (telaAtual == TELA_HISTORICO) {
-            drawTelaHistorico(linhasHistorico, totalHistorico, scrollHistorico, tempo);
+            drawTelaHistorico(registrosHistorico, totalHistorico, scrollHistorico, historicoSelecionado, historicoExpandido, tempo);
         } else {
             // ── DRAW ── sempre desenha (jogo congelado, mas visível) ───────────
             drawPlayer(&jogador);
