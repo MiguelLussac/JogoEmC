@@ -40,8 +40,7 @@ Ao final, o jogo gera um relatório com médias de acertos e sugestões de estra
 ## 🛠️ Tecnologias Utilizadas
 
 - **Linguagem:** C
-- **Compilador:** Compatível com compiladores C11
-- **Gerenciamento de Build:** Makefile
+- **Execução Oficial:** Docker / Docker Compose
 - **Controle de Versão:** Git / GitHub
 
 ---
@@ -115,80 +114,57 @@ https://github.com/user-attachments/assets/a79b4fae-119b-4530-aed5-d6dbb97d5350
 
 ---
 
-## 🚀 Como Compilar e Executar
+## 🚀 Como Rodar o Projeto
+
+### Forma oficial (única): Docker
+
+Para evitar problemas de ambiente local (compilador, dependências gráficas, PATH e versões), a execução oficial do projeto é **exclusivamente via Docker**.
 
 ### Pré-requisitos
 
-- Windows com uma das opções abaixo:
-- MinGW-w64 com `gcc` e `mingw32-make` no `PATH`
-- Visual Studio 2022 ou Visual Studio 2026 com suporte a C/C++
-- `premake5.exe` já incluído na pasta `build/`
+- Docker Desktop
 
-> Observação: na primeira geração dos arquivos de build, o `premake` pode baixar automaticamente o código-fonte do `raylib` para `build/external/`.
-
-### Compilação
-
-#### Opção 1: MinGW-w64
+#### 1) Build da imagem
 
 ```bash
-# Instale MinGW / Compilador GCC/G++
-
-Instalação do compilador GCC/G++
-
-ALERTA: NAO COPIE OS ASTERISCOS!
-
-1. No terminal (powershell do computador) digite: **winget install MSYS2.MSYS2**
-2. Após instalação, abra o **MSYS2 UCRT64**
-3. No MSYS2 UCRT64, digite o comando:  **pacman -S mingw-w64-ucrt-x86_64-gcc** e aceite os termos de instalação digitando **Y**
-4. Inclua o **C:\msys64\ucrt64\bin** no **PATH** do sistema
-5. Feche e abra o Terminal e verifique a instalação digitando: **gcc --version** e depois **g++ --version**
-6. **Se por alguma razão você não consiga instalar o MSYS2 via gerenciador de pacotes winget, baixe o instalador oficial e instale o compilador, depois siga com os passos 2 a 5.**
-
-### macOS e Linux
-
-Dispositivos com macOS e Linux já vem de fábrica com o compilador GCC instalado.
-
-# Clonar o repositório já com o nome local do projeto
-git clone https://github.com/MiguelLussac/JogoEmC.git MindDrop
-cd MindDrop
-
-# Gerar os makefiles com o Premake
-cd build
-premake5.exe gmake
-cd ..
-
-# Compilar o projeto completo em modo debug usando o Makefile raiz
-mingw32-make config=debug_x64
-
-# Aperta `F5` (no vs-code)
+docker compose build
 ```
 
-Ou, no Windows, basta executar:
+#### 2) Rodar o jogo
+
+```bash
+docker compose run --rm minddrop
+```
+
+#### 2.1) Atalho para Windows (build + teste + run)
 
 ```bat
-build-MinGW-W64.bat
+run-docker.bat
 ```
 
-#### Opção 2: Visual Studio
+O script executa automaticamente:
+- build da imagem Docker
+- teste headless no container (`xvfb`)
+- inicialização do jogo via Docker
+
+Se nao houver servidor X ativo no host, a etapa de janela pode falhar, mas o script
+vai concluir com sucesso caso build + teste headless estejam OK.
+
+#### 3) Teste headless (validação rápida no container)
+
+Esse teste confirma que o binário inicia corretamente sem depender de janela interativa:
 
 ```bash
-# Clonar o repositório já com o nome local do projeto
-git clone https://github.com/MiguelLussac/JogoEmC.git MindDrop
-cd MindDrop
-
-# Gerar a solution do Visual Studio 2022
-build-VisualStudio2022.bat
+docker compose run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
 ```
 
-Se preferir Visual Studio 2026, use `build-VisualStudio2026.bat`.
+> Procure no log mensagens como `INFO: Initializing raylib` para confirmar que o jogo iniciou no container.
 
-Depois disso, abra `MindDrop.sln` na raiz do projeto e compile pela IDE.
+#### Observações sobre display (janela gráfica)
 
-### Execução
-
-```bash
-bin\Debug\MindDrop.exe
-```
+- **Linux**: exporte `DISPLAY` e permita acesso X11 se necessário.
+- **Windows (Docker Desktop)**: use um servidor X (ex.: VcXsrv) e mantenha `DISPLAY=host.docker.internal:0.0`.
+- Se quiser apenas validar build/start no CI, use o modo headless com `xvfb-run`.
 
 ---
 
