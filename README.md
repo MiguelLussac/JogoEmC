@@ -89,6 +89,56 @@ MindDrop/
 
 Todas as histórias de usuário de `UH1` a `UH10` foram incluídas e associadas a um integrante.
 
+<details>
+  <summary>[UH1] Movimentação (Base essencial)</summary>
+  <img width="1535" height="1024" alt="image" src="https://github.com/user-attachments/assets/44784067-98fd-4562-bc89-a39a38212d9a" />
+</details>
+
+<details>
+  <summary>[UH2] Disparo de Projéteis (Interação principal)</summary>
+  <img width="1535" height="1024" alt="image" src="https://github.com/user-attachments/assets/da935e4e-ea50-49d3-b1ae-e8d50aa6a2b9" />
+</details>
+
+<details>
+  <summary>[UH3] Sistema de Vidas (Estado do jogador)</summary>
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/a4d5e108-14e3-4dc6-adf1-bec800510df7" />
+</details>
+
+<details>
+  <summary>[UH4] Boss/Vilão Principal</summary>
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/af8ee370-d0fb-4268-92f4-a40d037c0d46" />
+</details>
+
+<details>
+  <summary>[UH5] Sistema de Dano ao Boss (Objetivo de combate)</summary>
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/562d2961-41b0-4e1d-80a0-b39926abcf17" />
+</details>
+
+<details>
+  <summary>[UH6] Sistema de Advinhação (Mecânica específica)</summary>
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/021d4c0f-eb63-45b8-9b92-a7eecf4e2f4b" />
+</details>
+
+<details>
+  <summary>[UH7] Regras de Tentativa (Controle da mecânica)</summary>
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d7fc5581-c036-4c9f-a050-d3f302324b48" />
+</details>
+
+<details>
+  <summary>[UH8] Drop de Atributos (Recompensa/Progressão)</summary>
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b2120d64-e3d0-4aa7-9292-8ace5483c959" />
+</details>
+
+<details>
+  <summary>[UH9] Aplicação de Buffs (Efeito dos drops)</summary>
+  <img width="655" height="412" alt="image" src="https://github.com/user-attachments/assets/5884a30b-f8b8-453a-9f47-a55a412ac026" />
+</details>
+
+<details>
+  <summary>[UH10] Sistema de Tempo e Vitória (Contexto da partida)</summary>
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/cbf03a45-ae3d-4ea4-9ceb-85d514654590" />
+</details>
+
 ---
 
 ## 📊 Quadro de Atividades / Backlog (Kanban)
