@@ -24,6 +24,7 @@ int main () {
 	jogador.hp = PLAYER_MAX_HP;
 	jogador.tempoPiscandoDano = 0.0f;
 
+    // Prepara o pool fixo de balas do jogador para reutilizar objetos ativos/inativos.
     Bullet bala[MAX_BULLETS];
     for (int i = 0; i < MAX_BULLETS; i++) {
         bala[i].posicaoX = 380;
@@ -94,6 +95,7 @@ int main () {
         }
 
         /*Debug*/
+        // Mostra no canto da tela se existe alguma bala ativa no pool do jogador.
         bool algumaAtiva = false;
         for (int i = 0; i < MAX_BULLETS; i++) {
             if (bala[i].ativa) { algumaAtiva = true; break; }

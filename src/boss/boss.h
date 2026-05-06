@@ -9,6 +9,7 @@
 #define BOSS_BULLET_SPEED 220.0f
 #define BOSS_DAMAGE_FLASH_DURATION 0.35f
 
+// Estado completo do boss: posicao, vida, movimento, tiro e feedback visual.
 typedef struct {
     float posicaoX;
     float posicaoY;
@@ -23,6 +24,7 @@ typedef struct {
     float tempoPiscandoDano;
 } Boss;
 
+// Projetil do boss com velocidade vetorial para perseguir a direcao calculada.
 typedef struct {
     float posicaoX;
     float posicaoY;

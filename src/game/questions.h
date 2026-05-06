@@ -21,6 +21,7 @@
 #define DESAFIO_MAX_TENTATIVAS 5
 #define DESAFIO_TAMANHO_ENTRADA 4
 
+// Resultado possivel apos avaliar a distancia entre chute e numero secreto.
 typedef enum {
     passouLonge,
     muitoPerto,
@@ -37,6 +38,7 @@ typedef struct {
     StatusChute status;
 } Questao;
 
+// Estado da estrela coletavel que dispara o desafio quando o player encosta nela.
 typedef struct {
     float x;
     float y;
@@ -44,6 +46,7 @@ typedef struct {
     float timerAparição;  // conta até ESTRELA_INTERVALO para spawnar
 } Estrela;
 
+// Etapas do fluxo do pop-up, do chute ate a contagem de retorno ao jogo.
 typedef enum {
     DESAFIO_INATIVO,
     DESAFIO_CHUTANDO,
@@ -68,6 +71,7 @@ typedef struct {
     float timerContagem;
 } DesafioPergunta;
 
+// API do numero secreto e avaliacao de chutes.
 int gerarNumeroSecreto(void);
 void executaQuestao(Questao *questao, int numeroSecreto, int chute);
 
@@ -80,6 +84,7 @@ bool atualizarEstrela(Estrela* estrela, const Boss* boss, const Player* jogador,
 // Desenha a estrela na tela
 void drawEstrela(const Estrela* estrela);
 
+// API do ciclo completo do desafio numerico.
 void inicializarDesafio(DesafioPergunta* desafio);
 void iniciarDesafio(DesafioPergunta* desafio);
 bool atualizarDesafio(DesafioPergunta* desafio, Player* jogador, float deltaTime);
