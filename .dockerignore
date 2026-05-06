@@ -1,0 +1,10 @@
+.git
+.vscode
+bin
+obj
+build/external
+historico_relatorios.txt
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
