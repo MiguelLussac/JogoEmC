@@ -1,0 +1,39 @@
+#ifndef PARTIDA_H
+#define PARTIDA_H
+
+#include <stdbool.h>
+#include "../player/player.h"
+#include "../boss/boss.h"
+#include "questions.h"
+
+#define MAX_BULLETS 10
+#define MAX_BOSS_BULLETS 10
+
+typedef enum {
+    FIM_JOGO_NENHUM,
+    FIM_JOGO_BOSS_DERROTADO,
+    FIM_JOGO_PLAYER_DERROTADO
+} MotivoFimJogo;
+
+typedef enum {
+    TELA_MENU,
+    TELA_HISTORICO,
+    TELA_JOGO,
+    TELA_RELATORIO_FINAL
+} TelaJogo;
+
+typedef struct {
+    int tirosAtirados;
+    int acertosNoBoss;
+    int desafiosIniciados;
+    int desafiosVencidos;
+    float tempoPartida;
+} EstatisticasPartida;
+
+void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, BossBullet balasBoss[],
+                        Estrela* estrela, DesafioPergunta* desafio, bool* perguntaAtiva,
+                        bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, EstatisticasPartida* stats);
+
+const char* textoMotivoFimJogo(MotivoFimJogo motivoFimJogo);
+
+#endif
