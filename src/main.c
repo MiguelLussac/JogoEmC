@@ -2,6 +2,7 @@
 #include "resource_dir.h"  // Utility header for SearchAndSetResourceDir
 #include "player/player.h"
 #include "boss/boss.h"
+#include "game/questions.h"
 #include <stdbool.h>
 
 #define MAX_BULLETS 10
@@ -20,6 +21,8 @@ int main () {
 	jogador.posicaoX = 400;
 	jogador.posicaoY = 500;
 	jogador.velocidade = 300; // pixels por segundo
+	jogador.hp = PLAYER_MAX_HP;
+	jogador.tempoPiscandoDano = 0.0f;
 
     Bullet bala[MAX_BULLETS];
     for (int i = 0; i < MAX_BULLETS; i++) {
@@ -35,76 +38,69 @@ int main () {
 	BossBullet balasBoss[MAX_BOSS_BULLETS];
 	inicializarBalasBoss(balasBoss, MAX_BOSS_BULLETS);
 
+	// Inicialização da Estrela (sistema de perguntas)
+	Estrela estrela;
+	inicializarEstrela(&estrela);
+	// O desafio fica separado da estrela para manter o modal pausado ate terminar.
+	DesafioPergunta desafio;
+	inicializarDesafio(&desafio);
+	bool perguntaAtiva = false; // true quando o jogador pegou a estrela
+
     // Loop Principal
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
         float deltaTime = GetFrameTime();
 
-        moverEsquerdaDireita(&jogador, deltaTime);
-        moverBalas(bala, MAX_BULLETS, deltaTime);
-        atirar(&jogador, bala, MAX_BULLETS);
-        moverBoss(&boss, deltaTime);
+        // ── UPDATE ── só roda quando o jogo não está pausado ──────────────
+        if (!perguntaAtiva) {
+            moverEsquerdaDireita(&jogador, deltaTime);
+            moverBalas(bala, MAX_BULLETS, deltaTime);
+            atirar(&jogador, bala, MAX_BULLETS);
 
-		// Atualiza a posição do boss
-		moverBoss(&boss, deltaTime);
-		atualizarFeedbackDanoBoss(&boss, deltaTime);
-		verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
-		atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
-		moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
-        
+            // Atualiza o boss
+            moverBoss(&boss, deltaTime);
+            atualizarFeedbackDanoBoss(&boss, deltaTime);
+            verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
+            atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
+            moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
+            verificarColisaoBalasComPlayer(&jogador, balasBoss, MAX_BOSS_BULLETS);
+            atualizarFeedbackDanoPlayer(&jogador, deltaTime);
 
-        // Grid de Pixels 60x80
-        // int rows = 60;
-        // int cols = 80;
-        // int cellSize = 10;
+            // Verifica colisão da estrela com o jogador
+            if (atualizarEstrela(&estrela, &boss, &jogador, deltaTime)) {
+                // Coletar a estrela congela o combate e abre o desafio numerico.
+                iniciarDesafio(&desafio);
+                perguntaAtiva = true;
+            }
+        } else {
+            // Enquanto o modal esta ativo, so o desafio recebe update.
+            perguntaAtiva = atualizarDesafio(&desafio, &jogador, deltaTime);
+        }
 
-        // for (int i = 0; i < rows; i++) {
-        //     for (int j = 0; j < cols; j++) {
-        //         DrawRectangleLines(j * cellSize, i * cellSize, cellSize, cellSize, LIGHTGRAY);
-        //     }
-        // }
-
+        // ── DRAW ── sempre desenha (jogo congelado, mas visível) ───────────
         drawPlayer(&jogador);
         drawBalas(bala, MAX_BULLETS);
         drawBoss(&boss);
+        drawBarraVidaBoss(&boss);
+        drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
+        drawPlayerHP(&jogador);
+        drawEstrela(&estrela);
 
-        bool algumaAtiva = false;
-        for (int i = 0; i < MAX_BULLETS; i++) {
-            if (bala[i].ativa) {
-                algumaAtiva = true;
-                break;
-            }
+        // ── TELA DE PERGUNTA (modal sobre o jogo congelado) ───────────────
+        if (perguntaAtiva) {
+            // O jogo fica visivel ao fundo; o desafio desenha apenas a camada modal.
+            drawDesafio(&desafio, &jogador);
         }
 
-		// Desenha o boss
-		drawBoss(&boss);
-		drawBarraVidaBoss(&boss);
-		drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
-		
-		/*Debug*/
-		
-		// Mostra se ao menos uma bala está ativa
-		algumaAtiva = false;
-		for (int i = 0; i < MAX_BULLETS; i++) {
-			if (bala[i].ativa) {
-				algumaAtiva = true;
-				break;
-			}
-		}
-		if (algumaAtiva) {
-			DrawText("Balas ativas!", 50, 80, 20, GREEN);
-		} else {
-			DrawText("Nenhuma bala ativa", 50, 80, 20, RED);
-		}
-
+        /*Debug*/
+        bool algumaAtiva = false;
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            if (bala[i].ativa) { algumaAtiva = true; break; }
+        }
+        DrawText(algumaAtiva ? "Balas ativas!" : "Nenhuma bala ativa",
+                 50, 80, 20, algumaAtiva ? GREEN : RED);
         DrawText("Movimentacao Inicial", 50, 50, 20, WHITE);
-        DrawTriangle(
-            (Vector2){380.0f, 520.0f},
-            (Vector2){400.0f, 500.0f},
-            (Vector2){420.0f, 500.0f},
-            VIOLET
-        );
 
         EndDrawing();
     }

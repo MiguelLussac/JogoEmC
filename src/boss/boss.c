@@ -29,6 +29,21 @@ static void aplicarDanoBoss(Boss* boss, int dano) {
     }
 }
 
+void verificarColisaoBalasComPlayer(Player* player, BossBullet bullets[], int count) {
+    if (player->hp <= 0) return;
+
+    // Balas do boss causam dano real no player e alimentam a regra de vida do desafio.
+    for (int i = 0; i < count; i++) {
+        if (!bullets[i].ativa) continue;
+
+        if (CheckCollisionCircles((Vector2){player->posicaoX, player->posicaoY}, PLAYER_RADIUS,
+                                  (Vector2){bullets[i].posicaoX, bullets[i].posicaoY}, BOSS_BULLET_RADIUS)) {
+            bullets[i].ativa = false;
+            aplicarDanoPlayer(player, 1);
+        }
+    }
+}
+
 void inicializarBoss(Boss* boss) {
     boss->posicaoX = 400.0f;
     boss->posicaoY = 100.0f;
