@@ -11,9 +11,12 @@
 #define PLAYER_HEALTH_BAR_X 20
 #define PLAYER_HEALTH_BAR_Y 560
 #define PLAYER_DAMAGE_FLASH_DURATION 0.35f
+#define PLAYER_BASE_SPEED 300.0f
 #define PLAYER_BASE_BULLET_DAMAGE 1
 #define PLAYER_DAMAGE_BOOST_MULTIPLIER 2
 #define PLAYER_DAMAGE_BOOST_DURATION 10.0f
+#define PLAYER_SPEED_BOOST_MULTIPLIER 1.5f
+#define PLAYER_SPEED_BOOST_DURATION 10.0f
 
 // Estado principal do jogador usado por movimento, vida e feedback visual.
 typedef struct {
@@ -24,6 +27,7 @@ typedef struct {
     float tempoPiscandoDano;
     int danoTiro;
     float tempoBoostDano;
+    float tempoBoostVelocidade;
 } Player;
 
 void moverEsquerdaDireita(Player* player, float deltaTime);
@@ -33,6 +37,8 @@ void aplicarDanoPlayer(Player* player, int dano);
 void atualizarFeedbackDanoPlayer(Player* player, float deltaTime);
 void aplicarBoostDanoPlayer(Player* player);
 void atualizarBoostDanoPlayer(Player* player, float deltaTime);
+void aplicarBoostVelocidadePlayer(Player* player);
+void atualizarBoostVelocidadePlayer(Player* player, float deltaTime);
 
 // Bala simples do jogador, reaproveitada em um pool fixo.
 typedef struct {

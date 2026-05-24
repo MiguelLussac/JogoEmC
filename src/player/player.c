@@ -37,6 +37,9 @@ void drawPlayerHP(const Player* player) {
     if (player->tempoBoostDano > 0.0f) {
         DrawText(TextFormat("DANO x%d: %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 24, 16, YELLOW);
     }
+    if (player->tempoBoostVelocidade > 0.0f) {
+        DrawText(TextFormat("VEL x%.1f: %.1fs", PLAYER_SPEED_BOOST_MULTIPLIER, player->tempoBoostVelocidade), PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 44, 16, SKYBLUE);
+    }
 }
 
 void aplicarDanoPlayer(Player* player, int dano) {
@@ -65,6 +68,21 @@ void atualizarBoostDanoPlayer(Player* player, float deltaTime) {
     if (player->tempoBoostDano <= 0.0f) {
         player->tempoBoostDano = 0.0f;
         player->danoTiro = PLAYER_BASE_BULLET_DAMAGE;
+    }
+}
+
+void aplicarBoostVelocidadePlayer(Player* player) {
+    player->velocidade = PLAYER_BASE_SPEED * PLAYER_SPEED_BOOST_MULTIPLIER;
+    player->tempoBoostVelocidade = PLAYER_SPEED_BOOST_DURATION;
+}
+
+void atualizarBoostVelocidadePlayer(Player* player, float deltaTime) {
+    if (player->tempoBoostVelocidade <= 0.0f) return;
+
+    player->tempoBoostVelocidade -= deltaTime;
+    if (player->tempoBoostVelocidade <= 0.0f) {
+        player->tempoBoostVelocidade = 0.0f;
+        player->velocidade = PLAYER_BASE_SPEED;
     }
 }
 

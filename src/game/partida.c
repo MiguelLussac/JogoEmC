@@ -5,11 +5,12 @@ void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, Boss
                         bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, EstatisticasPartida* stats) {
     jogador->posicaoX = 400;
     jogador->posicaoY = 500;
-    jogador->velocidade = 300;
+    jogador->velocidade = PLAYER_BASE_SPEED;
     jogador->hp = PLAYER_MAX_HP;
     jogador->tempoPiscandoDano = 0.0f;
     jogador->danoTiro = PLAYER_BASE_BULLET_DAMAGE;
     jogador->tempoBoostDano = 0.0f;
+    jogador->tempoBoostVelocidade = 0.0f;
 
     for (int i = 0; i < MAX_BULLETS; i++) {
         balasJogador[i].posicaoX = 380;
