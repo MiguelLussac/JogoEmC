@@ -34,11 +34,21 @@ void drawPlayerHP(const Player* player) {
     DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, larguraVida, PLAYER_HEALTH_BAR_HEIGHT, RED);
     DrawRectangleLines(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, WHITE);
     DrawText(TextFormat("PLAYER HP: %d/%d", player->hp, PLAYER_MAX_HP), PLAYER_HEALTH_BAR_X + 8, PLAYER_HEALTH_BAR_Y + 22, 16, WHITE);
+    DrawText("BUFFS ATIVOS:", PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 62, 16, RAYWHITE);
+
+    int yBuff = PLAYER_HEALTH_BAR_Y - 42;
+    bool temBuffAtivo = false;
     if (player->tempoBoostDano > 0.0f) {
-        DrawText(TextFormat("DANO x%d: %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 24, 16, YELLOW);
+        DrawText(TextFormat("DANO x%d: %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), PLAYER_HEALTH_BAR_X, yBuff, 16, YELLOW);
+        yBuff += 18;
+        temBuffAtivo = true;
     }
     if (player->tempoBoostVelocidade > 0.0f) {
-        DrawText(TextFormat("VEL x%.1f: %.1fs", PLAYER_SPEED_BOOST_MULTIPLIER, player->tempoBoostVelocidade), PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 44, 16, SKYBLUE);
+        DrawText(TextFormat("VEL x%.1f: %.1fs", PLAYER_SPEED_BOOST_MULTIPLIER, player->tempoBoostVelocidade), PLAYER_HEALTH_BAR_X, yBuff, 16, SKYBLUE);
+        temBuffAtivo = true;
+    }
+    if (!temBuffAtivo) {
+        DrawText("Nenhum", PLAYER_HEALTH_BAR_X, yBuff, 16, GRAY);
     }
 }
 
