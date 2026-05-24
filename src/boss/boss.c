@@ -113,7 +113,7 @@ void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count) {
         if (bullets[i].ativa &&
             CheckCollisionCircleRec((Vector2){ bullets[i].posicaoX, bullets[i].posicaoY }, PLAYER_BULLET_RADIUS, bossRect)) {
             bullets[i].ativa = false;
-            aplicarDanoBoss(boss, 1);
+            aplicarDanoBoss(boss, bullets[i].dano);
             if (!boss->ativa) return;
         }
     }

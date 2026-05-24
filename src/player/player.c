@@ -34,6 +34,9 @@ void drawPlayerHP(const Player* player) {
     DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, larguraVida, PLAYER_HEALTH_BAR_HEIGHT, RED);
     DrawRectangleLines(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, WHITE);
     DrawText(TextFormat("PLAYER HP: %d/%d", player->hp, PLAYER_MAX_HP), PLAYER_HEALTH_BAR_X + 8, PLAYER_HEALTH_BAR_Y + 22, 16, WHITE);
+    if (player->tempoBoostDano > 0.0f) {
+        DrawText(TextFormat("DANO x%d: %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 24, 16, YELLOW);
+    }
 }
 
 void aplicarDanoPlayer(Player* player, int dano) {
@@ -48,6 +51,21 @@ void atualizarFeedbackDanoPlayer(Player* player, float deltaTime) {
     if (player->tempoPiscandoDano <= 0.0f) return;
     player->tempoPiscandoDano -= deltaTime;
     if (player->tempoPiscandoDano < 0.0f) player->tempoPiscandoDano = 0.0f;
+}
+
+void aplicarBoostDanoPlayer(Player* player) {
+    player->danoTiro = PLAYER_BASE_BULLET_DAMAGE * PLAYER_DAMAGE_BOOST_MULTIPLIER;
+    player->tempoBoostDano = PLAYER_DAMAGE_BOOST_DURATION;
+}
+
+void atualizarBoostDanoPlayer(Player* player, float deltaTime) {
+    if (player->tempoBoostDano <= 0.0f) return;
+
+    player->tempoBoostDano -= deltaTime;
+    if (player->tempoBoostDano <= 0.0f) {
+        player->tempoBoostDano = 0.0f;
+        player->danoTiro = PLAYER_BASE_BULLET_DAMAGE;
+    }
 }
 
 // Atualiza as balas do jogador e desativa as que saem pelo topo da tela.
@@ -66,7 +84,8 @@ void moverBalas(Bullet bullets[], int count, float deltaTime) {
 void drawBalas(Bullet bullets[], int count) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
-            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, PLAYER_BULLET_RADIUS, YELLOW);
+            Color corBala = bullets[i].dano > PLAYER_BASE_BULLET_DAMAGE ? ORANGE : YELLOW;
+            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, PLAYER_BULLET_RADIUS, corBala);
         }
     }
 }
@@ -79,6 +98,7 @@ void atirar(Player* player, Bullet bullets[], int count) {
                 bullets[i].posicaoX = player->posicaoX;
                 bullets[i].posicaoY = player->posicaoY - PLAYER_RADIUS; // Posição inicial da bala
                 bullets[i].velocidade = 500.0f; // Velocidade aumentada para balas mais rápidas
+                bullets[i].dano = player->danoTiro > 0 ? player->danoTiro : PLAYER_BASE_BULLET_DAMAGE;
                 bullets[i].ativa = true;
                 break;
             }
