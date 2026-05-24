@@ -499,6 +499,8 @@ int main () {
                     solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_PLAYER_DERROTADO);
                 }
                 atualizarFeedbackDanoPlayer(&jogador, deltaTime);
+                atualizarBoostDanoPlayer(&jogador, deltaTime);
+                atualizarBoostVelocidadePlayer(&jogador, deltaTime);
 
                 // Verifica colisão da estrela com o jogador
                 if (!jogoEncerrado && atualizarEstrela(&estrela, &boss, &jogador, deltaTime)) {

@@ -65,6 +65,7 @@ typedef struct {
     char entrada[DESAFIO_TAMANHO_ENTRADA];
     int tamanhoEntrada;
     const char* dica;
+    const char* bonus;
     bool acertou;
     bool usouUltimaChance;
     float timerResultado;

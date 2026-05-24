@@ -27,12 +27,29 @@ void drawPlayer(Player* player) {
 void drawPlayerHP(const Player* player) {
     // Barra de vida usada pelo desafio para mostrar o custo da ultima tentativa.
     float percentualVida = player->hp > 0 ? (float)player->hp / (float)PLAYER_MAX_HP : 0.0f;
+    if (percentualVida > 1.0f) percentualVida = 1.0f;
     int larguraVida = (int)(PLAYER_HEALTH_BAR_WIDTH * percentualVida);
 
     DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, DARKGRAY);
     DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, larguraVida, PLAYER_HEALTH_BAR_HEIGHT, RED);
     DrawRectangleLines(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, WHITE);
     DrawText(TextFormat("PLAYER HP: %d/%d", player->hp, PLAYER_MAX_HP), PLAYER_HEALTH_BAR_X + 8, PLAYER_HEALTH_BAR_Y + 22, 16, WHITE);
+    DrawText("BUFFS ATIVOS:", PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 62, 16, RAYWHITE);
+
+    int yBuff = PLAYER_HEALTH_BAR_Y - 42;
+    bool temBuffAtivo = false;
+    if (player->tempoBoostDano > 0.0f) {
+        DrawText(TextFormat("DANO x%d: %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), PLAYER_HEALTH_BAR_X, yBuff, 16, YELLOW);
+        yBuff += 18;
+        temBuffAtivo = true;
+    }
+    if (player->tempoBoostVelocidade > 0.0f) {
+        DrawText(TextFormat("VEL x%.1f: %.1fs", PLAYER_SPEED_BOOST_MULTIPLIER, player->tempoBoostVelocidade), PLAYER_HEALTH_BAR_X, yBuff, 16, SKYBLUE);
+        temBuffAtivo = true;
+    }
+    if (!temBuffAtivo) {
+        DrawText("Nenhum", PLAYER_HEALTH_BAR_X, yBuff, 16, GRAY);
+    }
 }
 
 void aplicarDanoPlayer(Player* player, int dano) {
@@ -47,6 +64,36 @@ void atualizarFeedbackDanoPlayer(Player* player, float deltaTime) {
     if (player->tempoPiscandoDano <= 0.0f) return;
     player->tempoPiscandoDano -= deltaTime;
     if (player->tempoPiscandoDano < 0.0f) player->tempoPiscandoDano = 0.0f;
+}
+
+void aplicarBoostDanoPlayer(Player* player) {
+    player->danoTiro = PLAYER_BASE_BULLET_DAMAGE * PLAYER_DAMAGE_BOOST_MULTIPLIER;
+    player->tempoBoostDano = PLAYER_DAMAGE_BOOST_DURATION;
+}
+
+void atualizarBoostDanoPlayer(Player* player, float deltaTime) {
+    if (player->tempoBoostDano <= 0.0f) return;
+
+    player->tempoBoostDano -= deltaTime;
+    if (player->tempoBoostDano <= 0.0f) {
+        player->tempoBoostDano = 0.0f;
+        player->danoTiro = PLAYER_BASE_BULLET_DAMAGE;
+    }
+}
+
+void aplicarBoostVelocidadePlayer(Player* player) {
+    player->velocidade = PLAYER_BASE_SPEED * PLAYER_SPEED_BOOST_MULTIPLIER;
+    player->tempoBoostVelocidade = PLAYER_SPEED_BOOST_DURATION;
+}
+
+void atualizarBoostVelocidadePlayer(Player* player, float deltaTime) {
+    if (player->tempoBoostVelocidade <= 0.0f) return;
+
+    player->tempoBoostVelocidade -= deltaTime;
+    if (player->tempoBoostVelocidade <= 0.0f) {
+        player->tempoBoostVelocidade = 0.0f;
+        player->velocidade = PLAYER_BASE_SPEED;
+    }
 }
 
 // Atualiza as balas do jogador e desativa as que saem pelo topo da tela.
@@ -65,7 +112,8 @@ void moverBalas(Bullet bullets[], int count, float deltaTime) {
 void drawBalas(Bullet bullets[], int count) {
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
-            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, PLAYER_BULLET_RADIUS, YELLOW);
+            Color corBala = bullets[i].dano > PLAYER_BASE_BULLET_DAMAGE ? ORANGE : YELLOW;
+            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, PLAYER_BULLET_RADIUS, corBala);
         }
     }
 }
@@ -78,6 +126,7 @@ void atirar(Player* player, Bullet bullets[], int count) {
                 bullets[i].posicaoX = player->posicaoX;
                 bullets[i].posicaoY = player->posicaoY - PLAYER_RADIUS; // Posição inicial da bala
                 bullets[i].velocidade = 500.0f; // Velocidade aumentada para balas mais rápidas
+                bullets[i].dano = player->danoTiro > 0 ? player->danoTiro : PLAYER_BASE_BULLET_DAMAGE;
                 bullets[i].ativa = true;
                 break;
             }
