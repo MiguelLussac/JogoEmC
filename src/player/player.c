@@ -27,6 +27,7 @@ void drawPlayer(Player* player) {
 void drawPlayerHP(const Player* player) {
     // Barra de vida usada pelo desafio para mostrar o custo da ultima tentativa.
     float percentualVida = player->hp > 0 ? (float)player->hp / (float)PLAYER_MAX_HP : 0.0f;
+    if (percentualVida > 1.0f) percentualVida = 1.0f;
     int larguraVida = (int)(PLAYER_HEALTH_BAR_WIDTH * percentualVida);
 
     DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, DARKGRAY);

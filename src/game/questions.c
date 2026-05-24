@@ -118,6 +118,7 @@ static void processarPalpite(DesafioPergunta* desafio, Player* jogador) {
     executaQuestao(&desafio->questao, desafio->questao.numeroSecreto, palpite);
 
     if (desafio->questao.status == correto) {
+        jogador->hp++;
         finalizarDesafio(desafio, true);
         return;
     }
@@ -248,7 +249,7 @@ static void drawTelaResultado(const DesafioPergunta* desafio) {
     drawTextoCentralizadoNoModal(desafio->acertou ? "*" : "X", modal, (int)modal.y + 34, 42, borda);
     drawTextoCentralizadoNoModal(desafio->acertou ? "Parabens voce acertou o numero!!!" : "Nao foi dessa vez!!", modal, (int)modal.y + 88, 16, borda);
     if (desafio->acertou) {
-        drawTextoCentralizadoNoModal("Voce ganhara um bonus de Dano Aumentado!!", modal, (int)modal.y + 132, 15, WHITE);
+        drawTextoCentralizadoNoModal("Voce ganhou um bonus de +1 vida!!", modal, (int)modal.y + 132, 15, WHITE);
     } else {
         drawTextoCentralizadoNoModal(TextFormat("O numero era %d.", desafio->questao.numeroSecreto), modal, (int)modal.y + 126, 16, WHITE);
         drawTextoCentralizadoNoModal("Procure o proximo atributo e tente de", modal, (int)modal.y + 170, 15, WHITE);
