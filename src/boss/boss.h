@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include "../player/player.h"
 
-#define BOSS_MAX_HP 10
-#define BOSS_BULLET_COOLDOWN 1.0f
-#define BOSS_BULLET_SPEED 220.0f
+#define BOSS_MAX_HP 60
+#define BOSS_BULLET_COOLDOWN 1.05f
+#define BOSS_BULLET_SPEED 190.0f
 #define BOSS_DAMAGE_FLASH_DURATION 0.35f
 
 // Estado completo do boss: posicao, vida, movimento, tiro e feedback visual.
@@ -22,6 +22,16 @@ typedef struct {
     int direcao; // 0 = parado, 1 = direita, -1 = esquerda
     float tempoDesdeUltimoTiro;
     float tempoPiscandoDano;
+    int fase;
+    int padraoMovimento;
+    int padraoAtaque;
+    float tempoIA;
+    float tempoMudancaMovimento;
+    float tempoDash;
+    float duracaoDash;
+    float direcaoDash;
+    int tirosRajadaRestantes;
+    float tempoEntreRajadas;
 } Boss;
 
 // Projetil do boss com velocidade vetorial para perseguir a direcao calculada.
@@ -34,7 +44,7 @@ typedef struct {
 } BossBullet;
 
 void inicializarBoss(Boss* boss);
-void moverBoss(Boss* boss, float deltaTime);
+void moverBoss(Boss* boss, const Player* player, float deltaTime);
 void drawBoss(Boss* boss);
 void atualizarFeedbackDanoBoss(Boss* boss, float deltaTime);
 void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count);

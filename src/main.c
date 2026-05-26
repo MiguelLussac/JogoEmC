@@ -228,12 +228,14 @@ static void drawMenuInicial(int opcaoSelecionada, float tempo) {
 
     Rectangle botaoJogar = {(GetScreenWidth() - 390) / 2.0f, 250, 390, 54};
     Rectangle botaoHistorico = {(GetScreenWidth() - 390) / 2.0f, 324, 390, 54};
+    Rectangle botaoAnalise = {(GetScreenWidth() - 390) / 2.0f, 398, 390, 54};
     drawBotaoPixel(botaoJogar, "INICIAR PARTIDA", opcaoSelecionada == 0);
     drawBotaoPixel(botaoHistorico, "VER HISTORICO", opcaoSelecionada == 1);
+    drawBotaoPixel(botaoAnalise, "RELATORIO ANALITICO", opcaoSelecionada == 2);
 
     Color blink = ((int)(tempo * 3.5f) % 2 == 0) ? (Color){255, 255, 255, 245} : (Color){255, 220, 90, 255};
     const char* dicas = "W/S ou SETAS | ENTER para confirmar";
-    DrawText(dicas, (GetScreenWidth() - MeasureText(dicas, 18)) / 2, 410, 18, blink);
+    DrawText(dicas, (GetScreenWidth() - MeasureText(dicas, 18)) / 2, 474, 18, blink);
 }
 
 static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinhas, int scroll, int selecionado, int expandido, float tempo) {
@@ -342,7 +344,7 @@ static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinh
         }
     }
 
-    const char* rodape = "ESC voltar | W/S navega | ENTER ou clique expande";
+    const char* rodape = "ESC/B voltar | W/S navega | ENTER ou clique expande";
     DrawText(rodape, (GetScreenWidth() - MeasureText(rodape, 18)) / 2, 546, 18, (Color){220, 220, 220, 210});
 }
 
@@ -362,7 +364,7 @@ static void drawRelatorioFinal(MotivoFimJogo motivoFimJogo, const EstatisticasPa
     const char* titulo = "RELATORIO FINAL";
     const char* motivo = textoMotivoFimJogo(motivoFimJogo);
     const char* salvar = salvo ? "Relatorio salvo no historico." : "Salvando no historico...";
-    const char* sair = "ENTER ou ESC para voltar ao menu";
+    const char* sair = "ENTER, ESC ou B para voltar ao menu";
     const char* dica = gerarDiagnostico(stats);
 
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), (Color){0, 0, 0, 165});
@@ -384,6 +386,7 @@ int main () {
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
     // Create the game window
     InitWindow(800, 600, "MindDrop");
+    SetExitKey(KEY_NULL);
     SetTargetFPS(60);
     // Set the resources directory as the working directory
     SearchAndSetResourceDir("resources");
@@ -441,8 +444,11 @@ int main () {
         float tempo = (float)GetTime();
 
         if (telaAtual == TELA_MENU) {
-            if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W) || IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
-                opcaoMenu = (opcaoMenu + 1) % 2;
+            if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
+                opcaoMenu = (opcaoMenu + 2) % 3;
+            }
+            if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
+                opcaoMenu = (opcaoMenu + 1) % 3;
             }
 
             if (IsKeyPressed(KEY_ENTER)) {
@@ -450,7 +456,7 @@ int main () {
                     inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
                     relatorioSalvo = false;
                     telaAtual = TELA_JOGO;
-                } else {
+                } else if (opcaoMenu == 1) {
                     totalHistorico = carregarHistoricoRelatorios(linhasHistorico, MAX_HISTORICO_LINHAS);
                     scrollHistorico = 0;
                     historicoSelecionado = totalHistorico > 0 ? 0 : -1;
@@ -459,6 +465,8 @@ int main () {
                         registrosHistorico[i] = parseLinhaHistorico(linhasHistorico[i]);
                     }
                     telaAtual = TELA_HISTORICO;
+                } else if (opcaoMenu == 2) {
+                    telaAtual = TELA_RELATORIO_ANALITICO;
                 }
             }
         } else if (telaAtual == TELA_HISTORICO) {
@@ -500,7 +508,15 @@ int main () {
                     }
                 }
             }
-            if (IsKeyPressed(KEY_ESCAPE)) telaAtual = TELA_MENU;
+            if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_B)) telaAtual = TELA_MENU;
+        } else if (telaAtual == TELA_RELATORIO_ANALITICO) {
+            Rectangle botaoVoltarAnalise = {40, 536, 150, 36};
+            if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_B)) {
+                telaAtual = TELA_MENU;
+            }
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), botaoVoltarAnalise)) {
+                telaAtual = TELA_MENU;
+            }
         } else if (telaAtual == TELA_JOGO) {
             stats.tempoPartida += deltaTime;
 
@@ -520,7 +536,7 @@ int main () {
                 atirar(&jogador, bala, MAX_BULLETS);
 
                 // Atualiza o boss
-                moverBoss(&boss, deltaTime);
+                moverBoss(&boss, &jogador, deltaTime);
                 atualizarFeedbackDanoBoss(&boss, deltaTime);
                 verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
                 // Quando o boss fica inativo por HP zerado, registra o fim da partida.
@@ -570,7 +586,7 @@ int main () {
                 telaAtual = TELA_RELATORIO_FINAL;
             }
         } else if (telaAtual == TELA_RELATORIO_FINAL) {
-            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE)) {
+            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_B)) {
                 telaAtual = TELA_MENU;
             }
         }
@@ -582,6 +598,9 @@ int main () {
             drawMenuInicial(opcaoMenu, tempo);
         } else if (telaAtual == TELA_HISTORICO) {
             drawTelaHistorico(registrosHistorico, totalHistorico, scrollHistorico, historicoSelecionado, historicoExpandido, tempo);
+        } else if (telaAtual == TELA_RELATORIO_ANALITICO) {
+            drawFundoArcadeAnimado(tempo);
+            renderizarRelatorioAnalitico(NULL);
         } else {
             // ── DRAW ── sempre desenha (jogo congelado, mas visível) ───────────
             drawPlayer(&jogador);

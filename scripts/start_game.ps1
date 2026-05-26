@@ -27,10 +27,15 @@ Set-Location (Resolve-Path (Join-Path $scriptDir ".."))
 
 if (-not $Headless) {
     Start-VcXsrv
+    Write-Output "Atualizando imagem Docker com o codigo atual..."
+    docker compose build minddrop
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-Output "Iniciando o jogo (GUI). Pressione Ctrl+C para sair..."
     docker compose run --rm -e DISPLAY=host.docker.internal:0.0 minddrop
 }
 else {
     Write-Output "Executando teste headless (xvfb-run)..."
+    docker compose build minddrop
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     docker compose run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
 }

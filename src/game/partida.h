@@ -7,7 +7,7 @@
 #include "questions.h"
 
 #define MAX_BULLETS 10
-#define MAX_BOSS_BULLETS 10
+#define MAX_BOSS_BULLETS 20
 
 typedef enum {
     FIM_JOGO_NENHUM,
@@ -18,6 +18,7 @@ typedef enum {
 typedef enum {
     TELA_MENU,
     TELA_HISTORICO,
+    TELA_RELATORIO_ANALITICO,
     TELA_JOGO,
     TELA_RELATORIO_FINAL
 } TelaJogo;
