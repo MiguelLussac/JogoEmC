@@ -5,6 +5,7 @@
 #include "game/questions.h"
 #include "game/partida.h"
 #include "game/history.h"
+#include "analysis/analise.h"
 #include <stdbool.h>
 #include <math.h>
 #include <ctype.h>
@@ -35,6 +36,16 @@ typedef struct {
     char linhaOriginal[TAMANHO_LINHA_HISTORICO];
     bool valido;
 } HistoricoRegistro;
+
+/* Variáveis do módulo de análise — integradas à main para exposição à UI */
+static HistoricoPartida *g_historico = NULL;
+static size_t g_historico_count = 0;
+static int g_historico_err = 0; /* código HistoricoErro */
+static double g_media_score = 0.0;
+static double g_desvio_score = 0.0;
+static HistoricoPartida g_melhor_partida = {0};
+static HistoricoPartida g_pior_partida = {0};
+static int g_has_analise = 0; /* 1 se houver dados válidos */
 
 // Ponto unico para encerrar a partida.
 static void solicitarFimDeJogo(bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, MotivoFimJogo motivo) {
@@ -399,6 +410,31 @@ int main () {
 
     inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
 
+    /* Carregar histórico de partidas ao iniciar (arquivo opcional). */
+    {
+        const char *caminhoHistorico = "resources/historico.txt";
+        HistoricoErro err = carregarHistorico(caminhoHistorico, &g_historico, &g_historico_count);
+        g_historico_err = (int)err;
+        if (err == HIST_OK) {
+            if (validarDadosHistorico(g_historico, g_historico_count) == HIST_OK) {
+                g_media_score = calcularMediaScore(g_historico, g_historico_count);
+                g_desvio_score = calcularDesvioPadraoScore(g_historico, g_historico_count);
+                int found = 0;
+                g_melhor_partida = melhorPartida(g_historico, g_historico_count, &found);
+                g_pior_partida = piorPartida(g_historico, g_historico_count, &found);
+                g_has_analise = 1;
+            } else {
+                liberarHistorico(g_historico);
+                g_historico = NULL;
+                g_historico_count = 0;
+                g_has_analise = 0;
+            }
+        } else {
+            /* Não encontrou ou arquivo inválido — segue sem análise */
+            g_has_analise = 0;
+        }
+    }
+
     // Loop Principal
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
@@ -567,8 +603,16 @@ int main () {
             }
         }
 
-        EndDrawing();
+            EndDrawing();
+        }
+
+        /* Liberar recursos de análise se necessário */
+        if (g_historico) {
+            liberarHistorico(g_historico);
+            g_historico = NULL;
+            g_historico_count = 0;
+        }
+
+        CloseWindow();
+        return 0;
     }
-	CloseWindow();
-	return 0;
-}
