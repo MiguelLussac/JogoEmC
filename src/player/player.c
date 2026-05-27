@@ -3,21 +3,23 @@
 #include "../audio/audio.h"
 #include "raylib.h"
 #include <math.h>
+#include <string.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
 #define PLAYER_RADIUS 20
 
 // Move o jogador no eixo X e limita a posicao dentro da largura da tela.
 void moverEsquerdaDireita(Player* player, float deltaTime) {
+    float limiteEsquerda = PLAYER_RADIUS;
+    float limiteDireita = (float)GetScreenWidth() - PLAYER_RADIUS;
+
     if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
         player->posicaoX -= player->velocidade * deltaTime;
     }
     if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
         player->posicaoX += player->velocidade * deltaTime;
     }
-    if (player->posicaoX < PLAYER_RADIUS) player->posicaoX = PLAYER_RADIUS;
-    if (player->posicaoX > SCREEN_WIDTH - PLAYER_RADIUS) player->posicaoX = SCREEN_WIDTH - PLAYER_RADIUS;
+    if (player->posicaoX < limiteEsquerda) player->posicaoX = limiteEsquerda;
+    if (player->posicaoX > limiteDireita) player->posicaoX = limiteDireita;
 }
 
 void drawPlayer(Player* player) {
@@ -65,7 +67,7 @@ void drawPlayerHP(const Player* player) {
     if (percentualVida > 1.0f) percentualVida = 1.0f;
     int larguraVida = (int)(PLAYER_HEALTH_BAR_WIDTH * percentualVida);
     int bx = PLAYER_HEALTH_BAR_X;
-    int by = PLAYER_HEALTH_BAR_Y;
+    int by = GetScreenHeight() - 160;
 
     DrawRectangle(bx - 2, by - 2, PLAYER_HEALTH_BAR_WIDTH + 4, PLAYER_HEALTH_BAR_HEIGHT + 4, (Color){ 10, 20, 40, 200 });
     DrawRectangle(bx, by, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, (Color){ 20, 30, 50, 230 });
@@ -144,6 +146,59 @@ void atualizarBoostVelocidadePlayer(Player* player, float deltaTime) {
         player->tempoBoostVelocidade = 0.0f;
         player->velocidade = PLAYER_BASE_SPEED;
     }
+}
+
+bool aplicarBoostAleatorioPlayer(Player* player, char* mensagem, int tamMensagem) {
+    if (mensagem != NULL && tamMensagem > 0) mensagem[0] = '\0';
+
+    int boostSorteado = GetRandomValue(0, 2);
+
+    if (boostSorteado == 0) {
+        if (player->hp >= PLAYER_MAX_HP) {
+            if (mensagem != NULL && tamMensagem > 0) {
+                strncpy(mensagem, "Vida ja esta cheia!", tamMensagem - 1);
+                mensagem[tamMensagem - 1] = '\0';
+            }
+            return false;
+        }
+        player->hp++;
+        if (mensagem != NULL && tamMensagem > 0) {
+            strncpy(mensagem, "BUFF: +1 vida!", tamMensagem - 1);
+            mensagem[tamMensagem - 1] = '\0';
+        }
+        return true;
+    }
+
+    if (boostSorteado == 1) {
+        if (player->tempoBoostDano > 0.0f) {
+            if (mensagem != NULL && tamMensagem > 0) {
+                strncpy(mensagem, "Boost de dano ja ativo!", tamMensagem - 1);
+                mensagem[tamMensagem - 1] = '\0';
+            }
+            return false;
+        }
+        aplicarBoostDanoPlayer(player);
+        if (mensagem != NULL && tamMensagem > 0) {
+            strncpy(mensagem, "BUFF: Dano x2 por 10s!", tamMensagem - 1);
+            mensagem[tamMensagem - 1] = '\0';
+        }
+        return true;
+    }
+
+    if (player->tempoBoostVelocidade > 0.0f) {
+        if (mensagem != NULL && tamMensagem > 0) {
+            strncpy(mensagem, "Boost de velocidade ja ativo!", tamMensagem - 1);
+            mensagem[tamMensagem - 1] = '\0';
+        }
+        return false;
+    }
+
+    aplicarBoostVelocidadePlayer(player);
+    if (mensagem != NULL && tamMensagem > 0) {
+        strncpy(mensagem, "BUFF: Velocidade x1.5 por 10s!", tamMensagem - 1);
+        mensagem[tamMensagem - 1] = '\0';
+    }
+    return true;
 }
 
 // Atualiza as balas do jogador e desativa as que saem pelo topo da tela.

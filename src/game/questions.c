@@ -100,37 +100,14 @@ static void finalizarDesafio(DesafioPergunta* desafio, bool acertou) {
 }
 
 static void aplicarBoostAleatorio(DesafioPergunta* desafio, Player* jogador) {
-    int boostSorteado = GetRandomValue(0, 2);
-
-    if (boostSorteado == 0) {
-        if (jogador->hp >= PLAYER_MAX_HP) {
-            desafio->bonus = "Vida ja esta cheia!!";
-            return;
-        }
-
-        jogador->hp++;
-        desafio->bonus = "Voce ganhou +1 vida!!";
-        return;
+    char mensagem[64];
+    if (aplicarBoostAleatorioPlayer(jogador, mensagem, sizeof(mensagem))) {
+        desafio->bonus = TextFormat("%s", mensagem);
+    } else if (mensagem[0] != '\0') {
+        desafio->bonus = TextFormat("%s", mensagem);
+    } else {
+        desafio->bonus = "Nenhum buff aplicado.";
     }
-
-    if (boostSorteado == 1) {
-        if (jogador->tempoBoostDano > 0.0f) {
-            desafio->bonus = "Boost de dano ja esta ativo!!";
-            return;
-        }
-
-        aplicarBoostDanoPlayer(jogador);
-        desafio->bonus = "Voce ganhou Dano x2 por 10s!!";
-        return;
-    }
-
-    if (jogador->tempoBoostVelocidade > 0.0f) {
-        desafio->bonus = "Boost de velocidade ja esta ativo!!";
-        return;
-    }
-
-    aplicarBoostVelocidadePlayer(jogador);
-    desafio->bonus = "Voce ganhou Velocidade x1.5 por 10s!!";
 }
 
 static void processarPalpite(DesafioPergunta* desafio, Player* jogador) {

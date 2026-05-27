@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "../boss/boss.h"
 #include "../player/player.h"
+#include "../game/partida.h"
 
 #define LOGIC_MAX_DROPS   24
 #define LOGIC_DANO_BASE    4
@@ -22,6 +23,9 @@ typedef enum {
     DROP_AUTOCOMPLETE,
     DROP_SLOW,
     DROP_SHIELD,
+    DROP_BOOST_HP,
+    DROP_BOOST_DMG,
+    DROP_BOOST_SPD,
 } TipoDrop;
 
 typedef enum {
@@ -114,11 +118,17 @@ typedef struct {
     bool          ultimoVal0;
     bool          ultimoVal1;
     int           indiceRodada;
+    int           rodadasAcertadas;
+    int           rodadasErradas;
+    int           comboMaximo;
+    int           powerUpsColetados;
+    int           buffsObtidos;
 } FaseLogica;
 
 void inicializarFaseLogica(FaseLogica* fase, Boss* boss, Player* jogador);
 void atualizarFaseLogica(FaseLogica* fase, Boss* boss, Player* jogador,
                          BossBullet balasBoss[], int maxBoss, float deltaTime);
 void desenharFaseLogica(const FaseLogica* fase, const Boss* boss, const Player* jogador);
+void sincronizarStatsFaseLogica(const FaseLogica* fase, EstatisticasPartida* stats);
 
 #endif

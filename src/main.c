@@ -28,6 +28,7 @@
 #define HIST_DETAIL_H 420
 
 typedef struct {
+    char modo[16];
     char dataHora[32];
     char motivo[48];
     float tempo;
@@ -37,8 +38,15 @@ typedef struct {
     int desafiosVencidos;
     int desafiosTotal;
     float taxaDesafios;
+    int logicAcertos;
+    int logicTotal;
+    float logicTaxa;
+    int logicComboMax;
+    int logicPowerUps;
+    int logicBuffs;
     char linhaOriginal[TAMANHO_LINHA_HISTORICO];
     bool valido;
+    bool modoLogico;
 } HistoricoRegistro;
 
 /* Variáveis do módulo de análise — integradas à main para exposição à UI */
@@ -59,7 +67,18 @@ static void solicitarFimDeJogo(bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo
     *jogoEncerrado = true;
 }
 
-static const char* gerarDiagnostico(const EstatisticasPartida* stats) {
+static const char* gerarDiagnostico(ModoJogo modo, const EstatisticasPartida* stats) {
+    if (modo == MODO_LOGICO) {
+        int total = stats->logicAcertos + stats->logicErros;
+        float taxa = total > 0 ? ((float)stats->logicAcertos * 100.0f) / (float)total : 0.0f;
+        if (total == 0) return "DICA: colete drops V/F e operadores para montar a expressao.";
+        if (taxa < 50.0f) return "DICA: leia a expressao antes de coletar o proximo drop.";
+        if (stats->logicComboMax < 3) return "DICA: acertos seguidos geram combo e buffs de dano/velocidade.";
+        if (stats->logicPowerUps == 0) return "DICA: power-ups raros ajudam a limpar tiros e ganhar tempo.";
+        if (stats->tempoPartida > 120.0f) return "DICA: use slow motion e escudo para ganhar controle.";
+        return "DICA: otimo raciocinio logico! Tente bater seu combo maximo.";
+    }
+
     float precisao = stats->tirosAtirados > 0 ? ((float)stats->acertosNoBoss * 100.0f) / (float)stats->tirosAtirados : 0.0f;
     if (precisao < 20.0f) return "DICA: ajuste o timing dos tiros para subir a precisao.";
     if (stats->desafiosIniciados > 0 && stats->desafiosVencidos == 0) return "DICA: use buscas por intervalo no desafio numerico.";
@@ -86,8 +105,55 @@ static HistoricoRegistro parseLinhaHistorico(const char* linha) {
     HistoricoRegistro registro = {0};
     strncpy(registro.linhaOriginal, linha, TAMANHO_LINHA_HISTORICO - 1);
     registro.linhaOriginal[TAMANHO_LINHA_HISTORICO - 1] = '\0';
+    strcpy(registro.modo, "ARCADE");
 
-    int lidos = sscanf(
+    int lidosLogicos = sscanf(
+        linha,
+        "[%31[^]]] [%15[^]]] %47[^|]| tempo: %fs | expressoes: %d/%d (%f%%) | combo max: %d | powerups: %d | buffs: %d",
+        registro.dataHora,
+        registro.modo,
+        registro.motivo,
+        &registro.tempo,
+        &registro.logicAcertos,
+        &registro.logicTotal,
+        &registro.logicTaxa,
+        &registro.logicComboMax,
+        &registro.logicPowerUps,
+        &registro.logicBuffs
+    );
+
+    if (lidosLogicos == 10 && strcmp(registro.modo, "LOGICO") == 0) {
+        trimTexto(registro.dataHora);
+        trimTexto(registro.motivo);
+        registro.modoLogico = true;
+        registro.valido = true;
+        return registro;
+    }
+
+    int lidosArcade = sscanf(
+        linha,
+        "[%31[^]]] [%15[^]]] %47[^|]| tempo: %fs | tiros: %d | acertos boss: %d | precisao: %f%% | desafios: %d/%d (%f%%)",
+        registro.dataHora,
+        registro.modo,
+        registro.motivo,
+        &registro.tempo,
+        &registro.tiros,
+        &registro.acertosBoss,
+        &registro.precisao,
+        &registro.desafiosVencidos,
+        &registro.desafiosTotal,
+        &registro.taxaDesafios
+    );
+
+    if (lidosArcade == 10) {
+        trimTexto(registro.dataHora);
+        trimTexto(registro.motivo);
+        registro.modoLogico = (strcmp(registro.modo, "LOGICO") == 0);
+        registro.valido = true;
+        return registro;
+    }
+
+    int lidosLegado = sscanf(
         linha,
         "[%31[^]]] %47[^|]| tempo: %fs | tiros: %d | acertos boss: %d | precisao: %f%% | desafios: %d/%d (%f%%)",
         registro.dataHora,
@@ -101,14 +167,17 @@ static HistoricoRegistro parseLinhaHistorico(const char* linha) {
         &registro.taxaDesafios
     );
 
-    if (lidos == 9) {
+    if (lidosLegado == 9) {
         trimTexto(registro.dataHora);
         trimTexto(registro.motivo);
+        strcpy(registro.modo, "ARCADE");
+        registro.modoLogico = false;
         registro.valido = true;
     } else {
         registro.valido = false;
         strcpy(registro.dataHora, "Data nao identificada");
         strcpy(registro.motivo, "Formato de relatorio legado");
+        strcpy(registro.modo, "?");
     }
 
     return registro;
@@ -337,23 +406,43 @@ static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinh
             dy += 6;
 
             if (r->valido) {
+                DrawText(TextFormat("Modo: %s", r->modoLogico ? "LOGICO" : "ARCADE"), detalheX, dy, 17, (Color){120, 220, 255, 255});
+                dy += 24;
                 DrawText(TextFormat("Tempo de partida: %.1f s", r->tempo), detalheX, dy, 17, RAYWHITE);
                 dy += 24;
-                qtd = quebrarTextoComReticencias(
-                    TextFormat("Acertos no boss: %d/%d (%.1f%%)", r->acertosBoss, r->tiros, r->precisao),
-                    linhasWrap, 2, 17, detalheW
-                );
-                for (int i = 0; i < qtd; i++) {
-                    DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
-                    dy += 22;
-                }
-                qtd = quebrarTextoComReticencias(
-                    TextFormat("Desafios vencidos: %d/%d (%.1f%%)", r->desafiosVencidos, r->desafiosTotal, r->taxaDesafios),
-                    linhasWrap, 2, 17, detalheW
-                );
-                for (int i = 0; i < qtd; i++) {
-                    DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
-                    dy += 22;
+
+                if (r->modoLogico) {
+                    qtd = quebrarTextoComReticencias(
+                        TextFormat("Expressoes corretas: %d/%d (%.1f%%)", r->logicAcertos, r->logicTotal, r->logicTaxa),
+                        linhasWrap, 2, 17, detalheW
+                    );
+                    for (int i = 0; i < qtd; i++) {
+                        DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
+                        dy += 22;
+                    }
+                    DrawText(TextFormat("Combo maximo: %d", r->logicComboMax), detalheX, dy, 17, RAYWHITE);
+                    dy += 24;
+                    DrawText(TextFormat("Power-ups coletados: %d", r->logicPowerUps), detalheX, dy, 17, RAYWHITE);
+                    dy += 24;
+                    DrawText(TextFormat("Buffs obtidos: %d", r->logicBuffs), detalheX, dy, 17, RAYWHITE);
+                    dy += 24;
+                } else {
+                    qtd = quebrarTextoComReticencias(
+                        TextFormat("Acertos no boss: %d/%d (%.1f%%)", r->acertosBoss, r->tiros, r->precisao),
+                        linhasWrap, 2, 17, detalheW
+                    );
+                    for (int i = 0; i < qtd; i++) {
+                        DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
+                        dy += 22;
+                    }
+                    qtd = quebrarTextoComReticencias(
+                        TextFormat("Desafios vencidos: %d/%d (%.1f%%)", r->desafiosVencidos, r->desafiosTotal, r->taxaDesafios),
+                        linhasWrap, 2, 17, detalheW
+                    );
+                    for (int i = 0; i < qtd; i++) {
+                        DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
+                        dy += 22;
+                    }
                 }
             } else {
                 DrawText("Relatorio em formato legado:", detalheX, dy, 16, RAYWHITE);
@@ -376,37 +465,56 @@ static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinh
     DrawText(rodape, (GetScreenWidth() - MeasureText(rodape, 18)) / 2, 546, 18, (Color){220, 220, 220, 210});
 }
 
-static void drawRelatorioFinal(MotivoFimJogo motivoFimJogo, const EstatisticasPartida* stats, bool salvo) {
+static void drawRelatorioFinal(ModoJogo modo, MotivoFimJogo motivoFimJogo, const EstatisticasPartida* stats, bool salvo) {
+    float alturaModal = (modo == MODO_LOGICO) ? 360.0f : 320.0f;
     Rectangle modal = {
         (GetScreenWidth() - 620) / 2.0f,
-        (GetScreenHeight() - 320) / 2.0f,
+        (GetScreenHeight() - alturaModal) / 2.0f,
         620,
-        320
+        alturaModal
     };
 
-    float precisao = stats->tirosAtirados > 0 ? ((float)stats->acertosNoBoss * 100.0f) / (float)stats->tirosAtirados : 0.0f;
-    float aproveitamento = stats->desafiosIniciados > 0
-        ? ((float)stats->desafiosVencidos * 100.0f) / (float)stats->desafiosIniciados
-        : 0.0f;
-
-    const char* titulo = "RELATORIO FINAL";
+    const char* titulo = (modo == MODO_LOGICO) ? "RELATORIO FINAL - LOGICO" : "RELATORIO FINAL - ARCADE";
     const char* motivo = textoMotivoFimJogo(motivoFimJogo);
     const char* salvar = salvo ? "Relatorio salvo no historico." : "Salvando no historico...";
     const char* sair = "ENTER, ESC ou B para voltar ao menu";
-    const char* dica = gerarDiagnostico(stats);
+    const char* dica = gerarDiagnostico(modo, stats);
 
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), (Color){0, 0, 0, 165});
     DrawRectangleRec(modal, (Color){18, 18, 18, 245});
     DrawRectangleLinesEx(modal, 3.0f, YELLOW);
-    DrawText(titulo, (int)(modal.x + (modal.width - MeasureText(titulo, 32)) / 2), (int)modal.y + 24, 32, YELLOW);
+    DrawText(titulo, (int)(modal.x + (modal.width - MeasureText(titulo, 28)) / 2), (int)modal.y + 24, 28, YELLOW);
     DrawText(motivo, (int)(modal.x + (modal.width - MeasureText(motivo, 22)) / 2), (int)modal.y + 67, 22, WHITE);
 
     DrawText(TextFormat("Tempo de partida: %.1fs", stats->tempoPartida), (int)modal.x + 36, (int)modal.y + 116, 20, RAYWHITE);
-    DrawText(TextFormat("Tiros no boss: %d/%d (%.1f%%)", stats->acertosNoBoss, stats->tirosAtirados, precisao), (int)modal.x + 36, (int)modal.y + 146, 20, RAYWHITE);
-    DrawText(TextFormat("Desafios vencidos: %d/%d (%.1f%%)", stats->desafiosVencidos, stats->desafiosIniciados, aproveitamento), (int)modal.x + 36, (int)modal.y + 176, 20, RAYWHITE);
-    DrawText(dica, (int)modal.x + 36, (int)modal.y + 214, 18, (Color){190, 255, 190, 245});
-    DrawText(salvar, (int)modal.x + 36, (int)modal.y + 245, 16, (Color){185, 185, 185, 250});
-    DrawText(sair, (int)(modal.x + (modal.width - MeasureText(sair, 16)) / 2), (int)modal.y + 278, 16, GRAY);
+
+    if (modo == MODO_LOGICO) {
+        int total = stats->logicAcertos + stats->logicErros;
+        float taxa = total > 0 ? ((float)stats->logicAcertos * 100.0f) / (float)total : 0.0f;
+        DrawText(TextFormat("Expressoes corretas: %d/%d (%.1f%%)", stats->logicAcertos, total, taxa),
+                 (int)modal.x + 36, (int)modal.y + 146, 20, RAYWHITE);
+        DrawText(TextFormat("Combo maximo: %d", stats->logicComboMax),
+                 (int)modal.x + 36, (int)modal.y + 176, 20, RAYWHITE);
+        DrawText(TextFormat("Power-ups coletados: %d", stats->logicPowerUps),
+                 (int)modal.x + 36, (int)modal.y + 206, 20, RAYWHITE);
+        DrawText(TextFormat("Buffs obtidos: %d", stats->logicBuffs),
+                 (int)modal.x + 36, (int)modal.y + 236, 20, RAYWHITE);
+        DrawText(dica, (int)modal.x + 36, (int)modal.y + 274, 18, (Color){190, 255, 190, 245});
+        DrawText(salvar, (int)modal.x + 36, (int)modal.y + 305, 16, (Color){185, 185, 185, 250});
+        DrawText(sair, (int)(modal.x + (modal.width - MeasureText(sair, 16)) / 2), (int)modal.y + 332, 16, GRAY);
+    } else {
+        float precisao = stats->tirosAtirados > 0 ? ((float)stats->acertosNoBoss * 100.0f) / (float)stats->tirosAtirados : 0.0f;
+        float aproveitamento = stats->desafiosIniciados > 0
+            ? ((float)stats->desafiosVencidos * 100.0f) / (float)stats->desafiosIniciados
+            : 0.0f;
+        DrawText(TextFormat("Tiros no boss: %d/%d (%.1f%%)", stats->acertosNoBoss, stats->tirosAtirados, precisao),
+                 (int)modal.x + 36, (int)modal.y + 146, 20, RAYWHITE);
+        DrawText(TextFormat("Desafios vencidos: %d/%d (%.1f%%)", stats->desafiosVencidos, stats->desafiosIniciados, aproveitamento),
+                 (int)modal.x + 36, (int)modal.y + 176, 20, RAYWHITE);
+        DrawText(dica, (int)modal.x + 36, (int)modal.y + 214, 18, (Color){190, 255, 190, 245});
+        DrawText(salvar, (int)modal.x + 36, (int)modal.y + 245, 16, (Color){185, 185, 185, 250});
+        DrawText(sair, (int)(modal.x + (modal.width - MeasureText(sair, 16)) / 2), (int)modal.y + 278, 16, GRAY);
+    }
 }
 
 int main () {
@@ -514,6 +622,7 @@ int main () {
             if (IsKeyPressed(KEY_ENTER)) {
                 modoAtual = (opcaoModo == 0) ? MODO_ARCADE : MODO_LOGICO;
                 inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
+                stats.modo = modoAtual;
                 relatorioSalvo = false;
                 if (modoAtual == MODO_LOGICO) {
                     inicializarFaseLogica(&faseLogica, &boss, &jogador);
@@ -646,11 +755,16 @@ int main () {
                 if (tirosAtivosDepois > tirosAtivosAntes) {
                     stats.tirosAtirados += (tirosAtivosDepois - tirosAtivosAntes);
                 }
+
+                if (hpBossAntes > boss.hp) stats.acertosNoBoss += (hpBossAntes - boss.hp);
+            } else if (modoAtual == MODO_LOGICO) {
+                sincronizarStatsFaseLogica(&faseLogica, &stats);
             }
 
-            if (hpBossAntes > boss.hp) stats.acertosNoBoss += (hpBossAntes - boss.hp);
-
             if (jogoEncerrado) {
+                if (modoAtual == MODO_LOGICO) {
+                    sincronizarStatsFaseLogica(&faseLogica, &stats);
+                }
                 if (!relatorioSalvo) {
                     salvarRelatorioHistorico(motivoFimJogo, &stats);
                     relatorioSalvo = true;
@@ -711,7 +825,7 @@ int main () {
             }
 
             if (telaAtual == TELA_RELATORIO_FINAL) {
-                drawRelatorioFinal(motivoFimJogo, &stats, relatorioSalvo);
+                drawRelatorioFinal(modoAtual, motivoFimJogo, &stats, relatorioSalvo);
             }
         }
 

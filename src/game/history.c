@@ -14,22 +14,41 @@ void salvarRelatorioHistorico(MotivoFimJogo motivoFimJogo, const EstatisticasPar
         strftime(dataHora, sizeof(dataHora), "%d/%m/%Y %H:%M", infoLocal);
     }
 
-    float precisao = stats->tirosAtirados > 0 ? ((float)stats->acertosNoBoss * 100.0f) / (float)stats->tirosAtirados : 0.0f;
-    float taxaDesafios = stats->desafiosIniciados > 0
-        ? ((float)stats->desafiosVencidos * 100.0f) / (float)stats->desafiosIniciados
-        : 0.0f;
+    if (stats->modo == MODO_LOGICO) {
+        int total = stats->logicAcertos + stats->logicErros;
+        float taxa = total > 0 ? ((float)stats->logicAcertos * 100.0f) / (float)total : 0.0f;
+        fprintf(arquivo,
+                "[%s] [LOGICO] %s | tempo: %.1fs | expressoes: %d/%d (%.1f%%) | combo max: %d | powerups: %d | buffs: %d\n",
+                dataHora,
+                textoMotivoFimJogo(motivoFimJogo),
+                stats->tempoPartida,
+                stats->logicAcertos,
+                total,
+                taxa,
+                stats->logicComboMax,
+                stats->logicPowerUps,
+                stats->logicBuffs);
+    } else {
+        float precisao = stats->tirosAtirados > 0
+            ? ((float)stats->acertosNoBoss * 100.0f) / (float)stats->tirosAtirados
+            : 0.0f;
+        float taxaDesafios = stats->desafiosIniciados > 0
+            ? ((float)stats->desafiosVencidos * 100.0f) / (float)stats->desafiosIniciados
+            : 0.0f;
 
-    fprintf(arquivo,
-            "[%s] %s | tempo: %.1fs | tiros: %d | acertos boss: %d | precisao: %.1f%% | desafios: %d/%d (%.1f%%)\n",
-            dataHora,
-            textoMotivoFimJogo(motivoFimJogo),
-            stats->tempoPartida,
-            stats->tirosAtirados,
-            stats->acertosNoBoss,
-            precisao,
-            stats->desafiosVencidos,
-            stats->desafiosIniciados,
-            taxaDesafios);
+        fprintf(arquivo,
+                "[%s] [ARCADE] %s | tempo: %.1fs | tiros: %d | acertos boss: %d | precisao: %.1f%% | desafios: %d/%d (%.1f%%)\n",
+                dataHora,
+                textoMotivoFimJogo(motivoFimJogo),
+                stats->tempoPartida,
+                stats->tirosAtirados,
+                stats->acertosNoBoss,
+                precisao,
+                stats->desafiosVencidos,
+                stats->desafiosIniciados,
+                taxaDesafios);
+    }
+
     fclose(arquivo);
 }
 

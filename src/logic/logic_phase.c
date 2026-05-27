@@ -1,5 +1,6 @@
 #include "logic_phase.h"
 #include "../visual/vfx.h"
+#include "../game/partida.h"
 #include "screen_config.h"
 #include "raylib.h"
 #include <math.h>
@@ -227,11 +228,26 @@ static bool resolverExpressao(const FaseLogica* f) {
 }
 
 /* ── acerto / erro ───────────────────────────────────────────────────────────── */
-static void acertarRodada(FaseLogica* f, Boss* boss) {
+static void tentarBuffCombo(FaseLogica* f, Player* jogador) {
+    if (f->combo != 3 && f->combo != 5 && f->combo != 8) return;
+
+    char msg[48];
+    if (aplicarBoostAleatorioPlayer(jogador, msg, sizeof(msg))) {
+        f->buffsObtidos++;
+        setFeedback(f, msg, GOLD);
+        setFlash(f, (Color){255, 215, 0, 50}, 0.25f);
+    }
+}
+
+static void acertarRodada(FaseLogica* f, Boss* boss, Player* jogador) {
+    f->rodadasAcertadas++;
     f->combo++;
+    if (f->combo > f->comboMaximo) f->comboMaximo = f->combo;
     if (f->combo > 20) f->combo = 20;
     f->nivelLaser = f->combo / 3;
     if (f->nivelLaser > 3) f->nivelLaser = 3;
+
+    tentarBuffCombo(f, jogador);
 
     int dano = LOGIC_DANO_BASE + f->nivelLaser * 2;
     boss->hp -= dano;
@@ -249,6 +265,7 @@ static void acertarRodada(FaseLogica* f, Boss* boss) {
 }
 
 static void errarRodada(FaseLogica* f, Player* jogador) {
+    f->rodadasErradas++;
     if (f->shieldAtivo) {
         f->shieldAtivo = false;
         setFeedback(f, "ESCUDO ABSORVEU!", GOLD);
@@ -269,7 +286,7 @@ static void errarRodada(FaseLogica* f, Player* jogador) {
 
 static void resolverRodada(FaseLogica* f, Boss* boss, Player* jogador) {
     bool resultado = resolverExpressao(f);
-    if (resultado == f->objetivo) acertarRodada(f, boss);
+    if (resultado == f->objetivo) acertarRodada(f, boss, jogador);
     else                          errarRodada(f, jogador);
     f->pausaRodada = true;
     f->timerPausa  = PAUSA_DUR;
@@ -282,8 +299,11 @@ static TipoDrop sortearTipoDrop(const FaseLogica* f) {
 
     /* 7 % chance de power-up */
     if (roll >= 93) {
-        TipoDrop pws[] = { DROP_BOMB, DROP_FREEZE, DROP_AUTOCOMPLETE, DROP_SLOW, DROP_SHIELD };
-        return pws[GetRandomValue(0, 4)];
+        TipoDrop pws[] = {
+            DROP_BOMB, DROP_FREEZE, DROP_AUTOCOMPLETE, DROP_SLOW, DROP_SHIELD,
+            DROP_BOOST_HP, DROP_BOOST_DMG, DROP_BOOST_SPD
+        };
+        return pws[GetRandomValue(0, 7)];
     }
 
     if (f->eventoAtual == EVENTO_NOT_MODE)
@@ -347,15 +367,18 @@ static void coletarDrop(FaseLogica* f, Boss* boss, Player* jogador,
                         BossBullet balasBoss[], int maxBoss, TipoDrop tipo) {
     switch (tipo) {
         case DROP_BOMB:
+            f->powerUpsColetados++;
             for (int i = 0; i < maxBoss; i++) balasBoss[i].ativa = false;
             setFeedback(f, "BOMBA! TIROS LIMPOS!", GREEN);
             setFlash(f, (Color){255,255,0,60}, 0.35f);
             return;
         case DROP_FREEZE:
+            f->powerUpsColetados++;
             f->timerFreeze = 4.0f;
             setFeedback(f, "DROPS CONGELADOS!", SKYBLUE);
             return;
         case DROP_AUTOCOMPLETE:
+            f->powerUpsColetados++;
             for (int s = 0; s < f->slotsTotal; s++) {
                 if (!f->slotPreenchido[s]) {
                     autocompletarSlot(f, s, boss);
@@ -372,13 +395,48 @@ static void coletarDrop(FaseLogica* f, Boss* boss, Player* jogador,
             }
             return;
         case DROP_SLOW:
+            f->powerUpsColetados++;
             f->timerSlow = 6.0f;
             setFeedback(f, "SLOW MOTION!", PURPLE);
             return;
         case DROP_SHIELD:
+            f->powerUpsColetados++;
             f->shieldAtivo = true;
             f->timerShield = 10.0f;
             setFeedback(f, "ESCUDO ATIVO!", GOLD);
+            return;
+        case DROP_BOOST_HP:
+            f->powerUpsColetados++;
+            if (jogador->hp >= PLAYER_MAX_HP) {
+                setFeedback(f, "Vida ja esta cheia!", GRAY);
+                return;
+            }
+            jogador->hp++;
+            f->buffsObtidos++;
+            setFeedback(f, "BUFF: +1 vida!", GOLD);
+            setFlash(f, (Color){255, 215, 0, 50}, 0.25f);
+            return;
+        case DROP_BOOST_DMG:
+            f->powerUpsColetados++;
+            if (jogador->tempoBoostDano > 0.0f) {
+                setFeedback(f, "Boost de dano ja ativo!", GRAY);
+                return;
+            }
+            aplicarBoostDanoPlayer(jogador);
+            f->buffsObtidos++;
+            setFeedback(f, "BUFF: Dano x2 por 10s!", GOLD);
+            setFlash(f, (Color){255, 200, 60, 45}, 0.25f);
+            return;
+        case DROP_BOOST_SPD:
+            f->powerUpsColetados++;
+            if (jogador->tempoBoostVelocidade > 0.0f) {
+                setFeedback(f, "Boost de velocidade ja ativo!", GRAY);
+                return;
+            }
+            aplicarBoostVelocidadePlayer(jogador);
+            f->buffsObtidos++;
+            setFeedback(f, "BUFF: Velocidade x1.5 por 10s!", GOLD);
+            setFlash(f, (Color){100, 220, 255, 45}, 0.25f);
             return;
         default: break;
     }
@@ -451,6 +509,11 @@ void inicializarFaseLogica(FaseLogica* f, Boss* boss, Player* jogador) {
     f->ultimoVal0     = false;
     f->ultimoVal1     = false;
     f->indiceRodada   = 0;
+    f->rodadasAcertadas = 0;
+    f->rodadasErradas   = 0;
+    f->comboMaximo      = 0;
+    f->powerUpsColetados = 0;
+    f->buffsObtidos     = 0;
 
     limparSlots(f);
 
@@ -712,6 +775,9 @@ static Color corDrop(TipoDrop t) {
         case DROP_AUTOCOMPLETE: return (Color){0, 180, 210, 255};
         case DROP_SLOW:         return PURPLE;
         case DROP_SHIELD:       return (Color){220,180,20,255};
+        case DROP_BOOST_HP:     return (Color){255, 90, 120, 255};
+        case DROP_BOOST_DMG:    return (Color){255, 180, 40, 255};
+        case DROP_BOOST_SPD:    return (Color){80, 200, 255, 255};
     }
     return (Color){80, 80, 80, 255};
 }
@@ -721,6 +787,9 @@ static Color corTextoDrop(TipoDrop t) {
         case DROP_BOMB:
         case DROP_FREEZE:
         case DROP_AUTOCOMPLETE:
+        case DROP_BOOST_HP:
+        case DROP_BOOST_DMG:
+        case DROP_BOOST_SPD:
             return BLACK;
         default:
             return RAYWHITE;
@@ -739,6 +808,9 @@ static const char* labelDrop(TipoDrop t) {
         case DROP_AUTOCOMPLETE: return "AUTO";
         case DROP_SLOW:         return "SLO";
         case DROP_SHIELD:       return "SCU";
+        case DROP_BOOST_HP:     return "+HP";
+        case DROP_BOOST_DMG:    return "DMG";
+        case DROP_BOOST_SPD:    return "SPD";
     }
     return "?";
 }
@@ -849,4 +921,14 @@ void desenharFaseLogica(const FaseLogica* f, const Boss* boss, const Player* jog
                      (unsigned char)(f->flashCor.a * a) };
         DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, fc);
     }
+}
+
+void sincronizarStatsFaseLogica(const FaseLogica* fase, EstatisticasPartida* stats) {
+    if (!fase || !stats) return;
+
+    stats->logicAcertos = fase->rodadasAcertadas;
+    stats->logicErros = fase->rodadasErradas;
+    stats->logicComboMax = fase->comboMaximo;
+    stats->logicPowerUps = fase->powerUpsColetados;
+    stats->logicBuffs = fase->buffsObtidos;
 }

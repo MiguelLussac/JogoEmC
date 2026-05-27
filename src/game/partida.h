@@ -30,11 +30,17 @@ typedef enum {
 } ModoJogo;
 
 typedef struct {
+    ModoJogo modo;
     int tirosAtirados;
     int acertosNoBoss;
     int desafiosIniciados;
     int desafiosVencidos;
     float tempoPartida;
+    int logicAcertos;
+    int logicErros;
+    int logicComboMax;
+    int logicPowerUps;
+    int logicBuffs;
 } EstatisticasPartida;
 
 void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, BossBullet balasBoss[],
