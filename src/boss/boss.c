@@ -276,9 +276,8 @@ void verificarColisaoBalasComBoss(Boss* boss, Bullet bullets[], int count) {
 }
 
 // Renderiza a barra de vida do boss no topo central da tela.
-void drawBarraVidaBoss(const Boss* boss) {
+void drawBarraVidaBossEm(const Boss* boss, int posicaoY) {
     int posicaoX = (SCREEN_WIDTH - BOSS_HEALTH_BAR_WIDTH) / 2;
-    int posicaoY = 20;
     float percentualVida = boss->hpMaximo > 0 ? (float)boss->hp / (float)boss->hpMaximo : 0.0f;
     int larguraVida = (int)(BOSS_HEALTH_BAR_WIDTH * percentualVida);
 
@@ -286,6 +285,10 @@ void drawBarraVidaBoss(const Boss* boss) {
     DrawRectangle(posicaoX, posicaoY, larguraVida, BOSS_HEALTH_BAR_HEIGHT, RED);
     DrawRectangleLines(posicaoX, posicaoY, BOSS_HEALTH_BAR_WIDTH, BOSS_HEALTH_BAR_HEIGHT, WHITE);
     DrawText(TextFormat("BOSS HP: %d/%d", boss->hp, boss->hpMaximo), posicaoX + 50, posicaoY + 24, 16, WHITE);
+}
+
+void drawBarraVidaBoss(const Boss* boss) {
+    drawBarraVidaBossEm(boss, 20);
 }
 
 // Zera o pool de projeteis do boss para todos iniciarem inativos.

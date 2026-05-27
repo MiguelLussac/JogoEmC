@@ -6,6 +6,8 @@
 #include "game/partida.h"
 #include "game/history.h"
 #include "analysis/analise.h"
+#include "logic/logic_phase.h"
+#include "audio/audio.h"
 #include <stdbool.h>
 #include <math.h>
 #include <ctype.h>
@@ -238,6 +240,22 @@ static void drawMenuInicial(int opcaoSelecionada, float tempo) {
     DrawText(dicas, (GetScreenWidth() - MeasureText(dicas, 18)) / 2, 474, 18, blink);
 }
 
+static void drawSelecaoModo(int opcaoSelecionada, float tempo) {
+    drawFundoArcadeAnimado(tempo);
+
+    const char* titulo = "ESCOLHA O MODO";
+    DrawText(titulo, (GetScreenWidth() - MeasureText(titulo, 42)) / 2, 88, 42, (Color){255, 230, 80, 255});
+
+    Rectangle botaoArcade = {(GetScreenWidth() - 390) / 2.0f, 250, 390, 54};
+    Rectangle botaoLogico = {(GetScreenWidth() - 390) / 2.0f, 324, 390, 54};
+    drawBotaoPixel(botaoArcade, "ARCADE", opcaoSelecionada == 0);
+    drawBotaoPixel(botaoLogico, "LOGICO", opcaoSelecionada == 1);
+
+    Color blink = ((int)(tempo * 3.5f) % 2 == 0) ? (Color){255, 255, 255, 245} : (Color){255, 220, 90, 255};
+    const char* dicas = "W/S ou SETAS | ENTER inicia | ESC volta";
+    DrawText(dicas, (GetScreenWidth() - MeasureText(dicas, 18)) / 2, 410, 18, blink);
+}
+
 static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinhas, int scroll, int selecionado, int expandido, float tempo) {
     drawFundoArcadeAnimado(tempo);
     const char* titulo = "HISTORICO DE RELATORIOS";
@@ -410,8 +428,13 @@ int main () {
     int historicoExpandido = -1;
     HistoricoRegistro registrosHistorico[MAX_HISTORICO_LINHAS];
     bool relatorioSalvo = false;
+    FaseLogica faseLogica;
+    ModoJogo modoAtual = MODO_ARCADE;
+    int opcaoModo = 0;
 
     inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
+    inicializarAudio();
+    iniciarTrilhaSonora();
 
     /* Carregar histórico de partidas ao iniciar (arquivo opcional). */
     {
@@ -453,9 +476,8 @@ int main () {
 
             if (IsKeyPressed(KEY_ENTER)) {
                 if (opcaoMenu == 0) {
-                    inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
-                    relatorioSalvo = false;
-                    telaAtual = TELA_JOGO;
+                    opcaoModo = 0;
+                    telaAtual = TELA_SELECAO_MODO;
                 } else if (opcaoMenu == 1) {
                     totalHistorico = carregarHistoricoRelatorios(linhasHistorico, MAX_HISTORICO_LINHAS);
                     scrollHistorico = 0;
@@ -468,6 +490,25 @@ int main () {
                 } else if (opcaoMenu == 2) {
                     telaAtual = TELA_RELATORIO_ANALITICO;
                 }
+            }
+        } else if (telaAtual == TELA_SELECAO_MODO) {
+            if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
+                opcaoModo = (opcaoModo + 1) % 2;
+            }
+            if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
+                opcaoModo = (opcaoModo + 1) % 2;
+            }
+            if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_B)) {
+                telaAtual = TELA_MENU;
+            }
+            if (IsKeyPressed(KEY_ENTER)) {
+                modoAtual = (opcaoModo == 0) ? MODO_ARCADE : MODO_LOGICO;
+                inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
+                relatorioSalvo = false;
+                if (modoAtual == MODO_LOGICO) {
+                    inicializarFaseLogica(&faseLogica, &boss, &jogador);
+                }
+                telaAtual = TELA_JOGO;
             }
         } else if (telaAtual == TELA_HISTORICO) {
             if (totalHistorico > 0) {
@@ -529,24 +570,40 @@ int main () {
                 if (bala[i].ativa) tirosAtivosAntes++;
             }
 
-            // ── UPDATE ── só roda quando o jogo não está pausado ──────────────
-            if (!jogoEncerrado && !perguntaAtiva) {
+            if (!jogoEncerrado && modoAtual == MODO_LOGICO) {
                 moverEsquerdaDireita(&jogador, deltaTime);
                 moverBalas(bala, MAX_BULLETS, deltaTime);
-                atirar(&jogador, bala, MAX_BULLETS);
-
-                // Atualiza o boss
+                atirar(&jogador, bala, MAX_BULLETS, deltaTime);
                 moverBoss(&boss, &jogador, deltaTime);
                 atualizarFeedbackDanoBoss(&boss, deltaTime);
                 verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
-                // Quando o boss fica inativo por HP zerado, registra o fim da partida.
+                atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
+                moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
+                verificarColisaoBalasComPlayer(&jogador, balasBoss, MAX_BOSS_BULLETS);
+                atualizarFeedbackDanoPlayer(&jogador, deltaTime);
+                atualizarBoostDanoPlayer(&jogador, deltaTime);
+                atualizarBoostVelocidadePlayer(&jogador, deltaTime);
+                atualizarFaseLogica(&faseLogica, &boss, &jogador, balasBoss, MAX_BOSS_BULLETS, deltaTime);
+
+                if (!boss.ativa) {
+                    solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_BOSS_DERROTADO);
+                } else if (jogador.hp <= 0) {
+                    solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_PLAYER_DERROTADO);
+                }
+            } else if (!jogoEncerrado && !perguntaAtiva) {
+                moverEsquerdaDireita(&jogador, deltaTime);
+                moverBalas(bala, MAX_BULLETS, deltaTime);
+                atirar(&jogador, bala, MAX_BULLETS, deltaTime);
+
+                moverBoss(&boss, &jogador, deltaTime);
+                atualizarFeedbackDanoBoss(&boss, deltaTime);
+                verificarColisaoBalasComBoss(&boss, bala, MAX_BULLETS);
                 if (!boss.ativa) {
                     solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_BOSS_DERROTADO);
                 }
                 atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
                 moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
                 verificarColisaoBalasComPlayer(&jogador, balasBoss, MAX_BOSS_BULLETS);
-                // A morte do player usa o mesmo gancho que abre o relatório.
                 if (jogador.hp <= 0) {
                     solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_PLAYER_DERROTADO);
                 }
@@ -554,27 +611,28 @@ int main () {
                 atualizarBoostDanoPlayer(&jogador, deltaTime);
                 atualizarBoostVelocidadePlayer(&jogador, deltaTime);
 
-                // Verifica colisão da estrela com o jogador
                 if (!jogoEncerrado && atualizarEstrela(&estrela, &boss, &jogador, deltaTime)) {
-                    // Coletar a estrela congela o combate e abre o desafio numérico.
                     iniciarDesafio(&desafio);
                     perguntaAtiva = true;
                 }
             } else if (!jogoEncerrado) {
-                // Enquanto o modal esta ativo, so o desafio recebe update.
                 perguntaAtiva = atualizarDesafio(&desafio, &jogador, deltaTime);
                 if (jogador.hp <= 0) {
                     solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_PLAYER_DERROTADO);
                 }
             }
 
-            if (!desafioAtivoAntes && perguntaAtiva) stats.desafiosIniciados++;
-            if (desafioAtivoAntes && !perguntaAtiva && desafio.acertou) stats.desafiosVencidos++;
+            if (modoAtual == MODO_ARCADE) {
+                if (!desafioAtivoAntes && perguntaAtiva) stats.desafiosIniciados++;
+                if (desafioAtivoAntes && !perguntaAtiva && desafio.acertou) stats.desafiosVencidos++;
 
-            for (int i = 0; i < MAX_BULLETS; i++) {
-                if (bala[i].ativa) tirosAtivosDepois++;
+                for (int i = 0; i < MAX_BULLETS; i++) {
+                    if (bala[i].ativa) tirosAtivosDepois++;
+                }
+                if (tirosAtivosDepois > tirosAtivosAntes) {
+                    stats.tirosAtirados += (tirosAtivosDepois - tirosAtivosAntes);
+                }
             }
-            if (tirosAtivosDepois > tirosAtivosAntes) stats.tirosAtirados += (tirosAtivosDepois - tirosAtivosAntes);
 
             if (hpBossAntes > boss.hp) stats.acertosNoBoss += (hpBossAntes - boss.hp);
 
@@ -596,42 +654,58 @@ int main () {
 
         if (telaAtual == TELA_MENU) {
             drawMenuInicial(opcaoMenu, tempo);
+        } else if (telaAtual == TELA_SELECAO_MODO) {
+            drawSelecaoModo(opcaoModo, tempo);
         } else if (telaAtual == TELA_HISTORICO) {
             drawTelaHistorico(registrosHistorico, totalHistorico, scrollHistorico, historicoSelecionado, historicoExpandido, tempo);
         } else if (telaAtual == TELA_RELATORIO_ANALITICO) {
             drawFundoArcadeAnimado(tempo);
             renderizarRelatorioAnalitico(NULL);
         } else {
-            // ── DRAW ── sempre desenha (jogo congelado, mas visível) ───────────
-            drawPlayer(&jogador);
-            drawBalas(bala, MAX_BULLETS);
-            drawBoss(&boss);
-            drawBarraVidaBoss(&boss);
-            drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
-            drawPlayerHP(&jogador);
-            drawEstrela(&estrela);
+            if (modoAtual == MODO_LOGICO && telaAtual == TELA_JOGO) {
+                drawPlayer(&jogador);
+                drawBalas(bala, MAX_BULLETS);
+                drawBoss(&boss);
+                drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
+                desenharFaseLogica(&faseLogica, &boss, &jogador);
+                drawBarraVidaBossEm(&boss, 64);
+                drawPlayerHP(&jogador);
+                DrawText(TextFormat("%.1fs", stats.tempoPartida), 700, 570, 18, (Color){200, 200, 200, 200});
+                DrawText("LOGICO", 700, 550, 16, (Color){180, 220, 255, 200});
+            } else {
+                drawPlayer(&jogador);
+                drawBalas(bala, MAX_BULLETS);
+                drawBoss(&boss);
+                drawBarraVidaBoss(&boss);
+                drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
+                drawPlayerHP(&jogador);
+                drawEstrela(&estrela);
 
-            if (perguntaAtiva) {
-                drawDesafio(&desafio, &jogador);
+                if (perguntaAtiva) {
+                    drawDesafio(&desafio, &jogador);
+                }
+
+                DrawText(TextFormat("Tempo: %.1fs", stats.tempoPartida), 20, 20, 20, WHITE);
+                DrawText("MODO ARCADE", 20, 46, 16, (Color){255, 220, 90, 230});
             }
-
-            DrawText(TextFormat("Tempo: %.1fs", stats.tempoPartida), 20, 20, 20, WHITE);
 
             if (telaAtual == TELA_RELATORIO_FINAL) {
                 drawRelatorioFinal(motivoFimJogo, &stats, relatorioSalvo);
             }
         }
 
-            EndDrawing();
-        }
-
-        /* Liberar recursos de análise se necessário */
-        if (g_historico) {
-            liberarHistorico(g_historico);
-            g_historico = NULL;
-            g_historico_count = 0;
-        }
-
-        CloseWindow();
-        return 0;
+        atualizarAudio();
+        EndDrawing();
     }
+
+    /* Liberar recursos de análise se necessário */
+    if (g_historico) {
+        liberarHistorico(g_historico);
+        g_historico = NULL;
+        g_historico_count = 0;
+    }
+
+    encerrarAudio();
+    CloseWindow();
+    return 0;
+}

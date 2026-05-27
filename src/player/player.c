@@ -119,17 +119,22 @@ void drawBalas(Bullet bullets[], int count) {
 }
 
 // Procura uma bala livre no pool e dispara a partir da posicao atual do player.
-void atirar(Player* player, Bullet bullets[], int count) {
-    if (IsKeyPressed(KEY_SPACE)) {
-        for (int i = 0; i < count; i++) {
-            if (!bullets[i].ativa) {
-                bullets[i].posicaoX = player->posicaoX;
-                bullets[i].posicaoY = player->posicaoY - PLAYER_RADIUS; // Posição inicial da bala
-                bullets[i].velocidade = 500.0f; // Velocidade aumentada para balas mais rápidas
-                bullets[i].dano = player->danoTiro > 0 ? player->danoTiro : PLAYER_BASE_BULLET_DAMAGE;
-                bullets[i].ativa = true;
-                break;
-            }
+void atirar(Player* player, Bullet bullets[], int count, float deltaTime) {
+    if (player->tempoCooldownTiro > 0.0f) {
+        player->tempoCooldownTiro -= deltaTime;
+        if (player->tempoCooldownTiro < 0.0f) player->tempoCooldownTiro = 0.0f;
+    }
+    if (!IsKeyDown(KEY_SPACE) || player->tempoCooldownTiro > 0.0f) return;
+
+    for (int i = 0; i < count; i++) {
+        if (!bullets[i].ativa) {
+            bullets[i].posicaoX = player->posicaoX;
+            bullets[i].posicaoY = player->posicaoY - PLAYER_RADIUS;
+            bullets[i].velocidade = 500.0f;
+            bullets[i].dano = player->danoTiro > 0 ? player->danoTiro : PLAYER_BASE_BULLET_DAMAGE;
+            bullets[i].ativa = true;
+            player->tempoCooldownTiro = PLAYER_FIRE_COOLDOWN;
+            break;
         }
     }
 }

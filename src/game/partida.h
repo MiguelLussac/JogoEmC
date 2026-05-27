@@ -17,11 +17,17 @@ typedef enum {
 
 typedef enum {
     TELA_MENU,
+    TELA_SELECAO_MODO,
     TELA_HISTORICO,
     TELA_RELATORIO_ANALITICO,
     TELA_JOGO,
     TELA_RELATORIO_FINAL
 } TelaJogo;
+
+typedef enum {
+    MODO_ARCADE,
+    MODO_LOGICO
+} ModoJogo;
 
 typedef struct {
     int tirosAtirados;

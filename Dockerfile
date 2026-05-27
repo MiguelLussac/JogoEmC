@@ -44,6 +44,8 @@ RUN git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib && \
     ./src/game/game.c \
     ./src/game/history.c \
     ./src/analysis/analise.c \
+    ./src/logic/logic_phase.c \
+    ./src/audio/audio.c \
     -o ./bin/Debug/JogoEmC \
     -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
