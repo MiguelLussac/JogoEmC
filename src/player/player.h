@@ -44,6 +44,7 @@ void aplicarBoostDanoPlayer(Player* player);
 void atualizarBoostDanoPlayer(Player* player, float deltaTime);
 void aplicarBoostVelocidadePlayer(Player* player);
 void atualizarBoostVelocidadePlayer(Player* player, float deltaTime);
+bool aplicarBoostAleatorioPlayer(Player* player, char* mensagem, int tamMensagem);
 
 // Bala simples do jogador, reaproveitada em um pool fixo.
 typedef struct {
