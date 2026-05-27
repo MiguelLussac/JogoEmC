@@ -17,6 +17,7 @@
 #define PLAYER_DAMAGE_BOOST_DURATION 10.0f
 #define PLAYER_SPEED_BOOST_MULTIPLIER 1.5f
 #define PLAYER_SPEED_BOOST_DURATION 10.0f
+#define PLAYER_FIRE_COOLDOWN 0.32f
 
 // Estado principal do jogador usado por movimento, vida e feedback visual.
 typedef struct {
@@ -28,6 +29,7 @@ typedef struct {
     int danoTiro;
     float tempoBoostDano;
     float tempoBoostVelocidade;
+    float tempoCooldownTiro;
 } Player;
 
 void moverEsquerdaDireita(Player* player, float deltaTime);
@@ -51,6 +53,6 @@ typedef struct {
 
 void moverBalas(Bullet bullets[], int count, float deltaTime);
 void drawBalas(Bullet bullets[], int count);
-void atirar(Player* player, Bullet bullets[], int count);
+void atirar(Player* player, Bullet bullets[], int count, float deltaTime);
 
 #endif // PLAYER_H
