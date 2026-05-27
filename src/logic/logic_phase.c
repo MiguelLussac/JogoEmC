@@ -1,4 +1,5 @@
 #include "logic_phase.h"
+#include "../visual/vfx.h"
 #include "raylib.h"
 #include <math.h>
 #include <stdio.h>
@@ -242,10 +243,10 @@ static void acertarRodada(FaseLogica* f, Boss* boss) {
     f->timerLaser = LASER_DUR + (float)f->nivelLaser * 0.15f;
     f->timerComboTexto = 1.8f;
 
-    if      (f->combo >= 8) { setFeedback(f, "MODO FOCUS! x8!", (Color){80,220,255,255}); setFlash(f, (Color){80,255,200,55}, 0.30f); }
-    else if (f->combo >= 5) { setFeedback(f, "COMBO x5! MENTAL!", YELLOW);               setFlash(f, (Color){255,255,80,45}, 0.25f); }
-    else if (f->combo >= 3) { setFeedback(f, "COMBO x3!", GREEN);                         setFlash(f, (Color){80,255,120,40}, 0.20f); }
-    else                    { setFeedback(f, "ACERTO!", GREEN);                            setFlash(f, (Color){80,255,120,30}, 0.15f); }
+    if      (f->combo >= 8) { setFeedback(f, "MODO FOCUS! x8!", (Color){80,220,255,255}); setFlash(f, (Color){80,255,200,55}, 0.30f); vfxExplosao(vfxObter(), boss->posicaoX, boss->posicaoY, (Color){80,255,220,255}, 16, 110.0f); }
+    else if (f->combo >= 5) { setFeedback(f, "COMBO x5! MENTAL!", YELLOW);               setFlash(f, (Color){255,255,80,45}, 0.25f); vfxExplosao(vfxObter(), boss->posicaoX, boss->posicaoY, (Color){255,255,100,255}, 12, 90.0f); }
+    else if (f->combo >= 3) { setFeedback(f, "COMBO x3!", GREEN);                         setFlash(f, (Color){80,255,120,40}, 0.20f); vfxExplosao(vfxObter(), boss->posicaoX, boss->posicaoY, (Color){100,255,160,255}, 8, 75.0f); }
+    else                    { setFeedback(f, "ACERTO!", GREEN);                            setFlash(f, (Color){80,255,120,30}, 0.15f); vfxExplosao(vfxObter(), boss->posicaoX, boss->posicaoY, (Color){120,255,200,255}, 6, 60.0f); }
 }
 
 static void errarRodada(FaseLogica* f, Player* jogador) {
@@ -258,6 +259,8 @@ static void errarRodada(FaseLogica* f, Player* jogador) {
         setFeedback(f, "ERRO! COMBO PERDIDO", RED);
         setFlash(f, (Color){255,50,50,80}, 0.40f);
         f->shakeTimer = 0.45f;
+        vfxTremer(vfxObter(), 6.0f, 0.4f);
+        vfxExplosao(vfxObter(), jogador->posicaoX, jogador->posicaoY, (Color){255, 60, 90, 220}, 12, 85.0f);
     }
     f->combo      = 0;
     f->nivelLaser = 0;
@@ -639,7 +642,8 @@ static void drawHudExpressao(const FaseLogica* f) {
     }
 
     int fonteHud = 28;
-    DrawRectangle(0, 0, SCREEN_W, 60, (Color){8, 8, 22, 225});
+    DrawRectangle(0, 0, SCREEN_W, 60, (Color){6, 10, 24, 235});
+    DrawRectangleLines(0, 0, SCREEN_W, 60, (Color){80, 160, 255, 120});
 
     /* pisca quando pressão temporal está baixa */
     bool mostrar = true;
@@ -747,8 +751,10 @@ static void drawDropItem(float cx, float cy, TipoDrop tipo) {
     Color fundo = corDrop(tipo);
     Color texto = corTextoDrop(tipo);
 
-    DrawRectangleRec(r, fundo);
-    DrawRectangleLinesEx(r, 2.0f, RAYWHITE);
+    vfxDesenharGlowCirculo(cx, cy, DROP_W * 0.55f, (Color){ fundo.r, fundo.g, fundo.b, 80 }, 0.5f);
+    DrawRectangleRec(r, (Color){ 12, 16, 28, 230 });
+    DrawRectangle((int)r.x + 2, (int)r.y + 2, (int)r.width - 4, (int)r.height - 4, fundo);
+    DrawRectangleLinesEx(r, 2.0f, (Color){ 200, 240, 255, 220 });
     DrawText(lbl,
              (int)(r.x + (r.width  - MeasureText(lbl, fs)) / 2.0f),
              (int)(r.y + (r.height - fs) / 2.0f),
@@ -768,11 +774,10 @@ static void drawLaser(const FaseLogica* f, const Boss* boss, const Player* jogad
     Color c = (f->nivelLaser >= 3) ? (Color){255,220,80,255}
             : (f->nivelLaser >= 2) ? (Color){80,255,220,255}
             :                        (Color){80,180,255,255};
-    DrawLineEx(
-        (Vector2){jogador->posicaoX, jogador->posicaoY - PLAYER_RADIUS},
-        (Vector2){boss->posicaoX, boss->posicaoY},
-        grossura, c);
-    DrawCircle((int)boss->posicaoX, (int)boss->posicaoY, 10 + f->nivelLaser * 4, (Color){c.r, c.g, c.b, 160});
+    Vector2 origem = { jogador->posicaoX, jogador->posicaoY - PLAYER_RADIUS };
+    Vector2 alvo   = { boss->posicaoX, boss->posicaoY };
+    vfxDesenharGlowLinha(origem, alvo, grossura, c, 1.0f + (float)f->nivelLaser * 0.2f);
+    vfxDesenharGlowCirculo(alvo.x, alvo.y, 10 + f->nivelLaser * 4, (Color){ c.r, c.g, c.b, 180 }, 0.9f);
 }
 
 static void drawFeedbackTexto(const FaseLogica* f) {

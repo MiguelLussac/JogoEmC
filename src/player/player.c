@@ -1,5 +1,7 @@
 #include "player.h"
+#include "../visual/vfx.h"
 #include "raylib.h"
+#include <math.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -18,45 +20,81 @@ void moverEsquerdaDireita(Player* player, float deltaTime) {
 }
 
 void drawPlayer(Player* player) {
-    // Pisca o player apos dano para comunicar invulnerabilidade/feedback visual.
-    int framePiscando = (int)(player->tempoPiscandoDano * 20.0f);
-    Color corJogador = (player->tempoPiscandoDano > 0.0f && framePiscando % 2 == 0) ? WHITE : RED;
-    DrawCircle((int)player->posicaoX, (int)player->posicaoY, PLAYER_RADIUS, corJogador);
+    float t = (float)GetTime();
+    float x = player->posicaoX;
+    float y = player->posicaoY;
+    bool piscando = player->tempoPiscandoDano > 0.0f && ((int)(t * 28.0f) % 2 == 0);
+
+    float propulsao = 0.55f + 0.45f * sinf(t * 14.0f);
+    bool movendo = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
+    float motor = movendo ? propulsao : propulsao * 0.45f;
+
+    Color motorCor = { 0, (unsigned char)(180 + motor * 75), 255, (unsigned char)(90 + motor * 120) };
+    vfxDesenharGlowCirculo(x, y + 16.0f, 5.0f + motor * 5.0f, motorCor, 0.8f);
+    DrawTriangle(
+        (Vector2){ x - 7.0f, y + 14.0f },
+        (Vector2){ x + 7.0f, y + 14.0f },
+        (Vector2){ x, y + 22.0f + motor * 4.0f },
+        (Color){ 255, 120, 40, (unsigned char)(120 + motor * 100) }
+    );
+
+    Vector2 nariz = { x, y - 24.0f };
+    Vector2 asaE  = { x - 20.0f, y + 14.0f };
+    Vector2 asaD  = { x + 20.0f, y + 14.0f };
+    Vector2 base  = { x, y + 10.0f };
+
+    Color casco = piscando ? WHITE : (Color){ 70, 230, 255, 255 };
+    Color borda = (Color){ 200, 255, 255, 255 };
+    DrawTriangle(nariz, asaE, base, casco);
+    DrawTriangle(nariz, asaD, base, (Color){ casco.r, casco.g, casco.b, 220 });
+    DrawTriangleLines(nariz, asaE, base, borda);
+    DrawTriangleLines(nariz, asaD, base, borda);
+    DrawLineEx((Vector2){ x, y - 8.0f }, (Vector2){ x, y + 6.0f }, 2.0f, (Color){ 255, 255, 255, 180 });
+
+    if (player->tempoBoostDano > 0.0f) {
+        vfxDesenharGlowCirculo(x, y, PLAYER_RADIUS + 4.0f, (Color){ 255, 200, 60, 80 }, 0.6f);
+    }
+    if (player->tempoBoostVelocidade > 0.0f) {
+        DrawCircleLines((int)x, (int)y, PLAYER_RADIUS + 6, (Color){ 100, 220, 255, 200 });
+    }
 }
 
 void drawPlayerHP(const Player* player) {
-    // Barra de vida usada pelo desafio para mostrar o custo da ultima tentativa.
     float percentualVida = player->hp > 0 ? (float)player->hp / (float)PLAYER_MAX_HP : 0.0f;
     if (percentualVida > 1.0f) percentualVida = 1.0f;
     int larguraVida = (int)(PLAYER_HEALTH_BAR_WIDTH * percentualVida);
+    int bx = PLAYER_HEALTH_BAR_X;
+    int by = PLAYER_HEALTH_BAR_Y;
 
-    DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, DARKGRAY);
-    DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, larguraVida, PLAYER_HEALTH_BAR_HEIGHT, RED);
-    DrawRectangleLines(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, WHITE);
-    DrawText(TextFormat("PLAYER HP: %d/%d", player->hp, PLAYER_MAX_HP), PLAYER_HEALTH_BAR_X + 8, PLAYER_HEALTH_BAR_Y + 22, 16, WHITE);
-    DrawText("BUFFS ATIVOS:", PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 62, 16, RAYWHITE);
+    DrawRectangle(bx - 2, by - 2, PLAYER_HEALTH_BAR_WIDTH + 4, PLAYER_HEALTH_BAR_HEIGHT + 4, (Color){ 10, 20, 40, 200 });
+    DrawRectangle(bx, by, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, (Color){ 20, 30, 50, 230 });
+    DrawRectangle(bx, by, larguraVida, PLAYER_HEALTH_BAR_HEIGHT, (Color){ 255, 70, 110, 255 });
+    DrawRectangleLines(bx, by, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, (Color){ 100, 220, 255, 255 });
+    DrawText(TextFormat("HP %d/%d", player->hp, PLAYER_MAX_HP), bx + 8, by + 22, 16, (Color){ 200, 240, 255, 255 });
+    DrawText("BUFFS", bx, by - 62, 16, (Color){ 120, 200, 255, 255 });
 
-    int yBuff = PLAYER_HEALTH_BAR_Y - 42;
+    int yBuff = by - 42;
     bool temBuffAtivo = false;
     if (player->tempoBoostDano > 0.0f) {
-        DrawText(TextFormat("DANO x%d: %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), PLAYER_HEALTH_BAR_X, yBuff, 16, YELLOW);
+        DrawText(TextFormat("DMG x%d  %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), bx, yBuff, 16, (Color){ 255, 220, 80, 255 });
         yBuff += 18;
         temBuffAtivo = true;
     }
     if (player->tempoBoostVelocidade > 0.0f) {
-        DrawText(TextFormat("VEL x%.1f: %.1fs", PLAYER_SPEED_BOOST_MULTIPLIER, player->tempoBoostVelocidade), PLAYER_HEALTH_BAR_X, yBuff, 16, SKYBLUE);
+        DrawText(TextFormat("SPD x%.1f  %.1fs", PLAYER_SPEED_BOOST_MULTIPLIER, player->tempoBoostVelocidade), bx, yBuff, 16, SKYBLUE);
         temBuffAtivo = true;
     }
     if (!temBuffAtivo) {
-        DrawText("Nenhum", PLAYER_HEALTH_BAR_X, yBuff, 16, GRAY);
+        DrawText("—", bx, yBuff, 16, GRAY);
     }
 }
 
 void aplicarDanoPlayer(Player* player, int dano) {
-    // Tambem usado pelo desafio quando o player aceita gastar 1 vida.
     player->hp -= dano;
     if (player->hp < 0) player->hp = 0;
     player->tempoPiscandoDano = PLAYER_DAMAGE_FLASH_DURATION;
+    vfxTremer(vfxObter(), 5.0f, 0.35f);
+    vfxExplosao(vfxObter(), player->posicaoX, player->posicaoY, (Color){ 255, 80, 120, 220 }, 10, 90.0f);
 }
 
 // Reduz o timer do pisca de dano ate o player voltar ao desenho normal.
@@ -110,11 +148,24 @@ void moverBalas(Bullet bullets[], int count, float deltaTime) {
 
 // Renderiza somente as balas ativas do pool do jogador.
 void drawBalas(Bullet bullets[], int count) {
+    VfxEstado* vfx = vfxObter();
     for (int i = 0; i < count; i++) {
-        if (bullets[i].ativa) {
-            Color corBala = bullets[i].dano > PLAYER_BASE_BULLET_DAMAGE ? ORANGE : YELLOW;
-            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, PLAYER_BULLET_RADIUS, corBala);
-        }
+        if (!bullets[i].ativa) continue;
+        float x = bullets[i].posicaoX;
+        float y = bullets[i].posicaoY;
+        bool boosted = bullets[i].dano > PLAYER_BASE_BULLET_DAMAGE;
+        Color nucleo = boosted ? (Color){ 255, 220, 80, 255 } : (Color){ 120, 255, 255, 255 };
+        Color halo   = boosted ? (Color){ 255, 160, 40, 120 } : (Color){ 60, 200, 255, 100 };
+
+        vfxDesenharGlowCirculo(x, y, PLAYER_BULLET_RADIUS, halo, 0.7f);
+        vfxDesenharGlowLinha(
+            (Vector2){ x, y + 10.0f },
+            (Vector2){ x, y - 14.0f },
+            boosted ? 3.5f : 2.5f,
+            nucleo,
+            0.9f
+        );
+        vfxRastro(vfx, x, y + 6.0f, (Color){ nucleo.r, nucleo.g, nucleo.b, 160 });
     }
 }
 
@@ -134,6 +185,7 @@ void atirar(Player* player, Bullet bullets[], int count, float deltaTime) {
             bullets[i].dano = player->danoTiro > 0 ? player->danoTiro : PLAYER_BASE_BULLET_DAMAGE;
             bullets[i].ativa = true;
             player->tempoCooldownTiro = PLAYER_FIRE_COOLDOWN;
+            vfxRastro(vfxObter(), player->posicaoX, player->posicaoY - PLAYER_RADIUS, (Color){ 120, 255, 255, 200 });
             break;
         }
     }

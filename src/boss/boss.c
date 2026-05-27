@@ -1,4 +1,5 @@
 #include "boss.h"
+#include "../visual/vfx.h"
 #include "raylib.h"
 #include <math.h>
 
@@ -132,6 +133,7 @@ static void aplicarDanoBoss(Boss* boss, int dano) {
 
     boss->hp -= dano;
     boss->tempoPiscandoDano = BOSS_DAMAGE_FLASH_DURATION;
+    vfxExplosao(vfxObter(), boss->posicaoX, boss->posicaoY, (Color){ 255, 140, 60, 230 }, 8, 70.0f);
 
     if (boss->hp <= 0) {
         boss->hp = 0;
@@ -233,19 +235,56 @@ void moverBoss(Boss* boss, const Player* player, float deltaTime) {
     }
 }
 
-// Desenha o boss e alterna a cor durante o feedback de dano.
-void drawBoss(Boss* boss) {
-    if (boss->ativa) {
-        int framePiscando = (int)(boss->tempoPiscandoDano * 20.0f);
-        Color corBoss = (boss->tempoPiscandoDano > 0.0f && framePiscando % 2 == 0) ? WHITE : RED;
+static Color corNucleoBoss(const Boss* boss) {
+    float pct = boss->hpMaximo > 0 ? (float)boss->hp / (float)boss->hpMaximo : 0.0f;
+    if (pct > 0.6f) return (Color){ 80, 255, 200, 255 };
+    if (pct > 0.3f) return (Color){ 255, 220, 80, 255 };
+    return (Color){ 255, 90, 90, 255 };
+}
 
-        DrawRectangle(
-            (int)boss->posicaoX - (int)boss->largura / 2,
-            (int)boss->posicaoY - (int)boss->altura / 2,
-            (int)boss->largura,
-            (int)boss->altura,
-            corBoss
-        );
+// Desenha o boss como entidade mecanica sci-fi.
+void drawBoss(Boss* boss) {
+    if (!boss->ativa) return;
+
+    float t = (float)GetTime();
+    float cx = boss->posicaoX;
+    float cy = boss->posicaoY;
+    float escala = 1.28f;
+    float hw = boss->largura * 0.5f * escala;
+    float hh = boss->altura * 0.5f * escala;
+    bool piscando = boss->tempoPiscandoDano > 0.0f && ((int)(t * 24.0f) % 2 == 0);
+    bool atacando = boss->tirosRajadaRestantes > 0;
+
+    Color chassi = piscando ? WHITE : (Color){ 55, 65, 90, 255 };
+    Color borda  = (Color){ 140, 170, 220, 255 };
+    Color nucleo = corNucleoBoss(boss);
+
+    if (atacando) {
+        vfxDesenharGlowCirculo(cx, cy, hh + 18.0f, (Color){ 255, 80, 40, 60 }, 1.0f);
+    }
+
+    for (int b = 0; b < 4; b++) {
+        float ang = boss->tempoIA * (1.4f + boss->fase * 0.25f) + (float)b * 1.5708f;
+        float bx = cx + cosf(ang) * (hw + 10.0f);
+        float by = cy + sinf(ang) * (hh * 0.55f);
+        DrawRectangle((int)(bx - 8), (int)(by - 8), 16, 16, (Color){ 35, 45, 70, 255 });
+        DrawRectangleLines((int)(bx - 8), (int)(by - 8), 16, 16, borda);
+    }
+
+    DrawRectangle((int)(cx - hw), (int)(cy - hh), (int)(hw * 2.0f), (int)(hh * 2.0f), chassi);
+    DrawRectangleLines((int)(cx - hw), (int)(cy - hh), (int)(hw * 2.0f), (int)(hh * 2.0f), borda);
+
+    DrawRectangle((int)(cx - hw + 8), (int)(cy - hh + 8), (int)(hw * 2.0f - 16), (int)(hh * 0.35f), (Color){ 25, 30, 45, 255 });
+    DrawRectangle((int)(cx - hw + 8), (int)(cy + hh - hh * 0.35f - 8), (int)(hw * 2.0f - 16), (int)(hh * 0.35f), (Color){ 25, 30, 45, 255 });
+
+    float pulso = 0.5f + 0.5f * sinf(t * (4.0f + boss->fase));
+    vfxDesenharGlowCirculo(cx, cy, 14.0f + pulso * 6.0f + boss->fase * 2.0f, nucleo, 0.85f);
+
+    if (boss->fase >= 2) {
+        DrawCircleLines((int)cx, (int)cy, hw + 14.0f + pulso * 4.0f, (Color){ 255, 100, 80, 180 });
+    }
+    if (boss->duracaoDash > 0.0f) {
+        DrawLineEx((Vector2){ cx - hw - 10, cy }, (Vector2){ cx + hw + 10, cy }, 3.0f, (Color){ 255, 255, 255, 120 });
     }
 }
 
@@ -280,11 +319,15 @@ void drawBarraVidaBossEm(const Boss* boss, int posicaoY) {
     int posicaoX = (SCREEN_WIDTH - BOSS_HEALTH_BAR_WIDTH) / 2;
     float percentualVida = boss->hpMaximo > 0 ? (float)boss->hp / (float)boss->hpMaximo : 0.0f;
     int larguraVida = (int)(BOSS_HEALTH_BAR_WIDTH * percentualVida);
+    Color fill = percentualVida > 0.5f ? (Color){ 80, 255, 180, 255 }
+               : percentualVida > 0.25f ? (Color){ 255, 200, 60, 255 }
+               : (Color){ 255, 70, 90, 255 };
 
-    DrawRectangle(posicaoX, posicaoY, BOSS_HEALTH_BAR_WIDTH, BOSS_HEALTH_BAR_HEIGHT, DARKGRAY);
-    DrawRectangle(posicaoX, posicaoY, larguraVida, BOSS_HEALTH_BAR_HEIGHT, RED);
-    DrawRectangleLines(posicaoX, posicaoY, BOSS_HEALTH_BAR_WIDTH, BOSS_HEALTH_BAR_HEIGHT, WHITE);
-    DrawText(TextFormat("BOSS HP: %d/%d", boss->hp, boss->hpMaximo), posicaoX + 50, posicaoY + 24, 16, WHITE);
+    DrawRectangle(posicaoX - 2, posicaoY - 2, BOSS_HEALTH_BAR_WIDTH + 4, BOSS_HEALTH_BAR_HEIGHT + 4, (Color){ 10, 20, 40, 200 });
+    DrawRectangle(posicaoX, posicaoY, BOSS_HEALTH_BAR_WIDTH, BOSS_HEALTH_BAR_HEIGHT, (Color){ 20, 28, 45, 230 });
+    DrawRectangle(posicaoX, posicaoY, larguraVida, BOSS_HEALTH_BAR_HEIGHT, fill);
+    DrawRectangleLines(posicaoX, posicaoY, BOSS_HEALTH_BAR_WIDTH, BOSS_HEALTH_BAR_HEIGHT, (Color){ 120, 200, 255, 255 });
+    DrawText(TextFormat("BOSS %d/%d", boss->hp, boss->hpMaximo), posicaoX + 50, posicaoY + 24, 16, (Color){ 210, 240, 255, 255 });
 }
 
 void drawBarraVidaBoss(const Boss* boss) {
@@ -364,9 +407,26 @@ void moverBalasBoss(BossBullet bullets[], int count, float deltaTime) {
 
 // Desenha apenas as balas ativas do boss.
 void drawBalasBoss(BossBullet bullets[], int count) {
+    VfxEstado* vfx = vfxObter();
     for (int i = 0; i < count; i++) {
-        if (bullets[i].ativa) {
-            DrawCircle((int)bullets[i].posicaoX, (int)bullets[i].posicaoY, BOSS_BULLET_RADIUS, ORANGE);
-        }
+        if (!bullets[i].ativa) continue;
+        float x = bullets[i].posicaoX;
+        float y = bullets[i].posicaoY;
+        float len = sqrtf(bullets[i].velocidadeX * bullets[i].velocidadeX + bullets[i].velocidadeY * bullets[i].velocidadeY);
+        float dx = len > 0.0f ? -bullets[i].velocidadeX / len : 0.0f;
+        float dy = len > 0.0f ? -bullets[i].velocidadeY / len : 1.0f;
+
+        Color plasma = (Color){ 255, 90, 40, 255 };
+        Color halo   = (Color){ 255, 50, 120, 100 };
+        vfxDesenharGlowCirculo(x, y, BOSS_BULLET_RADIUS + 2.0f, halo, 0.8f);
+        vfxDesenharGlowLinha(
+            (Vector2){ x, y },
+            (Vector2){ x + dx * 14.0f, y + dy * 14.0f },
+            3.0f,
+            plasma,
+            0.85f
+        );
+        DrawCircle((int)x, (int)y, BOSS_BULLET_RADIUS - 1.0f, (Color){ 255, 220, 180, 255 });
+        vfxRastro(vfx, x, y, (Color){ 255, 100, 60, 180 });
     }
 }
