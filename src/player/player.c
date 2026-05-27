@@ -1,5 +1,6 @@
 #include "player.h"
 #include "../visual/vfx.h"
+#include "../audio/audio.h"
 #include "raylib.h"
 #include <math.h>
 
@@ -196,6 +197,7 @@ void atirar(Player* player, Bullet bullets[], int count, float deltaTime) {
             bullets[i].dano = player->danoTiro > 0 ? player->danoTiro : PLAYER_BASE_BULLET_DAMAGE;
             bullets[i].ativa = true;
             player->tempoCooldownTiro = PLAYER_FIRE_COOLDOWN;
+            tocarSfxTiro();
             vfxRastro(vfxObter(), player->posicaoX, player->posicaoY - PLAYER_RADIUS, (Color){ 120, 255, 255, 200 });
             break;
         }

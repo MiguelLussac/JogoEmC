@@ -7,7 +7,9 @@ void inicializarAudio(void);
 void encerrarAudio(void);
 void atualizarAudio(void);
 void iniciarTrilhaSonora(void);
+void pararTrilhaSonora(void);
 void pausarTrilhaSonora(bool pausar);
 bool trilhaSonoraAtiva(void);
+void tocarSfxTiro(void);
 
 #endif

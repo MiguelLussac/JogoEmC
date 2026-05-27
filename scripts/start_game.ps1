@@ -26,33 +26,100 @@ $scriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 $projectRoot = Resolve-Path (Join-Path $scriptDir "..")
 Set-Location $projectRoot
 
+function Ensure-MciApi {
+    if ("WinMci" -as [type]) { return }
+
+    Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+public class WinMci {
+    [DllImport("winmm.dll", CharSet=CharSet.Unicode)]
+    public static extern int mciSendString(string command, StringBuilder buffer, int bufferSize, IntPtr hwnd);
+}
+"@
+}
+
+function Invoke-MciCommand {
+    param(
+        [string]$Command,
+        [switch]$SilentError
+    )
+
+    $buffer = New-Object System.Text.StringBuilder 256
+    $result = [WinMci]::mciSendString($Command, $buffer, 256, [IntPtr]::Zero)
+    if ($result -ne 0 -and -not $SilentError) {
+        [WinMci]::mciSendString("status error", $buffer, 256, [IntPtr]::Zero) | Out-Null
+        Write-Output "Aviso MCI ($result) em '$Command': $($buffer.ToString())"
+        return $false
+    }
+
+    return ($result -eq 0)
+}
+
 function Start-TrilhaHost {
     $candidatos = @(
         (Join-Path $projectRoot "resources\musica\trilha.mp3"),
         (Join-Path $projectRoot "musica\THE FLIPSIDE - boggio (youtube).mp3")
     )
     $trilha = $candidatos | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if (-not $trilha) { return $null }
+    if (-not $trilha) {
+        Write-Output "Aviso: nenhum arquivo de trilha encontrado em resources/musica ou musica/."
+        return $false
+    }
 
     try {
-        $player = New-Object -ComObject WMPlayer.OCX
-        $player.settings.setMode("loop", $true)
-        $player.settings.volume = 45
-        $player.URL = (Resolve-Path $trilha).Path
-        $player.controls.play()
-        return $player
+        Ensure-MciApi
+        $trilhaPath = (Resolve-Path $trilha).Path
+        [void](Invoke-MciCommand -Command "close trilha" -SilentError)
+
+        if (-not (Invoke-MciCommand -Command ('open "' + $trilhaPath + '" type mpegvideo alias trilha'))) {
+            Write-Output "Aviso: nao foi possivel abrir a trilha no host."
+            return $false
+        }
+
+        [void](Invoke-MciCommand -Command "setaudio trilha volume to 450")
+        if (-not (Invoke-MciCommand -Command "play trilha repeat")) {
+            [void](Invoke-MciCommand -Command "close trilha" -SilentError)
+            Write-Output "Aviso: nao foi possivel iniciar reproducao da trilha no host."
+            return $false
+        }
+
+        Write-Output "Trilha sonora iniciada no Windows: $trilhaPath"
+        return $true
     }
     catch {
-        Write-Output "Aviso: nao foi possivel iniciar trilha no host."
-        return $null
+        Write-Output "Aviso: nao foi possivel iniciar trilha no host ($($_.Exception.Message))."
+        return $false
     }
 }
 
-function Stop-TrilhaHost($player) {
-    if ($null -eq $player) { return }
+function Stop-TrilhaHost($trilhaAtiva) {
+    if (-not $trilhaAtiva) { return }
     try {
-        $player.controls.stop()
-        $player.close()
+        Ensure-MciApi
+        [void](Invoke-MciCommand -Command "stop trilha" -SilentError)
+        [void](Invoke-MciCommand -Command "close trilha" -SilentError)
+        Write-Output "Trilha sonora encerrada."
+    }
+    catch { }
+}
+
+function Play-TiroHost {
+    $candidatos = @(
+        (Join-Path $projectRoot "musica\freesound_community-shoot-5-102360.mp3"),
+        (Join-Path $projectRoot "resources\musica\freesound_community-shoot-5-102360.mp3")
+    )
+    $sfx = $candidatos | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (-not $sfx) { return }
+
+    try {
+        Ensure-MciApi
+        $sfxPath = (Resolve-Path $sfx).Path
+        [void](Invoke-MciCommand -Command "close sfx_tiro" -SilentError)
+        if (-not (Invoke-MciCommand -Command ('open "' + $sfxPath + '" type mpegvideo alias sfx_tiro'))) { return }
+        [void](Invoke-MciCommand -Command "setaudio sfx_tiro volume to 550")
+        [void](Invoke-MciCommand -Command "play sfx_tiro" -SilentError)
     }
     catch { }
 }
@@ -63,9 +130,24 @@ if (-not $Headless) {
     docker compose build minddrop
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-Output "Iniciando o jogo (GUI). Pressione Ctrl+C para sair..."
-    $trilhaHost = Start-TrilhaHost
+    $trilhaHost = $false
     try {
-        docker compose run --rm -e DISPLAY=host.docker.internal:0.0 minddrop
+        docker compose run --rm -e DISPLAY=host.docker.internal:0.0 minddrop 2>&1 | ForEach-Object {
+            $line = $_.ToString()
+            Write-Output $line
+            if ($line -match '\[MINDDROP\] MUSIC:START') {
+                if (-not $trilhaHost) {
+                    $trilhaHost = Start-TrilhaHost
+                }
+            }
+            elseif ($line -match '\[MINDDROP\] MUSIC:STOP') {
+                Stop-TrilhaHost $trilhaHost
+                $trilhaHost = $false
+            }
+            elseif ($line -match '\[MINDDROP\] SFX:SHOOT') {
+                Play-TiroHost
+            }
+        }
     }
     finally {
         Stop-TrilhaHost $trilhaHost
