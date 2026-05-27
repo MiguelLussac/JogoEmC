@@ -23,7 +23,7 @@ void drawPlayer(Player* player) {
     float t = (float)GetTime();
     float x = player->posicaoX;
     float y = player->posicaoY;
-    bool piscando = player->tempoPiscandoDano > 0.0f && ((int)(t * 28.0f) % 2 == 0);
+    bool piscando = player->tempoInvencivel > 0.0f && ((int)(t * 28.0f) % 2 == 0);
 
     float propulsao = 0.55f + 0.45f * sinf(t * 14.0f);
     bool movendo = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
@@ -90,15 +90,26 @@ void drawPlayerHP(const Player* player) {
 }
 
 void aplicarDanoPlayer(Player* player, int dano) {
+    if (player->tempoInvencivel > 0.0f) return;
+
     player->hp -= dano;
     if (player->hp < 0) player->hp = 0;
     player->tempoPiscandoDano = PLAYER_DAMAGE_FLASH_DURATION;
+    player->tempoInvencivel = PLAYER_INVINCIBILITY_DURATION;
     vfxTremer(vfxObter(), 5.0f, 0.35f);
     vfxExplosao(vfxObter(), player->posicaoX, player->posicaoY, (Color){ 255, 80, 120, 220 }, 10, 90.0f);
 }
 
-// Reduz o timer do pisca de dano ate o player voltar ao desenho normal.
+bool jogadorEstaInvencivel(const Player* player) {
+    return player->tempoInvencivel > 0.0f;
+}
+
 void atualizarFeedbackDanoPlayer(Player* player, float deltaTime) {
+    if (player->tempoInvencivel > 0.0f) {
+        player->tempoInvencivel -= deltaTime;
+        if (player->tempoInvencivel < 0.0f) player->tempoInvencivel = 0.0f;
+    }
+
     if (player->tempoPiscandoDano <= 0.0f) return;
     player->tempoPiscandoDano -= deltaTime;
     if (player->tempoPiscandoDano < 0.0f) player->tempoPiscandoDano = 0.0f;
