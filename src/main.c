@@ -8,6 +8,7 @@
 #include "analysis/analise.h"
 #include "logic/logic_phase.h"
 #include "audio/audio.h"
+#include "visual/vfx.h"
 #include <stdbool.h>
 #include <math.h>
 #include <ctype.h>
@@ -191,28 +192,36 @@ static int quebrarTextoComReticencias(const char* texto, char linhas[][120], int
 }
 
 static void drawFundoArcadeAnimado(float tempo) {
-    DrawRectangleGradientV(0, 0, GetScreenWidth(), GetScreenHeight(), (Color){8, 8, 20, 255}, (Color){24, 8, 35, 255});
+    DrawRectangleGradientV(0, 0, GetScreenWidth(), GetScreenHeight(),
+        (Color){ 4, 6, 18, 255 }, (Color){ 18, 8, 32, 255 });
+    DrawRectangleGradientH(0, 0, GetScreenWidth(), GetScreenHeight(),
+        (Color){ 0, 40, 80, 18 }, (Color){ 80, 0, 60, 18 });
 
-    for (int y = 0; y < GetScreenHeight(); y += 4) {
-        DrawLine(0, y, GetScreenWidth(), y, (Color){255, 255, 255, 8});
+    for (int y = 0; y < GetScreenHeight(); y += 3) {
+        DrawLine(0, y, GetScreenWidth(), y, (Color){ 120, 180, 255, 6 });
     }
 
-    for (int i = 0; i < 48; i++) {
-        float x = (float)((i * 173) % GetScreenWidth());
-        float movimento = fmodf((tempo * (22.0f + (float)(i % 8) * 6.0f)) + (float)(i * 19), (float)GetScreenHeight());
+    for (int i = 0; i < 72; i++) {
+        float camada = (float)(i % 3);
+        float x = (float)((i * 173 + (int)(tempo * (14.0f + camada * 8.0f))) % GetScreenWidth());
+        float movimento = fmodf((tempo * (18.0f + camada * 10.0f)) + (float)(i * 23), (float)GetScreenHeight() + 40.0f);
         float y = GetScreenHeight() - movimento;
-        Color cor = (i % 2 == 0) ? (Color){255, 255, 255, 130} : (Color){255, 225, 80, 130};
-        DrawRectangle((int)x, (int)y, 2, 2, cor);
+        int tamanho = (i % 3 == 0) ? 2 : 1;
+        Color cor = (i % 4 == 0) ? (Color){ 180, 240, 255, 160 }
+                  : (i % 4 == 1) ? (Color){ 255, 220, 120, 140 }
+                  : (Color){ 255, 120, 200, 120 };
+        DrawRectangle((int)x, (int)y, tamanho, tamanho, cor);
     }
 }
 
 static void drawBotaoPixel(Rectangle botao, const char* texto, bool selecionado) {
-    Color fundo = selecionado ? (Color){245, 200, 60, 255} : (Color){40, 40, 58, 255};
-    Color sombra = selecionado ? (Color){185, 135, 20, 255} : (Color){18, 18, 28, 255};
-    Color textoCor = selecionado ? BLACK : RAYWHITE;
+    Color fundo = selecionado ? (Color){ 40, 180, 255, 255 } : (Color){ 22, 28, 48, 240 };
+    Color sombra = selecionado ? (Color){ 20, 100, 180, 255 } : (Color){ 8, 10, 20, 255 };
+    Color textoCor = selecionado ? (Color){ 8, 16, 32, 255 } : (Color){ 210, 240, 255, 255 };
+    Color borda = selecionado ? (Color){ 180, 255, 255, 255 } : (Color){ 80, 140, 220, 180 };
     DrawRectangle((int)botao.x + 5, (int)botao.y + 5, (int)botao.width, (int)botao.height, sombra);
     DrawRectangleRec(botao, fundo);
-    DrawRectangleLinesEx(botao, 3.0f, selecionado ? WHITE : (Color){120, 120, 160, 255});
+    DrawRectangleLinesEx(botao, 3.0f, borda);
     DrawText(texto,
              (int)(botao.x + (botao.width - MeasureText(texto, 24)) / 2.0f),
              (int)botao.y + 13,
@@ -225,8 +234,8 @@ static void drawMenuInicial(int opcaoSelecionada, float tempo) {
 
     const char* titulo = "MINDDROP";
     const char* subtitulo = "ARCADE REPORT EDITION";
-    DrawText(titulo, (GetScreenWidth() - MeasureText(titulo, 74)) / 2, 88, 74, (Color){255, 230, 80, 255});
-    DrawText(subtitulo, (GetScreenWidth() - MeasureText(subtitulo, 24)) / 2, 170, 24, (Color){255, 255, 255, 200});
+    DrawText(titulo, (GetScreenWidth() - MeasureText(titulo, 74)) / 2, 88, 74, (Color){120, 240, 255, 255});
+    DrawText(subtitulo, (GetScreenWidth() - MeasureText(subtitulo, 24)) / 2, 170, 24, (Color){200, 220, 255, 200});
 
     Rectangle botaoJogar = {(GetScreenWidth() - 390) / 2.0f, 250, 390, 54};
     Rectangle botaoHistorico = {(GetScreenWidth() - 390) / 2.0f, 324, 390, 54};
@@ -435,6 +444,7 @@ int main () {
     inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
     inicializarAudio();
     iniciarTrilhaSonora();
+    vfxInicializar();
 
     /* Carregar histórico de partidas ao iniciar (arquivo opcional). */
     {
@@ -560,6 +570,7 @@ int main () {
             }
         } else if (telaAtual == TELA_JOGO) {
             stats.tempoPartida += deltaTime;
+            vfxAtualizar(vfxObter(), deltaTime);
 
             int tirosAtivosAntes = 0;
             int tirosAtivosDepois = 0;
@@ -662,22 +673,26 @@ int main () {
             drawFundoArcadeAnimado(tempo);
             renderizarRelatorioAnalitico(NULL);
         } else {
+            drawFundoArcadeAnimado(tempo);
+
             if (modoAtual == MODO_LOGICO && telaAtual == TELA_JOGO) {
                 drawPlayer(&jogador);
                 drawBalas(bala, MAX_BULLETS);
                 drawBoss(&boss);
                 drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
+                vfxDesenhar(vfxObter());
                 desenharFaseLogica(&faseLogica, &boss, &jogador);
                 drawBarraVidaBossEm(&boss, 64);
                 drawPlayerHP(&jogador);
-                DrawText(TextFormat("%.1fs", stats.tempoPartida), 700, 570, 18, (Color){200, 200, 200, 200});
-                DrawText("LOGICO", 700, 550, 16, (Color){180, 220, 255, 200});
+                DrawText(TextFormat("%.1fs", stats.tempoPartida), 700, 570, 18, (Color){160, 200, 240, 200});
+                DrawText("LOGICO", 700, 550, 16, (Color){120, 220, 255, 220});
             } else {
                 drawPlayer(&jogador);
                 drawBalas(bala, MAX_BULLETS);
                 drawBoss(&boss);
-                drawBarraVidaBoss(&boss);
                 drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
+                vfxDesenhar(vfxObter());
+                drawBarraVidaBoss(&boss);
                 drawPlayerHP(&jogador);
                 drawEstrela(&estrela);
 
@@ -685,7 +700,7 @@ int main () {
                     drawDesafio(&desafio, &jogador);
                 }
 
-                DrawText(TextFormat("Tempo: %.1fs", stats.tempoPartida), 20, 20, 20, WHITE);
+                DrawText(TextFormat("Tempo: %.1fs", stats.tempoPartida), 20, 20, 20, (Color){200, 230, 255, 255});
                 DrawText("MODO ARCADE", 20, 46, 16, (Color){255, 220, 90, 230});
             }
 
