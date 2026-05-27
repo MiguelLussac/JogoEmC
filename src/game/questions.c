@@ -104,7 +104,8 @@ static void aplicarBoostAleatorio(DesafioPergunta* desafio, Player* jogador) {
 
     if (boostSorteado == 0) {
         if (jogador->hp >= PLAYER_MAX_HP) {
-            desafio->bonus = "Vida ja esta cheia!!";
+            jogador->escudos++;
+            desafio->bonus = "Vida cheia: voce ganhou +1 escudo!!";
             return;
         }
 

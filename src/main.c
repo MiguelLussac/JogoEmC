@@ -6,6 +6,8 @@
 #include "game/partida.h"
 #include "game/history.h"
 #include "analysis/analise.h"
+#include "logic_phase.h"
+#include "game_state.h"
 #include <stdbool.h>
 #include <math.h>
 #include <ctype.h>
@@ -36,6 +38,10 @@ typedef struct {
     char linhaOriginal[TAMANHO_LINHA_HISTORICO];
     bool valido;
 } HistoricoRegistro;
+
+static int menuSelection = 0; // 0 para Clássico, 1 para Lógica
+
+// Use shared GameState from game_state.h
 
 /* Variáveis do módulo de análise — integradas à main para exposição à UI */
 static HistoricoPartida *g_historico = NULL;
@@ -219,23 +225,60 @@ static void drawBotaoPixel(Rectangle botao, const char* texto, bool selecionado)
 }
 
 static void drawMenuInicial(int opcaoSelecionada, float tempo) {
-    drawFundoArcadeAnimado(tempo);
+    // Fundo escuro elegante para a tela principal
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), (Color){15, 18, 32, 255});
+    DrawRectangleGradientV(0, 0, GetScreenWidth(), GetScreenHeight(), (Color){18, 22, 40, 255}, (Color){8, 12, 24, 255});
 
-    const char* titulo = "MINDDROP";
-    const char* subtitulo = "ARCADE REPORT EDITION";
-    DrawText(titulo, (GetScreenWidth() - MeasureText(titulo, 74)) / 2, 88, 74, (Color){255, 230, 80, 255});
-    DrawText(subtitulo, (GetScreenWidth() - MeasureText(subtitulo, 24)) / 2, 170, 24, (Color){255, 255, 255, 200});
+    for (int i = 0; i < 18; i++) {
+        float x = fmodf(tempo * (40.0f + i * 5.0f) + i * 120.0f, GetScreenWidth() + 60.0f) - 30.0f;
+        float y = 80.0f + sinf(tempo * 1.1f + i * 0.9f) * 18.0f + (i % 2) * 16.0f;
+        DrawCircle((int)x, (int)y, 1.5f + (i % 3), (Color){180, 220, 255, 110});
+    }
 
-    Rectangle botaoJogar = {(GetScreenWidth() - 390) / 2.0f, 250, 390, 54};
-    Rectangle botaoHistorico = {(GetScreenWidth() - 390) / 2.0f, 324, 390, 54};
-    Rectangle botaoAnalise = {(GetScreenWidth() - 390) / 2.0f, 398, 390, 54};
-    drawBotaoPixel(botaoJogar, "INICIAR PARTIDA", opcaoSelecionada == 0);
-    drawBotaoPixel(botaoHistorico, "VER HISTORICO", opcaoSelecionada == 1);
-    drawBotaoPixel(botaoAnalise, "RELATORIO ANALITICO", opcaoSelecionada == 2);
+    const char* titulo = "MIND DROP";
+    int tituloLargura = MeasureText(titulo, 80);
+    int tituloX = (GetScreenWidth() - tituloLargura) / 2;
+    DrawText(titulo, tituloX + 4, 88 + 4, 80, (Color){10, 12, 18, 180});
+    DrawText(titulo, tituloX, 88, 80, (Color){180, 220, 255, 255});
 
-    Color blink = ((int)(tempo * 3.5f) % 2 == 0) ? (Color){255, 255, 255, 245} : (Color){255, 220, 90, 255};
-    const char* dicas = "W/S ou SETAS | ENTER para confirmar";
-    DrawText(dicas, (GetScreenWidth() - MeasureText(dicas, 18)) / 2, 474, 18, blink);
+    const char* subtitulo = "LOGIC ARCADE MODE";
+    DrawText(subtitulo, (GetScreenWidth() - MeasureText(subtitulo, 24)) / 2, 178, 24, (Color){200, 220, 255, 200});
+
+    Rectangle botaoClassico = {(GetScreenWidth() - 360) / 2.0f, 300, 360, 60};
+    Rectangle botaoLogica = {(GetScreenWidth() - 360) / 2.0f, 384, 360, 60};
+
+    Vector2 mouse = GetMousePosition();
+    bool hoverClassico = CheckCollisionPointRec(mouse, botaoClassico);
+    bool hoverLogica = CheckCollisionPointRec(mouse, botaoLogica);
+
+    bool selecionadoClassico = (opcaoSelecionada == 0) || hoverClassico;
+    bool selecionadoLogica = (opcaoSelecionada == 1) || hoverLogica;
+
+    Color fundoClassico = selecionadoClassico ? (Color){245, 200, 60, 255} : (Color){35, 35, 54, 255};
+    Color fundoLogica = selecionadoLogica ? (Color){245, 200, 60, 255} : (Color){35, 35, 54, 255};
+    Color sombraClassico = selecionadoClassico ? (Color){185, 135, 20, 255} : (Color){18, 18, 28, 255};
+    Color sombraLogica = selecionadoLogica ? (Color){185, 135, 20, 255} : (Color){18, 18, 28, 255};
+    Color textoClassico = selecionadoClassico ? BLACK : RAYWHITE;
+    Color textoLogica = selecionadoLogica ? BLACK : RAYWHITE;
+
+    DrawRectangle((int)botaoClassico.x + 5, (int)botaoClassico.y + 5, (int)botaoClassico.width, (int)botaoClassico.height, sombraClassico);
+    DrawRectangleRec(botaoClassico, fundoClassico);
+    DrawRectangleLinesEx(botaoClassico, 3.0f, selecionadoClassico ? WHITE : (Color){120, 120, 160, 255});
+    if (selecionadoClassico) {
+        DrawText(">", (int)(botaoClassico.x - 28), (int)(botaoClassico.y + 16), 36, YELLOW);
+    }
+    DrawText("Modo Classico", (int)(botaoClassico.x + (botaoClassico.width - MeasureText("Modo Classico", 30)) / 2), (int)(botaoClassico.y + 14), 30, textoClassico);
+
+    DrawRectangle((int)botaoLogica.x + 5, (int)botaoLogica.y + 5, (int)botaoLogica.width, (int)botaoLogica.height, sombraLogica);
+    DrawRectangleRec(botaoLogica, fundoLogica);
+    DrawRectangleLinesEx(botaoLogica, 3.0f, selecionadoLogica ? WHITE : (Color){120, 120, 160, 255});
+    if (selecionadoLogica) {
+        DrawText(">", (int)(botaoLogica.x - 28), (int)(botaoLogica.y + 16), 36, YELLOW);
+    }
+    DrawText("Fase Logica", (int)(botaoLogica.x + (botaoLogica.width - MeasureText("Fase Logica", 30)) / 2), (int)(botaoLogica.y + 14), 30, textoLogica);
+
+    const char* dica = "Use W/S ou ↑/↓ e Enter para selecionar.";
+    DrawText(dica, (GetScreenWidth() - MeasureText(dica, 18)) / 2, GetScreenHeight() - 50, 18, (Color){190, 200, 220, 220});
 }
 
 static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinhas, int scroll, int selecionado, int expandido, float tempo) {
@@ -386,6 +429,7 @@ int main () {
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
     // Create the game window
     InitWindow(800, 600, "MindDrop");
+    InitLogicPhase();
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
     // Set the resources directory as the working directory
@@ -410,6 +454,7 @@ int main () {
     int historicoExpandido = -1;
     HistoricoRegistro registrosHistorico[MAX_HISTORICO_LINHAS];
     bool relatorioSalvo = false;
+    GameState currentState = STATE_MENU;
 
     inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
 
@@ -443,6 +488,47 @@ int main () {
         float deltaTime = GetFrameTime();
         float tempo = (float)GetTime();
 
+if (IsKeyPressed(KEY_M)) currentState = STATE_LOGIC_PHASE;
+
+        if (currentState == STATE_MENU) {
+            Vector2 mouse = GetMousePosition();
+            Rectangle botaoClassico = {(GetScreenWidth() - 360) / 2.0f, 300, 360, 60};
+            Rectangle botaoLogica = {(GetScreenWidth() - 360) / 2.0f, 384, 360, 60};
+            bool hoverClassico = CheckCollisionPointRec(mouse, botaoClassico);
+            bool hoverLogica = CheckCollisionPointRec(mouse, botaoLogica);
+
+            if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
+                menuSelection = 0;
+            } else if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
+                menuSelection = 1;
+            }
+
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                if (hoverClassico) {
+                    menuSelection = 0;
+                    inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
+                    relatorioSalvo = false;
+                    telaAtual = TELA_JOGO;
+                    currentState = STATE_LOGIC_PHASE;
+                } else if (hoverLogica) {
+                    menuSelection = 1;
+                    currentState = STATE_TUTORIAL_LOGICA;
+                }
+            }
+
+            if (IsKeyPressed(KEY_ENTER)) {
+                if (menuSelection == 0) {
+                    inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
+                    relatorioSalvo = false;
+                    telaAtual = TELA_JOGO;
+                    currentState = STATE_LOGIC_PHASE;
+                } else if (menuSelection == 1) {
+                    currentState = STATE_TUTORIAL_LOGICA;
+                }
+            }
+        }
+
+        if (currentState == STATE_LOGIC_PHASE) {
         if (telaAtual == TELA_MENU) {
             if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
                 opcaoMenu = (opcaoMenu + 2) % 3;
@@ -590,10 +676,22 @@ int main () {
                 telaAtual = TELA_MENU;
             }
         }
+        }
+        if (currentState == STATE_TUTORIAL_LOGICA) {
+            UpdateLogicTutorial(&currentState);
+        } else if (currentState == STATE_LOGIC_PHASE) {
+            UpdateLogicPhase(&currentState);
+            if (LogicPhaseHasEnded()) {
+                currentState = STATE_MENU;
+            }
+        } else if (currentState == STATE_LOGIC_REPORT) {
+            UpdateLogicReport(&currentState);
+        }
 
         BeginDrawing();
         ClearBackground(BLACK);
 
+        if (currentState == STATE_LOGIC_PHASE) {
         if (telaAtual == TELA_MENU) {
             drawMenuInicial(opcaoMenu, tempo);
         } else if (telaAtual == TELA_HISTORICO) {
@@ -620,6 +718,15 @@ int main () {
             if (telaAtual == TELA_RELATORIO_FINAL) {
                 drawRelatorioFinal(motivoFimJogo, &stats, relatorioSalvo);
             }
+        }
+        } else if (currentState == STATE_MENU) {
+            drawMenuInicial(menuSelection, tempo);
+        } else if (currentState == STATE_TUTORIAL_LOGICA) {
+            DrawLogicTutorial();
+        } else if (currentState == STATE_LOGIC_PHASE) {
+            DrawLogicPhase();
+        } else if (currentState == STATE_LOGIC_REPORT) {
+            DrawLogicReport();
         }
 
             EndDrawing();

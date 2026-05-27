@@ -3,6 +3,8 @@
  * do histórico de partidas.
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include "analise.h"
 
 #include <stdio.h>

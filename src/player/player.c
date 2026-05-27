@@ -34,6 +34,7 @@ void drawPlayerHP(const Player* player) {
     DrawRectangle(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, larguraVida, PLAYER_HEALTH_BAR_HEIGHT, RED);
     DrawRectangleLines(PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y, PLAYER_HEALTH_BAR_WIDTH, PLAYER_HEALTH_BAR_HEIGHT, WHITE);
     DrawText(TextFormat("PLAYER HP: %d/%d", player->hp, PLAYER_MAX_HP), PLAYER_HEALTH_BAR_X + 8, PLAYER_HEALTH_BAR_Y + 22, 16, WHITE);
+    DrawText(TextFormat("ESCUDOS: %d", player->escudos), PLAYER_HEALTH_BAR_X + 8, PLAYER_HEALTH_BAR_Y + 40, 16, SKYBLUE);
     DrawText("BUFFS ATIVOS:", PLAYER_HEALTH_BAR_X, PLAYER_HEALTH_BAR_Y - 62, 16, RAYWHITE);
 
     int yBuff = PLAYER_HEALTH_BAR_Y - 42;
@@ -54,6 +55,10 @@ void drawPlayerHP(const Player* player) {
 
 void aplicarDanoPlayer(Player* player, int dano) {
     // Tambem usado pelo desafio quando o player aceita gastar 1 vida.
+    while (dano > 0 && player->escudos > 0) {
+        player->escudos--;
+        dano--;
+    }
     player->hp -= dano;
     if (player->hp < 0) player->hp = 0;
     player->tempoPiscandoDano = PLAYER_DAMAGE_FLASH_DURATION;

@@ -5,7 +5,7 @@
 
 #define PLAYER_BULLET_RADIUS 5
 #define PLAYER_RADIUS 20
-#define PLAYER_MAX_HP 3
+#define PLAYER_MAX_HP 5
 #define PLAYER_HEALTH_BAR_WIDTH 220
 #define PLAYER_HEALTH_BAR_HEIGHT 18
 #define PLAYER_HEALTH_BAR_X 20
@@ -24,6 +24,7 @@ typedef struct {
     float posicaoY;
     float velocidade;
     int hp;
+    int escudos;
     float tempoPiscandoDano;
     int danoTiro;
     float tempoBoostDano;

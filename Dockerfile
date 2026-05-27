@@ -37,6 +37,7 @@ RUN git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib && \
     -I./src \
     -I./include \
     ./src/main.c \
+    ./src/logic_phase.c \
     ./src/player/player.c \
     ./src/boss/boss.c \
     ./src/game/questions.c \
