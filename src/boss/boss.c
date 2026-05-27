@@ -1,10 +1,9 @@
 #include "boss.h"
 #include "../visual/vfx.h"
+#include "screen_config.h"
 #include "raylib.h"
 #include <math.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
 #define BOSS_BULLET_RADIUS 6
 #define BOSS_HEALTH_BAR_WIDTH 240
 #define BOSS_HEALTH_BAR_HEIGHT 18
@@ -50,6 +49,7 @@ static void atualizarFaseBoss(Boss* boss) {
         boss->padraoAtaque = GetRandomValue(0, 2);
         boss->tempoMudancaMovimento = 0.25f;
         boss->tempoDash = 0.35f;
+        boss->ataqueAtivo = BOSS_ATAQUE_PADRAO;
     }
 }
 
@@ -116,6 +116,170 @@ static void dispararBalaBoss(Boss* boss, BossBullet bullets[], int count, const 
     bullets[indice].ativa = true;
 }
 
+static void dispararBalaBossVel(Boss* boss, BossBullet bullets[], int count, float origemX, float origemY, float velX, float velY) {
+    int indice = buscarBalaLivre(bullets, count);
+    if (indice < 0) return;
+
+    bullets[indice].posicaoX = origemX;
+    bullets[indice].posicaoY = origemY;
+    bullets[indice].velocidadeX = velX;
+    bullets[indice].velocidadeY = velY;
+    bullets[indice].ativa = true;
+}
+
+static void dispararBalaBossAngulo(Boss* boss, BossBullet bullets[], int count, float anguloRad, float velocidade) {
+    float origemX = boss->posicaoX;
+    float origemY = boss->posicaoY + (boss->altura / 2.0f);
+    dispararBalaBossVel(boss, bullets, count, origemX, origemY, cosf(anguloRad) * velocidade, sinf(anguloRad) * velocidade);
+}
+
+static BossAtaqueId escolherAtaqueEspecial(const Boss* boss) {
+    if (boss->fase <= 0) return BOSS_ATAQUE_PADRAO;
+
+    int chanceEspecial = 18 + boss->fase * 12;
+    if (GetRandomValue(0, 99) >= chanceEspecial) return BOSS_ATAQUE_PADRAO;
+
+    int roll = GetRandomValue(0, 99);
+    if (roll < 28) return BOSS_ATAQUE_LASER;
+    if (roll < 52) return BOSS_ATAQUE_ONDAS;
+    if (roll < 76) return BOSS_ATAQUE_PAREDE;
+    return BOSS_ATAQUE_ESPIRAL;
+}
+
+static void iniciarAtaqueEspecial(Boss* boss, BossAtaqueId ataque, const Player* player) {
+    boss->ataqueAtivo = ataque;
+    boss->tempoAtaqueEspecial = 0.0f;
+    boss->passoAtaqueEspecial = 0;
+    boss->anguloEspiral = -1.5708f;
+
+    if (ataque == BOSS_ATAQUE_LASER) {
+        boss->laserX = boss->posicaoX;
+        boss->laserLargura = 28.0f + (float)boss->fase * 4.0f;
+        boss->laserVelX = (player && player->posicaoX >= boss->posicaoX) ? 145.0f : -145.0f;
+        vfxTremer(vfxObter(), 0.22f, 0.15f);
+    } else if (ataque == BOSS_ATAQUE_ESPIRAL) {
+        boss->anguloEspiral = -1.5708f;
+        boss->tempoEntreRajadas = 0.0f;
+    }
+}
+
+static void spawnOndaBalas(Boss* boss, BossBullet bullets[], int count, const Player* player, int indiceOnda) {
+    int quantidade = 5 + boss->fase;
+    float origemY = boss->posicaoY + (boss->altura / 2.0f);
+    float alvoX = player ? player->posicaoX : boss->posicaoX;
+    float baseAng = atan2f((player ? player->posicaoY : SCREEN_HEIGHT - 120.0f) - origemY, alvoX - boss->posicaoX);
+    float abertura = 0.32f + (float)boss->fase * 0.06f + (float)indiceOnda * 0.04f;
+    float velocidade = BOSS_BULLET_SPEED + 12.0f + (float)boss->fase * 10.0f;
+
+    for (int i = 0; i < quantidade; i++) {
+        float t = (quantidade <= 1) ? 0.0f : (float)i / (float)(quantidade - 1);
+        float ang = baseAng - abertura + t * abertura * 2.0f;
+        dispararBalaBossAngulo(boss, bullets, count, ang, velocidade);
+    }
+}
+
+static void spawnParedeBalas(Boss* boss, BossBullet bullets[], int count, int indiceParede) {
+    float origemY = 110.0f + (float)indiceParede * 28.0f;
+    float espacamento = 56.0f;
+    float velocidade = 95.0f + (float)boss->fase * 12.0f;
+    int coluna = 0;
+    int blocoGap = 3 + indiceParede;
+
+    for (float x = espacamento * 0.5f; x < (float)SCREEN_WIDTH; x += espacamento) {
+        bool corredor = (coluna % blocoGap) == (blocoGap / 2);
+        coluna++;
+        if (corredor) continue;
+        dispararBalaBossVel(boss, bullets, count, x, origemY, 0.0f, velocidade);
+    }
+}
+
+static bool atualizarAtaqueEspecial(Boss* boss, BossBullet bullets[], int count, const Player* player, float deltaTime) {
+    if (boss->ataqueAtivo == BOSS_ATAQUE_PADRAO) return false;
+
+    boss->tempoAtaqueEspecial += deltaTime;
+
+    if (boss->ataqueAtivo == BOSS_ATAQUE_LASER) {
+        if (boss->passoAtaqueEspecial == 0) {
+            boss->laserX = boss->posicaoX;
+            if (boss->tempoAtaqueEspecial >= 0.95f) {
+                boss->passoAtaqueEspecial = 1;
+                boss->tempoAtaqueEspecial = 0.0f;
+                vfxTremer(vfxObter(), 0.35f, 0.2f);
+            }
+        } else {
+            boss->laserX += boss->laserVelX * deltaTime;
+            if (boss->laserX < boss->laserLargura) {
+                boss->laserX = boss->laserLargura;
+                boss->laserVelX = fabsf(boss->laserVelX);
+            }
+            if (boss->laserX > (float)SCREEN_WIDTH - boss->laserLargura) {
+                boss->laserX = (float)SCREEN_WIDTH - boss->laserLargura;
+                boss->laserVelX = -fabsf(boss->laserVelX);
+            }
+            if (boss->tempoAtaqueEspecial >= 1.05f) {
+                boss->ataqueAtivo = BOSS_ATAQUE_PADRAO;
+            }
+        }
+        return boss->ataqueAtivo != BOSS_ATAQUE_PADRAO;
+    }
+
+    if (boss->ataqueAtivo == BOSS_ATAQUE_ONDAS) {
+        float intervalo = 0.58f - (float)boss->fase * 0.03f;
+        if (intervalo < 0.48f) intervalo = 0.48f;
+
+        if (boss->tempoAtaqueEspecial >= intervalo) {
+            spawnOndaBalas(boss, bullets, count, player, boss->passoAtaqueEspecial);
+            boss->passoAtaqueEspecial++;
+            boss->tempoAtaqueEspecial = 0.0f;
+            vfxTremer(vfxObter(), 0.12f, 0.05f);
+        }
+
+        if (boss->passoAtaqueEspecial >= 2 + boss->fase / 2) {
+            boss->ataqueAtivo = BOSS_ATAQUE_PADRAO;
+        }
+        return boss->ataqueAtivo != BOSS_ATAQUE_PADRAO;
+    }
+
+    if (boss->ataqueAtivo == BOSS_ATAQUE_PAREDE) {
+        float intervalo = 0.85f - (float)boss->fase * 0.04f;
+        if (intervalo < 0.72f) intervalo = 0.72f;
+
+        if (boss->tempoAtaqueEspecial >= intervalo) {
+            spawnParedeBalas(boss, bullets, count, boss->passoAtaqueEspecial);
+            boss->passoAtaqueEspecial++;
+            boss->tempoAtaqueEspecial = 0.0f;
+        }
+
+        if (boss->passoAtaqueEspecial >= 2) {
+            boss->ataqueAtivo = BOSS_ATAQUE_PADRAO;
+        }
+        return boss->ataqueAtivo != BOSS_ATAQUE_PADRAO;
+    }
+
+    if (boss->ataqueAtivo == BOSS_ATAQUE_ESPIRAL) {
+        float intervalo = 0.11f - (float)boss->fase * 0.004f;
+        if (intervalo < 0.09f) intervalo = 0.09f;
+        float duracao = 1.15f + (float)boss->fase * 0.15f;
+        float velocidade = BOSS_BULLET_SPEED + 18.0f + (float)boss->fase * 8.0f;
+
+        boss->tempoEntreRajadas -= deltaTime;
+        while (boss->tempoEntreRajadas <= 0.0f && boss->tempoAtaqueEspecial < duracao) {
+            dispararBalaBossAngulo(boss, bullets, count, boss->anguloEspiral, velocidade);
+            boss->anguloEspiral += 0.28f + (float)boss->fase * 0.03f;
+            boss->tempoEntreRajadas += intervalo;
+        }
+
+        if (boss->tempoAtaqueEspecial >= duracao) {
+            boss->ataqueAtivo = BOSS_ATAQUE_PADRAO;
+            boss->tempoEntreRajadas = 0.0f;
+        }
+        return boss->ataqueAtivo != BOSS_ATAQUE_PADRAO;
+    }
+
+    boss->ataqueAtivo = BOSS_ATAQUE_PADRAO;
+    return false;
+}
+
 static float obterCooldownAtaque(const Boss* boss) {
     float dificuldade = calcularDificuldadeProgressiva(boss);
     float cooldown = BOSS_BULLET_COOLDOWN / dificuldade;
@@ -124,7 +288,7 @@ static float obterCooldownAtaque(const Boss* boss) {
     if (boss->fase == 2) cooldown *= 0.76f;
     if (boss->fase == 3) cooldown *= 0.58f;
 
-    return cooldown < 0.28f ? 0.28f : cooldown;
+    return cooldown < 0.32f ? 0.32f : cooldown;
 }
 
 // Aplica dano, aciona feedback visual e desativa o boss quando a vida zera.
@@ -158,7 +322,7 @@ void verificarColisaoBalasComPlayer(Player* player, BossBullet bullets[], int co
 
 // Define o estado inicial do boss antes do loop principal comecar.
 void inicializarBoss(Boss* boss) {
-    boss->posicaoX = 400.0f;
+    boss->posicaoX = SCREEN_WIDTH / 2.0f;
     boss->posicaoY = 100.0f;
     boss->velocidade = 140.0f;
     boss->largura = 80.0f;
@@ -179,6 +343,13 @@ void inicializarBoss(Boss* boss) {
     boss->direcaoDash = 0.0f;
     boss->tirosRajadaRestantes = 0;
     boss->tempoEntreRajadas = 0.0f;
+    boss->ataqueAtivo = BOSS_ATAQUE_PADRAO;
+    boss->tempoAtaqueEspecial = 0.0f;
+    boss->passoAtaqueEspecial = 0;
+    boss->laserX = SCREEN_WIDTH / 2.0f;
+    boss->laserVelX = 0.0f;
+    boss->laserLargura = 52.0f;
+    boss->anguloEspiral = 0.0f;
 }
 
 // Move o boss com padrões variáveis, perseguição parcial e dashes agressivos.
@@ -253,7 +424,7 @@ void drawBoss(Boss* boss) {
     float hw = boss->largura * 0.5f * escala;
     float hh = boss->altura * 0.5f * escala;
     bool piscando = boss->tempoPiscandoDano > 0.0f && ((int)(t * 24.0f) % 2 == 0);
-    bool atacando = boss->tirosRajadaRestantes > 0;
+    bool atacando = boss->tirosRajadaRestantes > 0 || boss->ataqueAtivo != BOSS_ATAQUE_PADRAO;
 
     Color chassi = piscando ? WHITE : (Color){ 55, 65, 90, 255 };
     Color borda  = (Color){ 140, 170, 220, 255 };
@@ -345,27 +516,7 @@ void inicializarBalasBoss(BossBullet bullets[], int count) {
     }
 }
 
-// Controla cooldown e alterna tiros simples, múltiplos e rajadas progressivas.
-void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player* player, float deltaTime) {
-    if (!boss->ativa) return;
-
-    atualizarFaseBoss(boss);
-
-    if (boss->tirosRajadaRestantes > 0) {
-        boss->tempoEntreRajadas -= deltaTime;
-        if (boss->tempoEntreRajadas <= 0.0f) {
-            float abertura = 14.0f + (float)boss->fase * 7.0f;
-            dispararBalaBoss(boss, bullets, count, player, 0.0f, abertura * (float)(boss->tirosRajadaRestantes % 2 == 0 ? 1 : -1), (float)boss->fase * 16.0f);
-            boss->tirosRajadaRestantes--;
-            boss->tempoEntreRajadas = 0.13f;
-        }
-    }
-
-    boss->tempoDesdeUltimoTiro += deltaTime;
-    if (boss->tempoDesdeUltimoTiro < obterCooldownAtaque(boss)) return;
-
-    boss->padraoAtaque = GetRandomValue(0, boss->fase >= 2 ? 3 : 2);
-
+static void executarAtaquePadrao(Boss* boss, BossBullet bullets[], int count, const Player* player) {
     if (boss->fase == 0) {
         dispararBalaBoss(boss, bullets, count, player, 0.0f, 0.0f, 0.0f);
     } else if (boss->fase == 1) {
@@ -385,6 +536,39 @@ void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player
         dispararBalaBoss(boss, bullets, count, player, 24.0f, 34.0f, 30.0f);
         boss->tirosRajadaRestantes = 3;
         boss->tempoEntreRajadas = 0.10f;
+    }
+}
+
+// Controla cooldown e alterna tiros simples, rajadas e ataques especiais.
+void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player* player, float deltaTime) {
+    if (!boss->ativa) return;
+
+    atualizarFaseBoss(boss);
+
+    if (boss->tirosRajadaRestantes > 0) {
+        boss->tempoEntreRajadas -= deltaTime;
+        if (boss->tempoEntreRajadas <= 0.0f) {
+            float abertura = 14.0f + (float)boss->fase * 7.0f;
+            dispararBalaBoss(boss, bullets, count, player, 0.0f, abertura * (float)(boss->tirosRajadaRestantes % 2 == 0 ? 1 : -1), (float)boss->fase * 16.0f);
+            boss->tirosRajadaRestantes--;
+            boss->tempoEntreRajadas = 0.13f;
+        }
+    }
+
+    if (atualizarAtaqueEspecial(boss, bullets, count, player, deltaTime)) {
+        return;
+    }
+
+    boss->tempoDesdeUltimoTiro += deltaTime;
+    if (boss->tempoDesdeUltimoTiro < obterCooldownAtaque(boss)) return;
+
+    boss->padraoAtaque = GetRandomValue(0, boss->fase >= 2 ? 3 : 2);
+    BossAtaqueId escolhido = escolherAtaqueEspecial(boss);
+
+    if (escolhido != BOSS_ATAQUE_PADRAO) {
+        iniciarAtaqueEspecial(boss, escolhido, player);
+    } else {
+        executarAtaquePadrao(boss, bullets, count, player);
     }
 
     boss->tempoDesdeUltimoTiro = 0.0f;
@@ -428,5 +612,50 @@ void drawBalasBoss(BossBullet bullets[], int count) {
         );
         DrawCircle((int)x, (int)y, BOSS_BULLET_RADIUS - 1.0f, (Color){ 255, 220, 180, 255 });
         vfxRastro(vfx, x, y, (Color){ 255, 100, 60, 180 });
+    }
+}
+
+void drawAtaquesEspeciaisBoss(const Boss* boss) {
+    if (!boss->ativa || boss->ataqueAtivo != BOSS_ATAQUE_LASER) return;
+
+    float topo = boss->posicaoY + boss->altura * 0.5f;
+    float altura = (float)SCREEN_HEIGHT - topo;
+    float cx = boss->laserX;
+    float hw = boss->laserLargura * 0.5f;
+    float t = (float)GetTime();
+    float pulso = 0.65f + 0.35f * sinf(t * 18.0f);
+
+    if (boss->passoAtaqueEspecial == 0) {
+        Color carga = (Color){ 255, 80, 40, (unsigned char)(70 + pulso * 50) };
+        DrawRectangle((int)(cx - hw - 6), (int)topo, (int)(boss->laserLargura + 12), (int)altura, carga);
+        vfxDesenharGlowCirculo(cx, topo + 8.0f, 18.0f + pulso * 10.0f, (Color){ 255, 160, 80, 200 }, 1.0f);
+        DrawText("CARGA", (int)(cx - MeasureText("CARGA", 16) / 2), (int)(topo + 24), 16, (Color){ 255, 220, 180, 230 });
+        return;
+    }
+
+    Color nucleo = (Color){ 255, 240, 220, (unsigned char)(220 + pulso * 35) };
+    Color halo   = (Color){ 255, 60, 40, (unsigned char)(90 + pulso * 60) };
+    DrawRectangle((int)(cx - hw - 14), (int)topo, (int)(boss->laserLargura + 28), (int)altura, halo);
+    DrawRectangle((int)(cx - hw), (int)topo, (int)boss->laserLargura, (int)altura, (Color){ 255, 120, 60, 160 });
+    DrawRectangle((int)(cx - hw * 0.35f), (int)topo, (int)(boss->laserLargura * 0.35f), (int)altura, nucleo);
+    DrawLineEx((Vector2){ cx, topo }, (Vector2){ cx, topo + altura }, 4.0f, (Color){ 255, 255, 255, 220 });
+}
+
+void verificarColisaoAtaquesEspeciaisComPlayer(const Boss* boss, Player* player) {
+    if (!boss->ativa || player->hp <= 0) return;
+    if (boss->ataqueAtivo != BOSS_ATAQUE_LASER || boss->passoAtaqueEspecial == 0) return;
+
+    float topo = boss->posicaoY + boss->altura * 0.5f;
+    Rectangle feixe = {
+        boss->laserX - boss->laserLargura * 0.5f,
+        topo,
+        boss->laserLargura,
+        (float)SCREEN_HEIGHT - topo
+    };
+
+    if (CheckCollisionCircleRec((Vector2){ player->posicaoX, player->posicaoY }, PLAYER_RADIUS, feixe)) {
+        if (player->tempoPiscandoDano <= 0.0f) {
+            aplicarDanoPlayer(player, 1);
+        }
     }
 }

@@ -1,5 +1,6 @@
 #include "logic_phase.h"
 #include "../visual/vfx.h"
+#include "screen_config.h"
 #include "raylib.h"
 #include <math.h>
 #include <stdio.h>
@@ -8,8 +9,6 @@
 #include <time.h>
 
 /* ── constantes ─────────────────────────────────────────────────────────────── */
-#define SCREEN_W     800
-#define SCREEN_H     600
 #define DROP_W       36.0f
 #define DROP_H       36.0f
 #define DROP_VEL     115.0f
@@ -304,7 +303,7 @@ static void spawnarDrop(FaseLogica* f) {
     int idx = buscarDropLivre(f);
     if (idx < 0) return;
     f->drops[idx].tipo  = sortearTipoDrop(f);
-    f->drops[idx].x     = (float)GetRandomValue((int)DROP_W, SCREEN_W - (int)DROP_W);
+    f->drops[idx].x     = (float)GetRandomValue((int)DROP_W, SCREEN_WIDTH - (int)DROP_W);
     f->drops[idx].y     = -DROP_H;
     f->drops[idx].ativo = true;
 }
@@ -576,7 +575,7 @@ void atualizarFaseLogica(FaseLogica* f, Boss* boss, Player* jogador,
     for (int i = 0; i < LOGIC_MAX_DROPS; i++) {
         if (!f->drops[i].ativo) continue;
         f->drops[i].y += velDrop;
-        if (f->drops[i].y > SCREEN_H + DROP_H) { f->drops[i].ativo = false; continue; }
+        if (f->drops[i].y > SCREEN_HEIGHT + DROP_H) { f->drops[i].ativo = false; continue; }
 
         float dx   = f->drops[i].x - jogador->posicaoX;
         float dy   = f->drops[i].y - jogador->posicaoY;
@@ -642,8 +641,8 @@ static void drawHudExpressao(const FaseLogica* f) {
     }
 
     int fonteHud = 28;
-    DrawRectangle(0, 0, SCREEN_W, 60, (Color){6, 10, 24, 235});
-    DrawRectangleLines(0, 0, SCREEN_W, 60, (Color){80, 160, 255, 120});
+    DrawRectangle(0, 0, SCREEN_WIDTH, 60, (Color){6, 10, 24, 235});
+    DrawRectangleLines(0, 0, SCREEN_WIDTH, 60, (Color){80, 160, 255, 120});
 
     /* pisca quando pressão temporal está baixa */
     bool mostrar = true;
@@ -652,17 +651,17 @@ static void drawHudExpressao(const FaseLogica* f) {
 
     if (mostrar) {
         int w = MeasureText(hud, fonteHud);
-        DrawText(hud, (SCREEN_W - w) / 2, 16, fonteHud, corObj);
+        DrawText(hud, (SCREEN_WIDTH - w) / 2, 16, fonteHud, corObj);
     }
 
-    DrawLine(0, 60, SCREEN_W, 60, (Color){100,100,180,255});
+    DrawLine(0, 60, SCREEN_WIDTH, 60, (Color){100,100,180,255});
 
     /* barra de timer */
     if (f->temTimer && f->timerMaxExpr > 0.0f) {
         float pct = f->timerExpr / f->timerMaxExpr;
         if (pct < 0.0f) pct = 0.0f;
         Color barCor = (pct > 0.5f) ? GREEN : (pct > 0.25f) ? ORANGE : RED;
-        DrawRectangle(0, 58, (int)(SCREEN_W * pct), 3, barCor);
+        DrawRectangle(0, 58, (int)(SCREEN_WIDTH * pct), 3, barCor);
     }
 }
 
@@ -673,7 +672,7 @@ static void drawCombo(const FaseLogica* f) {
     Color c = (f->combo >= 8) ? (Color){80,220,255,255}
             : (f->combo >= 5) ? YELLOW
             : GREEN;
-    DrawText(txt, SCREEN_W - MeasureText(txt, 22) - 16, 70, 22, c);
+    DrawText(txt, SCREEN_WIDTH - MeasureText(txt, 22) - 16, 70, 22, c);
 }
 
 static void drawShieldIndicator(const FaseLogica* f, const Player* jogador) {
@@ -785,8 +784,8 @@ static void drawFeedbackTexto(const FaseLogica* f) {
     float alpha = (f->timerFeedback > 0.5f) ? 1.0f : f->timerFeedback / 0.5f;
     Color c = { f->corFeedback.r, f->corFeedback.g, f->corFeedback.b, (unsigned char)(240 * alpha) };
     DrawText(f->textoFeedback,
-             (SCREEN_W - MeasureText(f->textoFeedback, 26)) / 2,
-             SCREEN_H / 2 - 20, 26, c);
+             (SCREEN_WIDTH - MeasureText(f->textoFeedback, 26)) / 2,
+             SCREEN_HEIGHT / 2 - 20, 26, c);
 }
 
 static void drawEventoBanner(const FaseLogica* f) {
@@ -808,7 +807,7 @@ void desenharFaseLogica(const FaseLogica* f, const Boss* boss, const Player* jog
     int ox = (int)f->shakeX;
     int oy = (int)f->shakeY;
 
-    if (ox || oy) BeginScissorMode(0, 0, SCREEN_W, SCREEN_H);
+    if (ox || oy) BeginScissorMode(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     for (int i = 0; i < LOGIC_MAX_DROPS; i++) {
         if (!f->drops[i].ativo) continue;
@@ -848,6 +847,6 @@ void desenharFaseLogica(const FaseLogica* f, const Boss* boss, const Player* jog
         if (a > 1.0f) a = 1.0f;
         Color fc = { f->flashCor.r, f->flashCor.g, f->flashCor.b,
                      (unsigned char)(f->flashCor.a * a) };
-        DrawRectangle(0, 0, SCREEN_W, SCREEN_H, fc);
+        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, fc);
     }
 }

@@ -9,6 +9,7 @@
 #include "logic/logic_phase.h"
 #include "audio/audio.h"
 #include "visual/vfx.h"
+#include "screen_config.h"
 #include <stdbool.h>
 #include <math.h>
 #include <ctype.h>
@@ -412,7 +413,7 @@ int main () {
     // Tell the window to use vsync and work on high DPI displays
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
     // Create the game window
-    InitWindow(800, 600, "MindDrop");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "MindDrop");
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
     // Set the resources directory as the working directory
@@ -443,7 +444,6 @@ int main () {
 
     inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
     inicializarAudio();
-    iniciarTrilhaSonora();
     vfxInicializar();
 
     /* Carregar histórico de partidas ao iniciar (arquivo opcional). */
@@ -518,6 +518,7 @@ int main () {
                 if (modoAtual == MODO_LOGICO) {
                     inicializarFaseLogica(&faseLogica, &boss, &jogador);
                 }
+                iniciarTrilhaSonora();
                 telaAtual = TELA_JOGO;
             }
         } else if (telaAtual == TELA_HISTORICO) {
@@ -591,6 +592,7 @@ int main () {
                 atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
                 moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
                 verificarColisaoBalasComPlayer(&jogador, balasBoss, MAX_BOSS_BULLETS);
+                verificarColisaoAtaquesEspeciaisComPlayer(&boss, &jogador);
                 atualizarFeedbackDanoPlayer(&jogador, deltaTime);
                 atualizarBoostDanoPlayer(&jogador, deltaTime);
                 atualizarBoostVelocidadePlayer(&jogador, deltaTime);
@@ -615,6 +617,7 @@ int main () {
                 atualizarTiroBoss(&boss, balasBoss, MAX_BOSS_BULLETS, &jogador, deltaTime);
                 moverBalasBoss(balasBoss, MAX_BOSS_BULLETS, deltaTime);
                 verificarColisaoBalasComPlayer(&jogador, balasBoss, MAX_BOSS_BULLETS);
+                verificarColisaoAtaquesEspeciaisComPlayer(&boss, &jogador);
                 if (jogador.hp <= 0) {
                     solicitarFimDeJogo(&jogoEncerrado, &motivoFimJogo, FIM_JOGO_PLAYER_DERROTADO);
                 }
@@ -652,6 +655,7 @@ int main () {
                     salvarRelatorioHistorico(motivoFimJogo, &stats);
                     relatorioSalvo = true;
                 }
+                pararTrilhaSonora();
                 telaAtual = TELA_RELATORIO_FINAL;
             }
         } else if (telaAtual == TELA_RELATORIO_FINAL) {
@@ -679,6 +683,7 @@ int main () {
                 drawPlayer(&jogador);
                 drawBalas(bala, MAX_BULLETS);
                 drawBoss(&boss);
+                drawAtaquesEspeciaisBoss(&boss);
                 drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
                 vfxDesenhar(vfxObter());
                 desenharFaseLogica(&faseLogica, &boss, &jogador);
@@ -690,6 +695,7 @@ int main () {
                 drawPlayer(&jogador);
                 drawBalas(bala, MAX_BULLETS);
                 drawBoss(&boss);
+                drawAtaquesEspeciaisBoss(&boss);
                 drawBalasBoss(balasBoss, MAX_BOSS_BULLETS);
                 vfxDesenhar(vfxObter());
                 drawBarraVidaBoss(&boss);
