@@ -8,6 +8,7 @@ void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, Boss
     jogador->velocidade = PLAYER_BASE_SPEED;
     jogador->hp = PLAYER_MAX_HP;
     jogador->tempoPiscandoDano = 0.0f;
+    jogador->tempoInvencivel = 0.0f;
     jogador->danoTiro = PLAYER_BASE_BULLET_DAMAGE;
     jogador->tempoBoostDano = 0.0f;
     jogador->tempoBoostVelocidade = 0.0f;

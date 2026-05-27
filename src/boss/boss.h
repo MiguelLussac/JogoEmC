@@ -9,6 +9,14 @@
 #define BOSS_BULLET_SPEED 190.0f
 #define BOSS_DAMAGE_FLASH_DURATION 0.35f
 
+typedef enum {
+    BOSS_ATAQUE_PADRAO = 0,
+    BOSS_ATAQUE_LASER,
+    BOSS_ATAQUE_ONDAS,
+    BOSS_ATAQUE_PAREDE,
+    BOSS_ATAQUE_ESPIRAL
+} BossAtaqueId;
+
 // Estado completo do boss: posicao, vida, movimento, tiro e feedback visual.
 typedef struct {
     float posicaoX;
@@ -32,6 +40,13 @@ typedef struct {
     float direcaoDash;
     int tirosRajadaRestantes;
     float tempoEntreRajadas;
+    BossAtaqueId ataqueAtivo;
+    float tempoAtaqueEspecial;
+    int passoAtaqueEspecial;
+    float laserX;
+    float laserVelX;
+    float laserLargura;
+    float anguloEspiral;
 } Boss;
 
 // Projetil do boss com velocidade vetorial para perseguir a direcao calculada.
@@ -55,5 +70,7 @@ void inicializarBalasBoss(BossBullet bullets[], int count);
 void atualizarTiroBoss(Boss* boss, BossBullet bullets[], int count, const Player* player, float deltaTime);
 void moverBalasBoss(BossBullet bullets[], int count, float deltaTime);
 void drawBalasBoss(BossBullet bullets[], int count);
+void drawAtaquesEspeciaisBoss(const Boss* boss);
+void verificarColisaoAtaquesEspeciaisComPlayer(const Boss* boss, Player* player);
 
 #endif

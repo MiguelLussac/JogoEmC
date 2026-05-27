@@ -11,6 +11,7 @@
 #define PLAYER_HEALTH_BAR_X 20
 #define PLAYER_HEALTH_BAR_Y 560
 #define PLAYER_DAMAGE_FLASH_DURATION 0.35f
+#define PLAYER_INVINCIBILITY_DURATION 1.0f
 #define PLAYER_BASE_SPEED 300.0f
 #define PLAYER_BASE_BULLET_DAMAGE 1
 #define PLAYER_DAMAGE_BOOST_MULTIPLIER 2
@@ -26,6 +27,7 @@ typedef struct {
     float velocidade;
     int hp;
     float tempoPiscandoDano;
+    float tempoInvencivel;
     int danoTiro;
     float tempoBoostDano;
     float tempoBoostVelocidade;
@@ -36,6 +38,7 @@ void moverEsquerdaDireita(Player* player, float deltaTime);
 void drawPlayer(Player* player);
 void drawPlayerHP(const Player* player);
 void aplicarDanoPlayer(Player* player, int dano);
+bool jogadorEstaInvencivel(const Player* player);
 void atualizarFeedbackDanoPlayer(Player* player, float deltaTime);
 void aplicarBoostDanoPlayer(Player* player);
 void atualizarBoostDanoPlayer(Player* player, float deltaTime);

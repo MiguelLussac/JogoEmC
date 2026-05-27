@@ -4,10 +4,19 @@
 #include <stdio.h>
 
 #define TRILHA_VOLUME 0.45f
+#define SFX_TIRO_VOLUME 0.55f
 
 static Music trilha;
+static Sound sfxTiro;
 static bool audioPronto = false;
 static bool trilhaCarregada = false;
+static bool sfxTiroCarregado = false;
+static bool trilhaPermitida = false;
+
+static void sinalizarAudioHost(const char* evento) {
+    printf("[MINDDROP] %s\n", evento);
+    fflush(stdout);
+}
 
 static bool carregarTrilhaDeArquivo(const char* caminho) {
     if (caminho == NULL || !FileExists(caminho)) return false;
@@ -43,19 +52,45 @@ static bool tentarCarregarTrilha(void) {
     return false;
 }
 
+static bool tentarCarregarSfxTiro(void) {
+    const char* caminhos[] = {
+        "musica/freesound_community-shoot-5-102360.mp3",
+        "resources/musica/freesound_community-shoot-5-102360.mp3",
+        "../musica/freesound_community-shoot-5-102360.mp3"
+    };
+
+    for (int i = 0; i < 3; i++) {
+        if (!FileExists(caminhos[i])) continue;
+        sfxTiro = LoadSound(caminhos[i]);
+        SetSoundVolume(sfxTiro, SFX_TIRO_VOLUME);
+        sfxTiroCarregado = true;
+        return true;
+    }
+
+    return false;
+}
+
 void inicializarAudio(void) {
     InitAudioDevice();
     audioPronto = IsAudioDeviceReady();
     if (!audioPronto) return;
 
     trilhaCarregada = tentarCarregarTrilha();
+    sfxTiroCarregado = tentarCarregarSfxTiro();
 }
 
 void encerrarAudio(void) {
+    pararTrilhaSonora();
+
     if (trilhaCarregada) {
         StopMusicStream(trilha);
         UnloadMusicStream(trilha);
         trilhaCarregada = false;
+    }
+
+    if (sfxTiroCarregado) {
+        UnloadSound(sfxTiro);
+        sfxTiroCarregado = false;
     }
 
     if (audioPronto) {
@@ -65,7 +100,7 @@ void encerrarAudio(void) {
 }
 
 void atualizarAudio(void) {
-    if (!audioPronto || !trilhaCarregada) return;
+    if (!trilhaPermitida || !audioPronto || !trilhaCarregada) return;
 
     UpdateMusicStream(trilha);
 
@@ -75,14 +110,27 @@ void atualizarAudio(void) {
 }
 
 void iniciarTrilhaSonora(void) {
-    if (!audioPronto || !trilhaCarregada) return;
-    if (!IsMusicStreamPlaying(trilha)) {
+    trilhaPermitida = true;
+    sinalizarAudioHost("MUSIC:START");
+
+    if (audioPronto && trilhaCarregada && !IsMusicStreamPlaying(trilha)) {
         PlayMusicStream(trilha);
     }
 }
 
+void pararTrilhaSonora(void) {
+    if (!trilhaPermitida) return;
+
+    trilhaPermitida = false;
+    sinalizarAudioHost("MUSIC:STOP");
+
+    if (audioPronto && trilhaCarregada && IsMusicStreamPlaying(trilha)) {
+        StopMusicStream(trilha);
+    }
+}
+
 void pausarTrilhaSonora(bool pausar) {
-    if (!audioPronto || !trilhaCarregada) return;
+    if (!audioPronto || !trilhaCarregada || !trilhaPermitida) return;
 
     if (pausar) {
         PauseMusicStream(trilha);
@@ -92,5 +140,13 @@ void pausarTrilhaSonora(bool pausar) {
 }
 
 bool trilhaSonoraAtiva(void) {
-    return audioPronto && trilhaCarregada && IsMusicStreamPlaying(trilha);
+    return trilhaPermitida && audioPronto && trilhaCarregada && IsMusicStreamPlaying(trilha);
+}
+
+void tocarSfxTiro(void) {
+    sinalizarAudioHost("SFX:SHOOT");
+
+    if (audioPronto && sfxTiroCarregado) {
+        PlaySound(sfxTiro);
+    }
 }

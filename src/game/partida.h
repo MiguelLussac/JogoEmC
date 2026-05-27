@@ -7,7 +7,7 @@
 #include "questions.h"
 
 #define MAX_BULLETS 10
-#define MAX_BOSS_BULLETS 20
+#define MAX_BOSS_BULLETS 96
 
 typedef enum {
     FIM_JOGO_NENHUM,
