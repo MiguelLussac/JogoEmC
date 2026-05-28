@@ -89,6 +89,28 @@ MindDrop/
 
 Todas as histórias de usuário de `UH1` a `UH10` foram incluídas e associadas a um integrante.
 
+## 👯 Programação em Par (Pair Programming)
+
+Durante a Entrega 03, a equipe experimentou a prática de **programação em par** de
+forma colaborativa: as duplas trabalharam lado a lado nas funcionalidades, revezando
+os papéis de *driver* (quem digita o código) e *navigator* (quem revisa e orienta).
+
+| Dupla | Funcionalidades executadas em par | Como foi |
+|-------|-----------------------------------|----------|
+| **Luan Ventura & Pedro Augusto** | [UH4] Boss/Vilão Principal · [UH5] Sistema de Dano ao Boss · [UH10] Sistema de Tempo e Vitória | _(descrever: quem pilotou o quê e o que aprenderam)_ |
+| **Allan Max & Boniek Araujo** | [UH1] Movimentação · [UH2] Disparo de Projéteis · [UH7] Regras de Tentativa · [UH8] Drop de Atributos | _(idem)_ |
+| **Caio César & Miguel Victor** | [UH3] Sistema de Vidas · [UH6] Sistema de Adivinhação · [UH9] Aplicação de Buffs | _(idem)_ |## 👯 Programação em Par (Pair Programming)
+
+Durante a Entrega 03, a equipe experimentou a prática de **programação em par** de
+forma colaborativa: as duplas trabalharam lado a lado nas funcionalidades, revezando
+os papéis de *driver* (quem digita o código) e *navigator* (quem revisa e orienta).
+
+| Dupla | Funcionalidades executadas em par | Como foi |
+|-------|-----------------------------------|----------|
+| **Luan Ventura & Pedro Augusto** | [UH4] Boss/Vilão Principal · [UH5] Sistema de Dano ao Boss · [UH10] Sistema de Tempo e Vitória | _(descrever: quem pilotou o quê e o que aprenderam)_ |
+| **Allan Max & Boniek Araujo** | [UH1] Movimentação · [UH2] Disparo de Projéteis · [UH7] Regras de Tentativa · [UH8] Drop de Atributos | _(idem)_ |
+| **Caio César & Miguel Victor** | [UH3] Sistema de Vidas · [UH6] Sistema de Adivinhação · [UH9] Aplicação de Buffs | _(idem)_ |
+
 <details>
   <summary>[UH1] Movimentação (Base essencial)</summary>
   <img width="1535" height="1024" alt="image" src="https://github.com/user-attachments/assets/44784067-98fd-4562-bc89-a39a38212d9a" />
