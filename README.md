@@ -89,17 +89,19 @@ MindDrop/
 
 Todas as histórias de usuário de `UH1` a `UH10` foram incluídas e associadas a um integrante.
 
-## 👯 Programação em Par (Pair Programming)
+## Programação em Par (Pair Programming)
 
-Durante a Entrega 03, a equipe experimentou a prática de **programação em par** de
-forma colaborativa: as duplas trabalharam lado a lado nas funcionalidades, revezando
-os papéis de *driver* (quem digita o código) e *navigator* (quem revisa e orienta).
+Durante a Entrega 03, a equipe experimentou a programação em par: em vez de cada um
+codar sozinho, a gente trabalhou em duplas nas funcionalidades, com uma pessoa
+escrevendo o código (o *driver*) e a outra acompanhando, revisando e dando ideia
+(o *navigator*) — revezando esses papéis ao longo da sprint.
 
-| Dupla | Funcionalidades executadas em par | Como foi |
-|-------|-----------------------------------|----------|
-| **Luan Ventura & Pedro Augusto** | [UH4] Boss/Vilão Principal · [UH5] Sistema de Dano ao Boss · [UH10] Sistema de Tempo e Vitória | _(descrever: quem pilotou o quê e o que aprenderam)_ |
-| **Allan Max & Boniek Araujo** | [UH1] Movimentação · [UH2] Disparo de Projéteis · [UH7] Regras de Tentativa · [UH8] Drop de Atributos | _(idem)_ |
-| **Caio César & Miguel Victor** | [UH3] Sistema de Vidas · [UH6] Sistema de Adivinhação · [UH9] Aplicação de Buffs | _(idem)_ |
+| Dupla | Funcionalidades feitas em par | Como foi |
+|-------|-------------------------------|----------|
+| **Luan Ventura & Pedro Augusto** | [UH4] Boss/Vilão Principal · [UH5] Sistema de Dano ao Boss · [UH10] Sistema de Tempo e Vitória | O Luan ficou mais no teclado montando o boss e a parte de tirar vida dele quando levava tiro, e o Pedro foi acompanhando e cuidando do tempo de partida e da tela de vitória. A maior briga foi acertar a hitbox do boss (às vezes o tiro passava direto) e fazer o cronômetro parar certinho quando o boss morria. A gente aprendeu a guardar a vida e as fases do boss numa struct e a checar colisão direitinho. |
+| **Allan Max & Boniek Araujo** | [UH1] Movimentação · [UH2] Disparo de Projéteis · [UH7] Regras de Tentativa · [UH8] Drop de Atributos | O Allan começou pilotando a movimentação do personagem e as regras de quantas tentativas o jogador tem, e o Boniek pegou o disparo dos tiros e o drop de atributos. A parte chata foi controlar vários tiros na tela ao mesmo tempo sem o jogo travar. Aprendemos a tratar a entrada do teclado, segurar o player dentro da tela e usar vetor pra guardar os projéteis. |
+| **Caio César & Miguel Victor** | [UH3] Sistema de Vidas · [UH6] Sistema de Adivinhação · [UH9] Aplicação de Buffs | O Miguel ficou mais com o sistema de adivinhação (sortear o número secreto e dar a dica de "maior" ou "menor"), e o Caio com as vidas e os buffs que vêm dos drops. O que mais confundiu no começo foi ligar o acerto do palpite com o efeito do buff e com a vida do jogador. Aprendemos a fazer o loop do palpite, comparar com o número sorteado e aplicar o efeito certo dependendo do resultado. |
+
 
 <details>
   <summary>[UH1] Movimentação (Base essencial)</summary>
