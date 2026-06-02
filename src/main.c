@@ -57,7 +57,35 @@ static double g_media_score = 0.0;
 static double g_desvio_score = 0.0;
 static HistoricoPartida g_melhor_partida = {0};
 static HistoricoPartida g_pior_partida = {0};
+static RelatorioAnalitico g_relatorio_analitico = {0};
 static int g_has_analise = 0; /* 1 se houver dados válidos */
+
+static void recarregarAnaliseHistorico(void) {
+    if (g_historico) {
+        liberarHistorico(g_historico);
+        g_historico = NULL;
+        g_historico_count = 0;
+    }
+
+    g_relatorio_analitico = (RelatorioAnalitico){0};
+    g_media_score = 0.0;
+    g_desvio_score = 0.0;
+    g_melhor_partida = (HistoricoPartida){0};
+    g_pior_partida = (HistoricoPartida){0};
+    g_has_analise = 0;
+
+    HistoricoErro err = carregarHistorico(CAMINHO_HISTORICO, &g_historico, &g_historico_count);
+    g_historico_err = (int)err;
+    if (err == HIST_OK && validarDadosHistorico(g_historico, g_historico_count) == HIST_OK) {
+        g_media_score = calcularMediaScore(g_historico, g_historico_count);
+        g_desvio_score = calcularDesvioPadraoScore(g_historico, g_historico_count);
+        int found = 0;
+        g_melhor_partida = melhorPartida(g_historico, g_historico_count, &found);
+        g_pior_partida = piorPartida(g_historico, g_historico_count, &found);
+        g_relatorio_analitico = gerarRelatorioAnalitico(g_historico, g_historico_count);
+        g_has_analise = g_relatorio_analitico.quantidadePartidas > 0;
+    }
+}
 
 // Ponto unico para encerrar a partida.
 static void solicitarFimDeJogo(bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, MotivoFimJogo motivo) {
@@ -555,29 +583,7 @@ int main () {
     vfxInicializar();
 
     /* Carregar histórico de partidas ao iniciar (arquivo opcional). */
-    {
-        const char *caminhoHistorico = "resources/historico.txt";
-        HistoricoErro err = carregarHistorico(caminhoHistorico, &g_historico, &g_historico_count);
-        g_historico_err = (int)err;
-        if (err == HIST_OK) {
-            if (validarDadosHistorico(g_historico, g_historico_count) == HIST_OK) {
-                g_media_score = calcularMediaScore(g_historico, g_historico_count);
-                g_desvio_score = calcularDesvioPadraoScore(g_historico, g_historico_count);
-                int found = 0;
-                g_melhor_partida = melhorPartida(g_historico, g_historico_count, &found);
-                g_pior_partida = piorPartida(g_historico, g_historico_count, &found);
-                g_has_analise = 1;
-            } else {
-                liberarHistorico(g_historico);
-                g_historico = NULL;
-                g_historico_count = 0;
-                g_has_analise = 0;
-            }
-        } else {
-            /* Não encontrou ou arquivo inválido — segue sem análise */
-            g_has_analise = 0;
-        }
-    }
+    recarregarAnaliseHistorico();
 
     // Loop Principal
     while (!WindowShouldClose()) {
@@ -606,6 +612,7 @@ int main () {
                     }
                     telaAtual = TELA_HISTORICO;
                 } else if (opcaoMenu == 2) {
+                    recarregarAnaliseHistorico();
                     telaAtual = TELA_RELATORIO_ANALITICO;
                 }
             }
@@ -789,7 +796,7 @@ int main () {
             drawTelaHistorico(registrosHistorico, totalHistorico, scrollHistorico, historicoSelecionado, historicoExpandido, tempo);
         } else if (telaAtual == TELA_RELATORIO_ANALITICO) {
             drawFundoArcadeAnimado(tempo);
-            renderizarRelatorioAnalitico(NULL);
+            renderizarRelatorioAnalitico(&g_relatorio_analitico);
         } else {
             drawFundoArcadeAnimado(tempo);
 

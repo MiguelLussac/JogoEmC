@@ -143,7 +143,7 @@ static void processarPalpite(DesafioPergunta* desafio, Player* jogador) {
     desafio->tentativasRestantes--;
     desafio->dica = textoDica(desafio->questao.status);
 
-    // Ao zerar tentativas, oferece uma ultima chance que custa 1 vida.
+    // Ao zerar tentativas, oferece 2 tentativas extras que custam 1 vida.
     if (desafio->tentativasRestantes <= 0) {
         if (!desafio->usouUltimaChance && jogador->hp > 0) {
             desafio->estado = DESAFIO_CONFIRMAR_ULTIMA;
@@ -234,10 +234,10 @@ static void drawTelaConfirmacao(const DesafioPergunta* desafio, const Player* jo
     drawTextoCentralizado(mensagem, (int)modal.y + 72, 18, YELLOW);
 
     if (jogador->hp > 0) {
-        DrawText("Quer gastar", (int)modal.x + 51, (int)modal.y + 108, 13, WHITE);
+        DrawText("Sacrificar", (int)modal.x + 51, (int)modal.y + 108, 13, WHITE);
         DrawText("1 vida", (int)modal.x + 150, (int)modal.y + 108, 13, RED);
-        DrawText("para uma ultima", (int)modal.x + 207, (int)modal.y + 108, 13, WHITE);
-        drawTextoCentralizado("tentativa?", (int)modal.y + 126, 13, WHITE);
+        DrawText("para receber", (int)modal.x + 207, (int)modal.y + 108, 13, WHITE);
+        drawTextoCentralizado("mais 2 tentativas?", (int)modal.y + 126, 13, WHITE);
     } else {
         drawTextoCentralizado("Sem vidas para tentar de novo.", (int)modal.y + 112, 13, WHITE);
     }
@@ -359,13 +359,13 @@ bool atualizarDesafio(DesafioPergunta* desafio, Player* jogador, float deltaTime
             break;
 
         case DESAFIO_CONFIRMAR_ULTIMA:
-            // SIM/Enter/S gastam 1 vida e liberam exatamente mais um chute.
+            // SIM/Enter/S gastam 1 vida e liberam exatamente mais dois chutes.
             if (jogador->hp > 0 && (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_ENTER) || botaoClicado(botaoSim))) {
                 aplicarDanoPlayer(jogador, 1);
                 desafio->estado = DESAFIO_CHUTANDO;
-                desafio->tentativasRestantes = 1;
+                desafio->tentativasRestantes = 2;
                 desafio->usouUltimaChance = true;
-                desafio->dica = "Ultima tentativa!";
+                desafio->dica = "Mais 2 tentativas!";
                 limparEntradaDesafio(desafio);
             } else if (IsKeyPressed(KEY_N) || botaoClicado(botaoNao) || jogador->hp <= 0) {
                 finalizarDesafio(desafio, false);

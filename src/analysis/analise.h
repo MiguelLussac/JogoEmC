@@ -17,6 +17,14 @@ typedef struct HistoricoPartida {
     int acertos;      /* número de acertos */
     int tentativas;   /* número de tentativas realizadas */
     double tempo;     /* tempo da partida em segundos */
+    int vitoria;      /* 1 se o boss foi derrotado */
+    int modoLogico;   /* 1 para modo LOGICO, 0 para ARCADE */
+    int tiros;        /* tiros disparados no modo arcade */
+    double precisao;  /* precisao em percentual */
+    int buffs;        /* buffs coletados/aplicados */
+    int desafiosVencidos;
+    int desafiosTotal;
+    int comboMax;
 } HistoricoPartida;
 
 /* Relatório analítico completo com todas as estatísticas e heurísticas. */
@@ -30,6 +38,10 @@ typedef struct RelatorioAnalitico {
     double piorTempo;
     double mediaAcertos;
     double taxaSucessoMedia;
+    double taxaVitoria;
+    double precisaoMedia;
+    double tempoMedio;
+    double buffsMedios;
     char heuristicas[4][256];  /* até 4 heurísticas textuais */
     int quantidadeHeuristicas;
 } RelatorioAnalitico;

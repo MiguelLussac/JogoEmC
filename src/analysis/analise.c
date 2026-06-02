@@ -24,8 +24,79 @@ static char *trim(char *s) {
     return s;
 }
 
+static int calcularScoreHistorico(const HistoricoPartida *h) {
+    int score = h->vitoria ? 1000 : 0;
+    score += h->acertos * (h->modoLogico ? 80 : 20);
+    score += h->desafiosVencidos * 80;
+    score += h->comboMax * 30;
+    score += h->buffs * 60;
+    score -= (int)(h->tempo * 2.0);
+    return score > 0 ? score : 0;
+}
+
+static int parse_line_relatorio(const char *line, HistoricoPartida *out) {
+    char dataHora[32];
+    char modo[16];
+    char motivo[64];
+    double tempo = 0.0;
+    int tiros = 0;
+    int acertosBoss = 0;
+    double precisao = 0.0;
+    int desafiosVencidos = 0;
+    int desafiosTotal = 0;
+    double taxaDesafios = 0.0;
+    int logicAcertos = 0;
+    int logicTotal = 0;
+    double logicTaxa = 0.0;
+    int logicComboMax = 0;
+    int logicPowerUps = 0;
+    int logicBuffs = 0;
+
+    memset(out, 0, sizeof(*out));
+
+    if (sscanf(line,
+               "[%31[^]]] [%15[^]]] %63[^|]| tempo: %lfs | expressoes: %d/%d (%lf%%) | combo max: %d | powerups: %d | buffs: %d",
+               dataHora, modo, motivo, &tempo, &logicAcertos, &logicTotal, &logicTaxa,
+               &logicComboMax, &logicPowerUps, &logicBuffs) == 10) {
+        out->tempo = tempo;
+        out->acertos = logicAcertos;
+        out->tentativas = logicTotal;
+        out->vitoria = strstr(motivo, "Boss derrotado") != NULL;
+        out->modoLogico = 1;
+        out->precisao = logicTaxa;
+        out->buffs = logicBuffs;
+        out->desafiosVencidos = logicAcertos;
+        out->desafiosTotal = logicTotal;
+        out->comboMax = logicComboMax;
+        out->score = calcularScoreHistorico(out);
+        return 1;
+    }
+
+    if (sscanf(line,
+               "[%31[^]]] [%15[^]]] %63[^|]| tempo: %lfs | tiros: %d | acertos boss: %d | precisao: %lf%% | desafios: %d/%d (%lf%%)",
+               dataHora, modo, motivo, &tempo, &tiros, &acertosBoss, &precisao,
+               &desafiosVencidos, &desafiosTotal, &taxaDesafios) == 10) {
+        out->tempo = tempo;
+        out->acertos = acertosBoss;
+        out->tentativas = tiros;
+        out->vitoria = strstr(motivo, "Boss derrotado") != NULL;
+        out->modoLogico = 0;
+        out->tiros = tiros;
+        out->precisao = precisao;
+        out->buffs = desafiosVencidos;
+        out->desafiosVencidos = desafiosVencidos;
+        out->desafiosTotal = desafiosTotal;
+        out->score = calcularScoreHistorico(out);
+        return 1;
+    }
+
+    return 0;
+}
+
 /* Função auxiliar para parse de linha do arquivo */
 static int parse_line(const char *line, HistoricoPartida *out) {
+    if (parse_line_relatorio(line, out)) return 1;
+
     /* aceita separadores espaço, tab ou vírgula */
     char buf[1024];
     strncpy(buf, line, sizeof(buf)-1);
@@ -63,6 +134,8 @@ static int parse_line(const char *line, HistoricoPartida *out) {
     out->acertos = (int)v_acertos;
     out->tentativas = (int)v_tent;
     out->tempo = v_tempo;
+    out->vitoria = v_score > 0;
+    out->precisao = v_tent > 0 ? ((double)v_acertos * 100.0) / (double)v_tent : 0.0;
     return 1;
 }
 
@@ -121,8 +194,8 @@ HistoricoErro validarDadosHistorico(const HistoricoPartida *arr, size_t count) {
     if (!arr) return HIST_ERR_INVALID;
     for (size_t i = 0; i < count; ++i) {
         const HistoricoPartida *h = &arr[i];
-        if (h->tentativas <= 0) return HIST_ERR_INVALID;
-        if (h->acertos < 0 || h->acertos > h->tentativas) return HIST_ERR_INVALID;
+        if (h->tentativas < 0) return HIST_ERR_INVALID;
+        if (h->acertos < 0) return HIST_ERR_INVALID;
         if (h->score < 0) return HIST_ERR_INVALID;
         if (h->tempo < 0.0) return HIST_ERR_INVALID;
     }
@@ -138,20 +211,16 @@ size_t quantidadePartidas(const HistoricoPartida *arr, size_t count) {
 /* Estatísticas básicas (operam sobre o array carregado). */
 double calcularMediaScore(const HistoricoPartida *arr, size_t count) {
     if (!arr || count == 0) return 0.0;
-    double sum = 0.0;
-    for (size_t i = 0; i < count; ++i) sum += (double)arr[i].score;
-    return sum / (double)count;
+    return (double)somaRecursiva(arr, 0, count) / (double)count;
 }
 
 /* Cálculo do desvio padrão amostral */
 double calcularDesvioPadraoScore(const HistoricoPartida *arr, size_t count) {
     if (!arr || count < 2) return 0.0;
     double mean = calcularMediaScore(arr, count);
-    double s = 0.0;
-    for (size_t i = 0; i < count; ++i) {
-        double d = (double)arr[i].score - mean;
-        s += d * d;
-    }
+    double soma = (double)somaRecursiva(arr, 0, count);
+    double somaQuadrados = somaQuadradosRecursiva(arr, 0, count);
+    double s = somaQuadrados - 2.0 * mean * soma + (double)count * mean * mean;
     return sqrt(s / (double)(count - 1)); /* amostral */
 }
 
@@ -194,7 +263,7 @@ int somaRecursiva(const HistoricoPartida *arr, size_t idx, size_t count) {
 /* Caso recursivo: compara arr[idx].score com o mínimo dos restantes */
 int minimoRecursivo(const HistoricoPartida *arr, size_t idx, size_t count) {
     if (!arr || count == 0) return 0;
-    if (idx >= count - 1) return arr[0].score;
+    if (idx >= count - 1) return arr[idx].score;
     int proxMin = minimoRecursivo(arr, idx + 1, count);
     return arr[idx].score < proxMin ? arr[idx].score : proxMin;
 }
@@ -204,7 +273,7 @@ int minimoRecursivo(const HistoricoPartida *arr, size_t idx, size_t count) {
 /* Caso recursivo: compara arr[idx].score com o máximo dos restantes */
 int maximoRecursivo(const HistoricoPartida *arr, size_t idx, size_t count) {
     if (!arr || count == 0) return 0;
-    if (idx >= count - 1) return arr[0].score;
+    if (idx >= count - 1) return arr[idx].score;
     int proxMax = maximoRecursivo(arr, idx + 1, count);
     return arr[idx].score > proxMax ? arr[idx].score : proxMax;
 }
@@ -218,15 +287,35 @@ double somaQuadradosRecursiva(const HistoricoPartida *arr, size_t idx, size_t co
     return score * score + somaQuadradosRecursiva(arr, idx + 1, count);
 }
 
+static int validarFuncoesRecursivas(const HistoricoPartida *arr, size_t count) {
+    if (!arr || count == 0) return 0;
+
+    int soma = 0;
+    int min = arr[0].score;
+    int max = arr[0].score;
+    double somaQuadrados = 0.0;
+
+    for (size_t i = 0; i < count; ++i) {
+        soma += arr[i].score;
+        if (arr[i].score < min) min = arr[i].score;
+        if (arr[i].score > max) max = arr[i].score;
+        somaQuadrados += (double)arr[i].score * (double)arr[i].score;
+    }
+
+    return somaRecursiva(arr, 0, count) == soma &&
+           minimoRecursivo(arr, 0, count) == min &&
+           maximoRecursivo(arr, 0, count) == max &&
+           fabs(somaQuadradosRecursiva(arr, 0, count) - somaQuadrados) < 0.001;
+}
+
 /* ===== GERAÇÃO DE HEURÍSTICAS ESTRATÉGICAS ===== */
 
 static double calcularTaxaAcertosMedia(const HistoricoPartida *arr, size_t count) {
     if (!arr || count == 0) return 0.0;
     double somaAcertos = 0.0;
     for (size_t i = 0; i < count; ++i) {
-        if (arr[i].tentativas > 0) {
-            somaAcertos += (double)arr[i].acertos / (double)arr[i].tentativas;
-        }
+        if (arr[i].precisao > 0.0) somaAcertos += arr[i].precisao / 100.0;
+        else if (arr[i].tentativas > 0) somaAcertos += (double)arr[i].acertos / (double)arr[i].tentativas;
     }
     return somaAcertos / (double)count;
 }
@@ -238,56 +327,61 @@ void gerarHeuristicas(const HistoricoPartida *arr, size_t count,
     
     *quantidadeHeuristicas = 0;
     
-    /* Heurística 1: Análise da taxa de sucesso */
-    double taxaAcertos = calcularTaxaAcertosMedia(arr, count);
-    if (taxaAcertos > 0.8) {
+    if (relatorio->precisaoMedia > 0.0 && relatorio->precisaoMedia < 35.0 && *quantidadeHeuristicas < 4) {
         snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                 "Excelente taxa de acertos! Mantenha a consistência.");
+                 "Precisao %.1f%%: atire com boss alinhado.",
+                 relatorio->precisaoMedia);
         (*quantidadeHeuristicas)++;
-    } else if (taxaAcertos > 0.6) {
+    }
+
+    if (relatorio->taxaVitoria < 45.0 && *quantidadeHeuristicas < 4) {
         snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                 "Taxa de acertos acima da média. Concentre em melhorar timing.");
+                 "Vitoria %.1f%%: priorize buffs defensivos.",
+                 relatorio->taxaVitoria);
         (*quantidadeHeuristicas)++;
-    } else if (taxaAcertos > 0.4) {
+    }
+
+    if (relatorio->tempoMedio > 0.0 && relatorio->tempoMedio < 45.0 && *quantidadeHeuristicas < 4) {
         snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                 "Taxa de acertos moderada. Pratique padrões de movimentação.");
+                 "Tempo %.1fs: esquive antes de atacar.",
+                 relatorio->tempoMedio);
         (*quantidadeHeuristicas)++;
-    } else {
+    }
+
+    if (relatorio->buffsMedios < 1.0 && *quantidadeHeuristicas < 4) {
         snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                 "Taxa de acertos baixa. Revise estratégia de posicionamento.");
+                 "Buffs %.1f: colete mais estrelas.",
+                 relatorio->buffsMedios);
+        (*quantidadeHeuristicas)++;
+    }
+
+    if (relatorio->desvioPadrao > relatorio->mediaScore * 0.5 && *quantidadeHeuristicas < 4) {
+        snprintf(heuristicas[*quantidadeHeuristicas], 256,
+                 "Score oscilando: repita melhores rotas.");
+        (*quantidadeHeuristicas)++;
+    } else if (relatorio->mediaScore > 0.0 && relatorio->desvioPadrao < relatorio->mediaScore * 0.2 && *quantidadeHeuristicas < 4) {
+        snprintf(heuristicas[*quantidadeHeuristicas], 256,
+                 "Score regular: busque mais precisao.");
         (*quantidadeHeuristicas)++;
     }
     
-    /* Heurística 2: Análise de variabilidade */
-    if (relatorio->desvioPadrao > relatorio->mediaScore * 0.5) {
-        snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                 "Alto desvio de desempenho. Procure regularizar execução.");
-        (*quantidadeHeuristicas)++;
-    } else if (relatorio->desvioPadrao < relatorio->mediaScore * 0.2) {
-        snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                 "Excelente regularidade! Desempenho previsível e constante.");
-        (*quantidadeHeuristicas)++;
-    }
-    
-    /* Heurística 3: Análise de progressão */
-    if (count >= 3) {
+    if (count >= 3 && *quantidadeHeuristicas < 4) {
         int ultimaTri = arr[count-1].score;
         int penultima = arr[count > 1 ? count-2 : 0].score;
         if (ultimaTri > penultima && penultima > arr[0].score) {
             snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                     "Tendência crescente detectada. Progresso em dia!");
+                     "Ultimas partidas em melhora.");
             (*quantidadeHeuristicas)++;
         } else if (ultimaTri < penultima && penultima < arr[0].score) {
             snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                     "Desempenho em declínio. Revise estratégia geral.");
+                     "Queda recente: reduza riscos.");
             (*quantidadeHeuristicas)++;
         }
     }
     
-    /* Heurística 4: Recomendação de foco estratégico */
-    if (relatorio->melhorScore - relatorio->piorScore > relatorio->mediaScore) {
+    if (*quantidadeHeuristicas == 0) {
         snprintf(heuristicas[*quantidadeHeuristicas], 256,
-                 "Reproduza condições das melhores partidas para consistência.");
+                 "Dados estaveis: reduza tempo.");
         (*quantidadeHeuristicas)++;
     }
 }
@@ -301,6 +395,7 @@ RelatorioAnalitico gerarRelatorioAnalitico(const HistoricoPartida *arr, size_t c
     
     /* Validação básica */
     if (validarDadosHistorico(arr, count) != HIST_OK) return rel;
+    if (!validarFuncoesRecursivas(arr, count)) return rel;
     
     /* Preencher quantidade de partidas */
     rel.quantidadePartidas = count;
@@ -323,12 +418,24 @@ RelatorioAnalitico gerarRelatorioAnalitico(const HistoricoPartida *arr, size_t c
         if (arr[i].tempo > rel.piorTempo) rel.piorTempo = arr[i].tempo;
     }
     
-    /* Calcular média de acertos */
+    /* Calcular medias agregadas */
     double somaAcertos = 0.0;
+    double somaPrecisao = 0.0;
+    double somaTempo = 0.0;
+    double somaBuffs = 0.0;
+    int vitorias = 0;
     for (size_t i = 0; i < count; ++i) {
         somaAcertos += (double)arr[i].acertos;
+        somaPrecisao += arr[i].precisao;
+        somaTempo += arr[i].tempo;
+        somaBuffs += (double)arr[i].buffs;
+        if (arr[i].vitoria) vitorias++;
     }
     rel.mediaAcertos = somaAcertos / (double)count;
+    rel.precisaoMedia = somaPrecisao / (double)count;
+    rel.tempoMedio = somaTempo / (double)count;
+    rel.buffsMedios = somaBuffs / (double)count;
+    rel.taxaVitoria = ((double)vitorias * 100.0) / (double)count;
     
     /* Calcular taxa de sucesso média */
     rel.taxaSucessoMedia = calcularTaxaAcertosMedia(arr, count);
@@ -488,8 +595,6 @@ static void renderizarRelatorioAnaliticoComDados(const RelatorioAnalitico *relat
 }
 
 void renderizarRelatorioAnalitico(const RelatorioAnalitico *relatorio) {
-    (void)relatorio;
-
     Color corPainel = (Color){12, 12, 20, 220};
     Color corPainel2 = (Color){14, 14, 26, 230};
     Color corBorda = (Color){170, 170, 215, 255};
@@ -510,50 +615,72 @@ void renderizarRelatorioAnalitico(const RelatorioAnalitico *relatorio) {
     DrawText("ESTATISTICAS", (int)painelStats.x + 12, (int)painelStats.y + 10, 22, corTitulo);
     DrawText("HEURISTICAS", (int)painelHeuristicas.x + 12, (int)painelHeuristicas.y + 10, 22, corTitulo);
 
+    if (!relatorio || relatorio->quantidadePartidas == 0) {
+        DrawText("Nenhum historico valido encontrado.", (int)painelStats.x + 20, (int)painelStats.y + 80, 17, corTexto);
+        DrawText("Jogue uma partida para gerar dados.", (int)painelStats.x + 20, (int)painelStats.y + 112, 17, corTexto);
+        DrawText("As heuristicas aparecem apos salvar", (int)painelHeuristicas.x + 20, (int)painelHeuristicas.y + 80, 17, corTexto);
+        DrawText("relatorios reais de desempenho.", (int)painelHeuristicas.x + 20, (int)painelHeuristicas.y + 112, 17, corTexto);
+    } else {
+    char valorPartidas[32];
+    char valorVitDer[32];
+    char valorTaxaVitoria[32];
+    char valorMediaScore[32];
+    char valorMelhorPior[48];
+    char valorPrecisao[32];
+    char valorTempo[32];
+    char valorBuffsDesvio[48];
+
+    int vitorias = (int)((relatorio->taxaVitoria * (double)relatorio->quantidadePartidas) / 100.0 + 0.5);
+    int derrotas = (int)relatorio->quantidadePartidas - vitorias;
+    snprintf(valorPartidas, sizeof(valorPartidas), "%zu", relatorio->quantidadePartidas);
+    snprintf(valorVitDer, sizeof(valorVitDer), "%d / %d", vitorias, derrotas);
+    snprintf(valorTaxaVitoria, sizeof(valorTaxaVitoria), "%.1f%%", relatorio->taxaVitoria);
+    snprintf(valorMediaScore, sizeof(valorMediaScore), "%.1f", relatorio->mediaScore);
+    snprintf(valorMelhorPior, sizeof(valorMelhorPior), "%d / %d", relatorio->melhorScore, relatorio->piorScore);
+    snprintf(valorPrecisao, sizeof(valorPrecisao), "%.1f%%", relatorio->precisaoMedia);
+    snprintf(valorTempo, sizeof(valorTempo), "%.1fs", relatorio->tempoMedio);
+    snprintf(valorBuffsDesvio, sizeof(valorBuffsDesvio), "%.1f / %.1f", relatorio->buffsMedios, relatorio->desvioPadrao);
+
     const char* labelsStats[] = {
         "Partidas analisadas",
-        "Vitorias",
-        "Derrotas",
-        "Media de desempenho",
-        "Melhor resultado",
-        "Pior resultado",
-        "Desvio estatistico"
+        "Vitorias / Derrotas",
+        "Taxa de vitoria",
+        "Media de score",
+        "Melhor / Pior",
+        "Precisao media",
+        "Tempo medio",
+        "Buffs / Desvio"
     };
     const char* valoresStats[] = {
-        "--",
-        "--",
-        "--",
-        "--%",
-        "--",
-        "--",
-        "--"
+        valorPartidas,
+        valorVitDer,
+        valorTaxaVitoria,
+        valorMediaScore,
+        valorMelhorPior,
+        valorPrecisao,
+        valorTempo,
+        valorBuffsDesvio
     };
 
     int y = (int)painelStats.y + 52;
-    for (int i = 0; i < 7; i++) {
-        Rectangle linha = {painelStats.x + 12, (float)y, painelStats.width - 24, 38};
+    for (int i = 0; i < 8; i++) {
+        Rectangle linha = {painelStats.x + 12, (float)y, painelStats.width - 24, 34};
         DrawRectangleRec(linha, (Color){20, 20, 34, 220});
         DrawRectangleLinesEx(linha, 1.5f, (Color){110, 110, 145, 255});
-        DrawText(labelsStats[i], (int)linha.x + 10, (int)linha.y + 7, 16, corTexto);
-        DrawText(valoresStats[i], (int)(linha.x + linha.width - MeasureText(valoresStats[i], 18) - 12), (int)linha.y + 6, 18, corDestaque);
-        y += 46;
+        DrawText(labelsStats[i], (int)linha.x + 10, (int)linha.y + 7, 15, corTexto);
+        DrawText(valoresStats[i], (int)(linha.x + linha.width - MeasureText(valoresStats[i], 17) - 12), (int)linha.y + 6, 17, corDestaque);
+        y += 40;
     }
 
-    const char* heuristicas[] = {
-        "Desempenho defensivo: aguardando dados reais.",
-        "Eficiencia com buffs: espaco preparado para analise.",
-        "Padroes de derrota: sugestoes futuras aparecerao aqui.",
-        "Recomendacao: ajuste estrategia conforme o historico."
-    };
-
     y = (int)painelHeuristicas.y + 52;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < relatorio->quantidadeHeuristicas && i < 4; i++) {
         Rectangle item = {painelHeuristicas.x + 12, (float)y, painelHeuristicas.width - 24, 58};
         DrawRectangleRec(item, (Color){20, 20, 34, 220});
         DrawRectangleLinesEx(item, 1.5f, (Color){110, 110, 145, 255});
         DrawText(TextFormat("%02d", i + 1), (int)item.x + 10, (int)item.y + 9, 18, corDestaque);
-        DrawText(heuristicas[i], (int)item.x + 48, (int)item.y + 12, 15, corTexto);
+        DrawText(relatorio->heuristicas[i], (int)item.x + 48, (int)item.y + 12, 15, corTexto);
         y += 68;
+    }
     }
 
     Rectangle botaoVoltar = {40, 536, 150, 36};
