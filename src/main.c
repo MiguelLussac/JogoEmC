@@ -44,6 +44,7 @@ typedef struct {
     int logicComboMax;
     int logicPowerUps;
     int logicBuffs;
+    int arcadeBuffs;
     char linhaOriginal[TAMANHO_LINHA_HISTORICO];
     bool valido;
     bool modoLogico;
@@ -158,9 +159,10 @@ static HistoricoRegistro parseLinhaHistorico(const char* linha) {
         return registro;
     }
 
+    registro.arcadeBuffs = 0;
     int lidosArcade = sscanf(
         linha,
-        "[%31[^]]] [%15[^]]] %47[^|]| tempo: %fs | tiros: %d | acertos boss: %d | precisao: %f%% | desafios: %d/%d (%f%%)",
+        "[%31[^]]] [%15[^]]] %47[^|]| tempo: %fs | tiros: %d | acertos boss: %d | precisao: %f%% | desafios: %d/%d (%f%%) | buffs: %d",
         registro.dataHora,
         registro.modo,
         registro.motivo,
@@ -170,10 +172,11 @@ static HistoricoRegistro parseLinhaHistorico(const char* linha) {
         &registro.precisao,
         &registro.desafiosVencidos,
         &registro.desafiosTotal,
-        &registro.taxaDesafios
+        &registro.taxaDesafios,
+        &registro.arcadeBuffs
     );
 
-    if (lidosArcade == 10) {
+    if (lidosArcade >= 10) {
         trimTexto(registro.dataHora);
         trimTexto(registro.motivo);
         registro.modoLogico = (strcmp(registro.modo, "LOGICO") == 0);
@@ -471,6 +474,8 @@ static void drawTelaHistorico(const HistoricoRegistro registros[], int totalLinh
                         DrawText(linhasWrap[i], detalheX, dy, 17, RAYWHITE);
                         dy += 22;
                     }
+                    DrawText(TextFormat("Buffs obtidos: %d", r->arcadeBuffs), detalheX, dy, 17, RAYWHITE);
+                    dy += 24;
                 }
             } else {
                 DrawText("Relatorio em formato legado:", detalheX, dy, 16, RAYWHITE);
@@ -539,9 +544,11 @@ static void drawRelatorioFinal(ModoJogo modo, MotivoFimJogo motivoFimJogo, const
                  (int)modal.x + 36, (int)modal.y + 146, 20, RAYWHITE);
         DrawText(TextFormat("Desafios vencidos: %d/%d (%.1f%%)", stats->desafiosVencidos, stats->desafiosIniciados, aproveitamento),
                  (int)modal.x + 36, (int)modal.y + 176, 20, RAYWHITE);
-        DrawText(dica, (int)modal.x + 36, (int)modal.y + 214, 18, (Color){190, 255, 190, 245});
-        DrawText(salvar, (int)modal.x + 36, (int)modal.y + 245, 16, (Color){185, 185, 185, 250});
-        DrawText(sair, (int)(modal.x + (modal.width - MeasureText(sair, 16)) / 2), (int)modal.y + 278, 16, GRAY);
+        DrawText(TextFormat("Buffs obtidos: %d", stats->arcadeBuffs),
+                 (int)modal.x + 36, (int)modal.y + 206, 20, RAYWHITE);
+        DrawText(dica, (int)modal.x + 36, (int)modal.y + 236, 18, (Color){190, 255, 190, 245});
+        DrawText(salvar, (int)modal.x + 36, (int)modal.y + 267, 16, (Color){185, 185, 185, 250});
+        DrawText(sair, (int)(modal.x + (modal.width - MeasureText(sair, 16)) / 2), (int)modal.y + 294, 16, GRAY);
     }
 }
 
@@ -754,7 +761,10 @@ int main () {
 
             if (modoAtual == MODO_ARCADE) {
                 if (!desafioAtivoAntes && perguntaAtiva) stats.desafiosIniciados++;
-                if (desafioAtivoAntes && !perguntaAtiva && desafio.acertou) stats.desafiosVencidos++;
+                if (desafioAtivoAntes && !perguntaAtiva && desafio.acertou) {
+                    stats.desafiosVencidos++;
+                    if (desafio.buffAplicado) stats.arcadeBuffs++;
+                }
 
                 for (int i = 0; i < MAX_BULLETS; i++) {
                     if (bala[i].ativa) tirosAtivosDepois++;

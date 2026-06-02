@@ -37,7 +37,7 @@ void salvarRelatorioHistorico(MotivoFimJogo motivoFimJogo, const EstatisticasPar
             : 0.0f;
 
         fprintf(arquivo,
-                "[%s] [ARCADE] %s | tempo: %.1fs | tiros: %d | acertos boss: %d | precisao: %.1f%% | desafios: %d/%d (%.1f%%)\n",
+                "[%s] [ARCADE] %s | tempo: %.1fs | tiros: %d | acertos boss: %d | precisao: %.1f%% | desafios: %d/%d (%.1f%%) | buffs: %d\n",
                 dataHora,
                 textoMotivoFimJogo(motivoFimJogo),
                 stats->tempoPartida,
@@ -46,7 +46,8 @@ void salvarRelatorioHistorico(MotivoFimJogo motivoFimJogo, const EstatisticasPar
                 precisao,
                 stats->desafiosVencidos,
                 stats->desafiosIniciados,
-                taxaDesafios);
+                taxaDesafios,
+                stats->arcadeBuffs);
     }
 
     fclose(arquivo);

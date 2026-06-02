@@ -13,6 +13,8 @@ void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, Boss
     jogador->danoTiro = PLAYER_BASE_BULLET_DAMAGE;
     jogador->tempoBoostDano = 0.0f;
     jogador->tempoBoostVelocidade = 0.0f;
+    jogador->boostDanoNivel = 0;
+    jogador->boostVelocidadeNivel = 0;
     jogador->tempoCooldownTiro = 0.0f;
 
     for (int i = 0; i < MAX_BULLETS; i++) {
@@ -42,6 +44,7 @@ void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, Boss
     stats->logicComboMax = 0;
     stats->logicPowerUps = 0;
     stats->logicBuffs = 0;
+    stats->arcadeBuffs = 0;
 }
 
 const char* textoMotivoFimJogo(MotivoFimJogo motivoFimJogo) {

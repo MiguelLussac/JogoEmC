@@ -55,6 +55,16 @@ typedef enum {
     DESAFIO_CONTAGEM
 } EstadoDesafio;
 
+typedef enum {
+    DICA_NENHUMA,
+    DICA_PAR,
+    DICA_IMPAR,
+    DICA_MULTIPLO_5,
+    DICA_MAIOR_50,
+    DICA_MENOR_50,
+    DICA_SOMA_DIGITOS_MAIOR_10
+} TipoDicaAvancada;
+
 // Estado completo do pop-up de desafio, incluindo entrada, tentativas e timers.
 typedef struct {
     EstadoDesafio estado;
@@ -64,10 +74,24 @@ typedef struct {
     int chutesTerminadosEmZero;
     char entrada[DESAFIO_TAMANHO_ENTRADA];
     int tamanhoEntrada;
-    const char* dica;
+
+    int limiteInferior;
+    int limiteSuperior;
+    TipoDicaAvancada tipoDicaAvancada;
+    char mensagemSistema[64];
+    char textoDirecao[64];
+    char textoDistancia[64];
+    char textoIntervalo[64];
+    char textoDicaAvancada[128];
+    Color corDistancia;
+
     const char* bonus;
+    Color corBonus;
+    bool buffAplicado;
+    
     bool acertou;
     bool usouUltimaChance;
+    int opcaoSelecionada;
     float timerResultado;
     float timerContagem;
 } DesafioPergunta;

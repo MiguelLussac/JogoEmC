@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include <math.h>
 #include <string.h>
+#include <stdio.h>
 
 #define PLAYER_RADIUS 20
 
@@ -79,12 +80,14 @@ void drawPlayerHP(const Player* player) {
     int yBuff = by - 42;
     bool temBuffAtivo = false;
     if (player->tempoBoostDano > 0.0f) {
-        DrawText(TextFormat("DMG x%d  %.1fs", PLAYER_DAMAGE_BOOST_MULTIPLIER, player->tempoBoostDano), bx, yBuff, 16, (Color){ 255, 220, 80, 255 });
+        int mult = 1 << player->boostDanoNivel;
+        DrawText(TextFormat("DMG x%d (NV%d)  %.1fs", mult, player->boostDanoNivel, player->tempoBoostDano), bx, yBuff, 16, (Color){ 255, 220, 80, 255 });
         yBuff += 18;
         temBuffAtivo = true;
     }
     if (player->tempoBoostVelocidade > 0.0f) {
-        DrawText(TextFormat("SPD x%.1f  %.1fs", PLAYER_SPEED_BOOST_MULTIPLIER, player->tempoBoostVelocidade), bx, yBuff, 16, SKYBLUE);
+        float mult = 1.0f + 0.5f * player->boostVelocidadeNivel;
+        DrawText(TextFormat("SPD x%.1f (NV%d)  %.1fs", mult, player->boostVelocidadeNivel, player->tempoBoostVelocidade), bx, yBuff, 16, SKYBLUE);
         temBuffAtivo = true;
     }
     if (!temBuffAtivo) {
@@ -119,8 +122,10 @@ void atualizarFeedbackDanoPlayer(Player* player, float deltaTime) {
 }
 
 void aplicarBoostDanoPlayer(Player* player) {
-    player->danoTiro = PLAYER_BASE_BULLET_DAMAGE * PLAYER_DAMAGE_BOOST_MULTIPLIER;
+    player->boostDanoNivel++;
+    if (player->boostDanoNivel > 3) player->boostDanoNivel = 3;
     player->tempoBoostDano = PLAYER_DAMAGE_BOOST_DURATION;
+    player->danoTiro = PLAYER_BASE_BULLET_DAMAGE * (1 << player->boostDanoNivel);
 }
 
 void atualizarBoostDanoPlayer(Player* player, float deltaTime) {
@@ -130,12 +135,15 @@ void atualizarBoostDanoPlayer(Player* player, float deltaTime) {
     if (player->tempoBoostDano <= 0.0f) {
         player->tempoBoostDano = 0.0f;
         player->danoTiro = PLAYER_BASE_BULLET_DAMAGE;
+        player->boostDanoNivel = 0;
     }
 }
 
 void aplicarBoostVelocidadePlayer(Player* player) {
-    player->velocidade = PLAYER_BASE_SPEED * PLAYER_SPEED_BOOST_MULTIPLIER;
+    player->boostVelocidadeNivel++;
+    if (player->boostVelocidadeNivel > 3) player->boostVelocidadeNivel = 3;
     player->tempoBoostVelocidade = PLAYER_SPEED_BOOST_DURATION;
+    player->velocidade = PLAYER_BASE_SPEED * (1.0f + 0.5f * player->boostVelocidadeNivel);
 }
 
 void atualizarBoostVelocidadePlayer(Player* player, float deltaTime) {
@@ -145,6 +153,7 @@ void atualizarBoostVelocidadePlayer(Player* player, float deltaTime) {
     if (player->tempoBoostVelocidade <= 0.0f) {
         player->tempoBoostVelocidade = 0.0f;
         player->velocidade = PLAYER_BASE_SPEED;
+        player->boostVelocidadeNivel = 0;
     }
 }
 
@@ -152,53 +161,53 @@ bool aplicarBoostAleatorioPlayer(Player* player, char* mensagem, int tamMensagem
     if (mensagem != NULL && tamMensagem > 0) mensagem[0] = '\0';
 
     int boostSorteado = GetRandomValue(0, 2);
+    bool substituiuVida = false;
+
+    if (boostSorteado == 0 && player->hp >= PLAYER_MAX_HP) {
+        substituiuVida = true;
+        boostSorteado = GetRandomValue(1, 2);
+    }
 
     if (boostSorteado == 0) {
-        if (player->hp >= PLAYER_MAX_HP) {
-            if (mensagem != NULL && tamMensagem > 0) {
-                strncpy(mensagem, "Vida ja esta cheia!", tamMensagem - 1);
-                mensagem[tamMensagem - 1] = '\0';
-            }
-            return false;
-        }
         player->hp++;
         if (mensagem != NULL && tamMensagem > 0) {
-            strncpy(mensagem, "BUFF: +1 vida!", tamMensagem - 1);
+            strncpy(mensagem, "+1 VIDA", tamMensagem - 1);
             mensagem[tamMensagem - 1] = '\0';
         }
         return true;
     }
 
     if (boostSorteado == 1) {
-        if (player->tempoBoostDano > 0.0f) {
-            if (mensagem != NULL && tamMensagem > 0) {
-                strncpy(mensagem, "Boost de dano ja ativo!", tamMensagem - 1);
-                mensagem[tamMensagem - 1] = '\0';
-            }
-            return false;
-        }
         aplicarBoostDanoPlayer(player);
         if (mensagem != NULL && tamMensagem > 0) {
-            strncpy(mensagem, "BUFF: Dano x2 por 10s!", tamMensagem - 1);
+            if (substituiuVida) {
+                snprintf(mensagem, tamMensagem, "VIDA SUBSTITUIDA!\nDANO APRIMORADO NV %d", player->boostDanoNivel);
+            } else if (player->boostDanoNivel > 1) {
+                snprintf(mensagem, tamMensagem, "BUFF APRIMORADO!\nDANO AUMENTADO P/ NV %d", player->boostDanoNivel);
+            } else {
+                strncpy(mensagem, "DANO DOBRADO", tamMensagem - 1);
+            }
             mensagem[tamMensagem - 1] = '\0';
         }
         return true;
     }
 
-    if (player->tempoBoostVelocidade > 0.0f) {
+    if (boostSorteado == 2) {
+        aplicarBoostVelocidadePlayer(player);
         if (mensagem != NULL && tamMensagem > 0) {
-            strncpy(mensagem, "Boost de velocidade ja ativo!", tamMensagem - 1);
+            if (substituiuVida) {
+                snprintf(mensagem, tamMensagem, "VIDA SUBSTITUIDA!\nVELOCIDADE APRIMORADA NV %d", player->boostVelocidadeNivel);
+            } else if (player->boostVelocidadeNivel > 1) {
+                snprintf(mensagem, tamMensagem, "BUFF APRIMORADO!\nVELOCIDADE AUMENTADA P/ NV %d", player->boostVelocidadeNivel);
+            } else {
+                strncpy(mensagem, "VELOCIDADE AUMENTADA", tamMensagem - 1);
+            }
             mensagem[tamMensagem - 1] = '\0';
         }
-        return false;
+        return true;
     }
 
-    aplicarBoostVelocidadePlayer(player);
-    if (mensagem != NULL && tamMensagem > 0) {
-        strncpy(mensagem, "BUFF: Velocidade x1.5 por 10s!", tamMensagem - 1);
-        mensagem[tamMensagem - 1] = '\0';
-    }
-    return true;
+    return false;
 }
 
 // Atualiza as balas do jogador e desativa as que saem pelo topo da tela.

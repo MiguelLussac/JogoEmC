@@ -72,10 +72,13 @@ static int parse_line_relatorio(const char *line, HistoricoPartida *out) {
         return 1;
     }
 
-    if (sscanf(line,
-               "[%31[^]]] [%15[^]]] %63[^|]| tempo: %lfs | tiros: %d | acertos boss: %d | precisao: %lf%% | desafios: %d/%d (%lf%%)",
+    int arcadeBuffs = 0;
+    int read_count = sscanf(line,
+               "[%31[^]]] [%15[^]]] %63[^|]| tempo: %lfs | tiros: %d | acertos boss: %d | precisao: %lf%% | desafios: %d/%d (%lf%%) | buffs: %d",
                dataHora, modo, motivo, &tempo, &tiros, &acertosBoss, &precisao,
-               &desafiosVencidos, &desafiosTotal, &taxaDesafios) == 10) {
+               &desafiosVencidos, &desafiosTotal, &taxaDesafios, &arcadeBuffs);
+               
+    if (read_count >= 10) {
         out->tempo = tempo;
         out->acertos = acertosBoss;
         out->tentativas = tiros;
@@ -83,7 +86,7 @@ static int parse_line_relatorio(const char *line, HistoricoPartida *out) {
         out->modoLogico = 0;
         out->tiros = tiros;
         out->precisao = precisao;
-        out->buffs = desafiosVencidos;
+        out->buffs = (read_count >= 11) ? arcadeBuffs : 0;
         out->desafiosVencidos = desafiosVencidos;
         out->desafiosTotal = desafiosTotal;
         out->score = calcularScoreHistorico(out);

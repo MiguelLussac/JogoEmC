@@ -2,6 +2,8 @@
 #include "raylib.h"
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #define DESAFIO_RESULTADO_TEMPO 2.0f
 #define DESAFIO_CONTAGEM_TEMPO 4.0f
@@ -101,13 +103,19 @@ static void finalizarDesafio(DesafioPergunta* desafio, bool acertou) {
 
 static void aplicarBoostAleatorio(DesafioPergunta* desafio, Player* jogador) {
     char mensagem[64];
-    if (aplicarBoostAleatorioPlayer(jogador, mensagem, sizeof(mensagem))) {
-        desafio->bonus = TextFormat("%s", mensagem);
-    } else if (mensagem[0] != '\0') {
+    bool aplicado = aplicarBoostAleatorioPlayer(jogador, mensagem, sizeof(mensagem));
+    desafio->buffAplicado = aplicado;
+    
+    if (aplicado || mensagem[0] != '\0') {
         desafio->bonus = TextFormat("%s", mensagem);
     } else {
         desafio->bonus = "Nenhum buff aplicado.";
     }
+
+    if (strstr(mensagem, "VIDA")) desafio->corBonus = GREEN;
+    else if (strstr(mensagem, "DANO")) desafio->corBonus = RED;
+    else if (strstr(mensagem, "VELOCIDADE")) desafio->corBonus = SKYBLUE;
+    else desafio->corBonus = GRAY;
 }
 
 static void processarPalpite(DesafioPergunta* desafio, Player* jogador) {
@@ -118,7 +126,7 @@ static void processarPalpite(DesafioPergunta* desafio, Player* jogador) {
     limparEntradaDesafio(desafio);
 
     if (palpite < NUMEROMIN || palpite > NUMEROMAX) {
-        desafio->dica = "Digite 1 a 100.";
+        strcpy(desafio->mensagemSistema, "Digite 1 a 100.");
         return;
     }
 
@@ -134,14 +142,47 @@ static void processarPalpite(DesafioPergunta* desafio, Player* jogador) {
         return;
     }
 
-    // Easter egg fica antes das dicas genericas de alto/baixo, mas nao cobre proximidade.
-    if (palpite % 10 == 0 && desafio->chutesTerminadosEmZero >= ESTRATEGIA_MIN_DEZENAS &&
-        (desafio->questao.status == muitoAlto || desafio->questao.status == muitoBaixo)) {
-        desafio->questao.status = estrategiaDezena;
+    desafio->tentativasRestantes--;
+
+    int diferenca = abs(palpite - desafio->questao.numeroSecreto);
+    if (diferenca > 30) {
+        strcpy(desafio->textoDistancia, "Muito distante");
+        desafio->corDistancia = RED;
+    } else if (diferenca > 15) {
+        strcpy(desafio->textoDistancia, "Distante");
+        desafio->corDistancia = ORANGE;
+    } else if (diferenca > 7) {
+        strcpy(desafio->textoDistancia, "Proximo");
+        desafio->corDistancia = YELLOW;
+    } else if (diferenca > 3) {
+        strcpy(desafio->textoDistancia, "Muito proximo");
+        desafio->corDistancia = GREEN;
+    } else {
+        strcpy(desafio->textoDistancia, "Extremamente proximo");
+        desafio->corDistancia = RAYWHITE;
     }
 
-    desafio->tentativasRestantes--;
-    desafio->dica = textoDica(desafio->questao.status);
+    if (palpite < desafio->questao.numeroSecreto) {
+        strcpy(desafio->textoDirecao, "O numero correto e MAIOR");
+        if (palpite >= desafio->limiteInferior) desafio->limiteInferior = palpite + 1;
+    } else {
+        strcpy(desafio->textoDirecao, "O numero correto e MENOR");
+        if (palpite <= desafio->limiteSuperior) desafio->limiteSuperior = palpite - 1;
+    }
+
+    snprintf(desafio->textoIntervalo, sizeof(desafio->textoIntervalo), "O valor esta entre %d e %d", desafio->limiteInferior, desafio->limiteSuperior);
+
+    if (desafio->tentativasRestantes <= 2) {
+        switch (desafio->tipoDicaAvancada) {
+            case DICA_PAR: strcpy(desafio->textoDicaAvancada, "* Dica: O numero e PAR"); break;
+            case DICA_IMPAR: strcpy(desafio->textoDicaAvancada, "* Dica: O numero e IMPAR"); break;
+            case DICA_MULTIPLO_5: strcpy(desafio->textoDicaAvancada, "* Dica: O numero e MULTIPLO DE 5"); break;
+            case DICA_MAIOR_50: strcpy(desafio->textoDicaAvancada, "* Dica: O numero e MAIOR QUE 50"); break;
+            case DICA_MENOR_50: strcpy(desafio->textoDicaAvancada, "* Dica: O numero e MENOR QUE 50"); break;
+            case DICA_SOMA_DIGITOS_MAIOR_10: strcpy(desafio->textoDicaAvancada, "* Dica: A soma dos digitos e MAIOR QUE 10"); break;
+            default: break;
+        }
+    }
 
     // Ao zerar tentativas, oferece 2 tentativas extras que custam 1 vida.
     if (desafio->tentativasRestantes <= 0) {
@@ -193,9 +234,9 @@ static void drawTentativas(const DesafioPergunta* desafio, Rectangle modal) {
 
 // Tela principal do desafio: entrada do chute, botao e indicadores de chance.
 static void drawTelaChute(const DesafioPergunta* desafio) {
-    Rectangle modal = {(GetScreenWidth() - 360) / 2.0f, 92, 360, 270};
-    Rectangle entrada = {modal.x + 27, modal.y + 116, 306, 38};
-    Rectangle enviar = {modal.x + 27, modal.y + 164, 306, 42};
+    Rectangle modal = {(GetScreenWidth() - 360) / 2.0f, 60, 360, 350};
+    Rectangle entrada = {modal.x + 27, modal.y + 206, 306, 38};
+    Rectangle enviar = {modal.x + 27, modal.y + 254, 306, 42};
 
     DrawRectangleRec(modal, (Color){18, 18, 18, 248});
     DrawRectangleLinesEx(modal, 2.0f, WHITE);
@@ -204,10 +245,40 @@ static void drawTelaChute(const DesafioPergunta* desafio) {
     DrawText("Adivinhe: 1 a 100", (int)modal.x + 27, (int)modal.y + 66, 14, WHITE);
     drawTentativas(desafio, modal);
 
-    if (desafio->dica[0] != '\0') {
-        DrawText(desafio->dica,
-                 (GetScreenWidth() - MeasureText(desafio->dica, 14)) / 2,
-                 (int)modal.y + 96, 14, RED);
+    int textY = modal.y + 96;
+
+    if (desafio->mensagemSistema[0] != '\0') {
+        DrawText(desafio->mensagemSistema,
+                 (GetScreenWidth() - MeasureText(desafio->mensagemSistema, 14)) / 2,
+                 textY, 14, RED);
+        textY += 18;
+    }
+    
+    if (desafio->textoDistancia[0] != '\0') {
+        DrawText(desafio->textoDistancia,
+                 (GetScreenWidth() - MeasureText(desafio->textoDistancia, 16)) / 2,
+                 textY, 16, desafio->corDistancia);
+        textY += 20;
+    }
+    
+    if (desafio->textoDirecao[0] != '\0') {
+        DrawText(desafio->textoDirecao,
+                 (GetScreenWidth() - MeasureText(desafio->textoDirecao, 14)) / 2,
+                 textY, 14, LIGHTGRAY);
+        textY += 18;
+    }
+    
+    if (desafio->textoIntervalo[0] != '\0') {
+        DrawText(desafio->textoIntervalo,
+                 (GetScreenWidth() - MeasureText(desafio->textoIntervalo, 14)) / 2,
+                 textY, 14, LIGHTGRAY);
+        textY += 18;
+    }
+    
+    if (desafio->textoDicaAvancada[0] != '\0') {
+        DrawText(desafio->textoDicaAvancada,
+                 (GetScreenWidth() - MeasureText(desafio->textoDicaAvancada, 14)) / 2,
+                 textY, 14, SKYBLUE);
     }
 
     DrawRectangleRec(entrada, BLACK);
@@ -242,10 +313,30 @@ static void drawTelaConfirmacao(const DesafioPergunta* desafio, const Player* jo
         drawTextoCentralizado("Sem vidas para tentar de novo.", (int)modal.y + 112, 13, WHITE);
     }
 
-    DrawRectangleRec(sim, jogador->hp > 0 ? YELLOW : DARKGRAY);
-    DrawRectangleRec(nao, GRAY);
-    DrawText("SIM", (int)sim.x + 54, (int)sim.y + 14, 14, BLACK);
-    DrawText("NAO", (int)nao.x + 54, (int)nao.y + 14, 14, WHITE);
+    bool simSelecionado = (desafio->opcaoSelecionada == 0) && (jogador->hp > 0);
+    bool naoSelecionado = (desafio->opcaoSelecionada == 1) || (jogador->hp <= 0);
+
+    Color simBg = simSelecionado ? YELLOW : (Color){40, 40, 40, 255};
+    Color simText = simSelecionado ? BLACK : RAYWHITE;
+    Color simBorda = simSelecionado ? WHITE : DARKGRAY;
+
+    Color naoBg = naoSelecionado ? YELLOW : (Color){40, 40, 40, 255};
+    Color naoText = naoSelecionado ? BLACK : RAYWHITE;
+    Color naoBorda = naoSelecionado ? WHITE : DARKGRAY;
+
+    if (jogador->hp <= 0) {
+        simBg = DARKGRAY;
+        simText = GRAY;
+        simBorda = DARKGRAY;
+    }
+
+    DrawRectangleRec(sim, simBg);
+    DrawRectangleLinesEx(sim, simSelecionado ? 2.0f : 1.0f, simBorda);
+    DrawText(simSelecionado ? "> SIM" : "  SIM", (int)sim.x + 40, (int)sim.y + 14, 14, simText);
+
+    DrawRectangleRec(nao, naoBg);
+    DrawRectangleLinesEx(nao, naoSelecionado ? 2.0f : 1.0f, naoBorda);
+    DrawText(naoSelecionado ? "> NAO" : "  NAO", (int)nao.x + 40, (int)nao.y + 14, 14, naoText);
 }
 
 // Resultado final antes de voltar ao combate: acerto em verde, erro em vermelho.
@@ -257,15 +348,19 @@ static void drawTelaResultado(const DesafioPergunta* desafio) {
     DrawRectangleRec(modal, fundo);
     DrawRectangleLinesEx(modal, 3.0f, borda);
 
-    drawTextoCentralizadoNoModal(desafio->acertou ? "*" : "X", modal, (int)modal.y + 34, 42, borda);
-    drawTextoCentralizadoNoModal(desafio->acertou ? "Parabens voce acertou o numero!!!" : "Nao foi dessa vez!!", modal, (int)modal.y + 88, 16, borda);
     if (desafio->acertou) {
-        drawTextoCentralizadoNoModal(desafio->bonus, modal, (int)modal.y + 132, 15, WHITE);
+        if (desafio->buffAplicado) {
+             drawTextoCentralizadoNoModal("BUFF RECEBIDO!", modal, (int)modal.y + 60, 32, YELLOW);
+             drawTextoCentralizadoNoModal(desafio->bonus, modal, (int)modal.y + 110, 26, desafio->corBonus);
+        } else {
+             drawTextoCentralizadoNoModal("NENHUM BUFF APLICADO", modal, (int)modal.y + 70, 24, LIGHTGRAY);
+             drawTextoCentralizadoNoModal(desafio->bonus, modal, (int)modal.y + 110, 20, GRAY);
+        }
     } else {
+        drawTextoCentralizadoNoModal("X", modal, (int)modal.y + 34, 42, borda);
+        drawTextoCentralizadoNoModal("Nao foi dessa vez!!", modal, (int)modal.y + 88, 16, borda);
         drawTextoCentralizadoNoModal(TextFormat("O numero era %d.", desafio->questao.numeroSecreto), modal, (int)modal.y + 126, 16, WHITE);
         drawTextoCentralizadoNoModal("Procure o proximo atributo e tente de", modal, (int)modal.y + 170, 15, WHITE);
-    }
-    if (!desafio->acertou) {
         drawTextoCentralizadoNoModal("novo!!!", modal, (int)modal.y + 192, 15, WHITE);
     }
 }
@@ -323,6 +418,28 @@ void inicializarEstrela(Estrela* estrela) {
 }
 
 // Retorna o desafio para o estado inativo padrao, limpando entradas e timers.
+static TipoDicaAvancada sortearDicaAvancada(int numero) {
+    int sum = 0;
+    int temp = numero;
+    while (temp > 0) {
+        sum += temp % 10;
+        temp /= 10;
+    }
+
+    int opcoes[6];
+    int count = 0;
+
+    if (numero % 2 == 0) opcoes[count++] = DICA_PAR;
+    if (numero % 2 != 0) opcoes[count++] = DICA_IMPAR;
+    if (numero % 5 == 0) opcoes[count++] = DICA_MULTIPLO_5;
+    if (numero > 50) opcoes[count++] = DICA_MAIOR_50;
+    if (numero < 50) opcoes[count++] = DICA_MENOR_50;
+    if (sum > 10) opcoes[count++] = DICA_SOMA_DIGITOS_MAIOR_10;
+
+    if (count == 0) return DICA_NENHUMA;
+    return opcoes[GetRandomValue(0, count - 1)];
+}
+
 void inicializarDesafio(DesafioPergunta* desafio) {
     desafio->estado = DESAFIO_INATIVO;
     desafio->questao.numeroSecreto = 0;
@@ -331,10 +448,24 @@ void inicializarDesafio(DesafioPergunta* desafio) {
     desafio->ultimoPalpite = 0;
     desafio->chutesTerminadosEmZero = 0;
     limparEntradaDesafio(desafio);
-    desafio->dica = "";
+    
+    desafio->mensagemSistema[0] = '\0';
+    desafio->textoDirecao[0] = '\0';
+    desafio->textoDistancia[0] = '\0';
+    desafio->textoIntervalo[0] = '\0';
+    desafio->textoDicaAvancada[0] = '\0';
+    desafio->corDistancia = BLANK;
+    desafio->limiteInferior = NUMEROMIN;
+    desafio->limiteSuperior = NUMEROMAX;
+    desafio->tipoDicaAvancada = DICA_NENHUMA;
+    
     desafio->bonus = "";
+    desafio->corBonus = BLANK;
+    desafio->buffAplicado = false;
+    
     desafio->acertou = false;
     desafio->usouUltimaChance = false;
+    desafio->opcaoSelecionada = 1;
     desafio->timerResultado = 0.0f;
     desafio->timerContagem = 0.0f;
 }
@@ -344,7 +475,7 @@ void iniciarDesafio(DesafioPergunta* desafio) {
     inicializarDesafio(desafio);
     desafio->estado = DESAFIO_CHUTANDO;
     desafio->questao.numeroSecreto = gerarNumeroSecreto();
-    desafio->dica = "";
+    desafio->tipoDicaAvancada = sortearDicaAvancada(desafio->questao.numeroSecreto);
 }
 
 bool atualizarDesafio(DesafioPergunta* desafio, Player* jogador, float deltaTime) {
@@ -359,15 +490,37 @@ bool atualizarDesafio(DesafioPergunta* desafio, Player* jogador, float deltaTime
             break;
 
         case DESAFIO_CONFIRMAR_ULTIMA:
-            // SIM/Enter/S gastam 1 vida e liberam exatamente mais dois chutes.
-            if (jogador->hp > 0 && (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_ENTER) || botaoClicado(botaoSim))) {
+            if (jogador->hp <= 0) {
+                finalizarDesafio(desafio, false);
+                break;
+            }
+
+            if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) {
+                desafio->opcaoSelecionada = 0; // SIM
+            }
+            if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
+                desafio->opcaoSelecionada = 1; // NAO
+            }
+
+            if (IsKeyPressed(KEY_ENTER)) {
+                if (desafio->opcaoSelecionada == 0) {
+                    aplicarDanoPlayer(jogador, 1);
+                    desafio->estado = DESAFIO_CHUTANDO;
+                    desafio->tentativasRestantes = 2;
+                    desafio->usouUltimaChance = true;
+                    strcpy(desafio->mensagemSistema, "Mais 2 tentativas!");
+                    limparEntradaDesafio(desafio);
+                } else {
+                    finalizarDesafio(desafio, false);
+                }
+            } else if (botaoClicado(botaoSim)) {
                 aplicarDanoPlayer(jogador, 1);
                 desafio->estado = DESAFIO_CHUTANDO;
                 desafio->tentativasRestantes = 2;
                 desafio->usouUltimaChance = true;
-                desafio->dica = "Mais 2 tentativas!";
+                strcpy(desafio->mensagemSistema, "Mais 2 tentativas!");
                 limparEntradaDesafio(desafio);
-            } else if (IsKeyPressed(KEY_N) || botaoClicado(botaoNao) || jogador->hp <= 0) {
+            } else if (botaoClicado(botaoNao)) {
                 finalizarDesafio(desafio, false);
             }
             break;

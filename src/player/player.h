@@ -31,6 +31,8 @@ typedef struct {
     int danoTiro;
     float tempoBoostDano;
     float tempoBoostVelocidade;
+    int boostDanoNivel;
+    int boostVelocidadeNivel;
     float tempoCooldownTiro;
 } Player;
 

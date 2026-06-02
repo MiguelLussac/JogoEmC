@@ -418,25 +418,25 @@ static void coletarDrop(FaseLogica* f, Boss* boss, Player* jogador,
             return;
         case DROP_BOOST_DMG:
             f->powerUpsColetados++;
-            if (jogador->tempoBoostDano > 0.0f) {
-                setFeedback(f, "Boost de dano ja ativo!", GRAY);
-                return;
-            }
             aplicarBoostDanoPlayer(jogador);
             f->buffsObtidos++;
-            setFeedback(f, "BUFF: Dano x2 por 10s!", GOLD);
-            setFlash(f, (Color){255, 200, 60, 45}, 0.25f);
+            {
+                char msg[64];
+                snprintf(msg, sizeof(msg), "DANO APRIMORADO NV %d!", jogador->boostDanoNivel);
+                setFeedback(f, msg, GOLD);
+                setFlash(f, (Color){255, 200, 60, 45}, 0.25f);
+            }
             return;
         case DROP_BOOST_SPD:
             f->powerUpsColetados++;
-            if (jogador->tempoBoostVelocidade > 0.0f) {
-                setFeedback(f, "Boost de velocidade ja ativo!", GRAY);
-                return;
-            }
             aplicarBoostVelocidadePlayer(jogador);
             f->buffsObtidos++;
-            setFeedback(f, "BUFF: Velocidade x1.5 por 10s!", GOLD);
-            setFlash(f, (Color){100, 220, 255, 45}, 0.25f);
+            {
+                char msg[64];
+                snprintf(msg, sizeof(msg), "VELOCIDADE APRIMORADA NV %d!", jogador->boostVelocidadeNivel);
+                setFeedback(f, msg, GOLD);
+                setFlash(f, (Color){100, 220, 255, 45}, 0.25f);
+            }
             return;
         default: break;
     }

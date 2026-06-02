@@ -41,6 +41,7 @@ typedef struct {
     int logicComboMax;
     int logicPowerUps;
     int logicBuffs;
+    int arcadeBuffs;
 } EstatisticasPartida;
 
 void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, BossBullet balasBoss[],
