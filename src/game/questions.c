@@ -536,7 +536,6 @@ bool atualizarDesafio(DesafioPergunta* desafio, Player* jogador, float deltaTime
         case DESAFIO_CONTAGEM:
             desafio->timerContagem -= deltaTime;
             if (desafio->timerContagem <= 0.0f) {
-                inicializarDesafio(desafio);
                 return false;
             }
             break;

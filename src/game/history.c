@@ -54,16 +54,29 @@ void salvarRelatorioHistorico(MotivoFimJogo motivoFimJogo, const EstatisticasPar
 }
 
 int carregarHistoricoRelatorios(char linhas[][TAMANHO_LINHA_HISTORICO], int maxLinhas) {
+    if (maxLinhas <= 0) return 0;
+
     FILE* arquivo = fopen(CAMINHO_HISTORICO, "r");
     if (arquivo == NULL) return 0;
 
     int count = 0;
-    while (count < maxLinhas && fgets(linhas[count], TAMANHO_LINHA_HISTORICO, arquivo) != NULL) {
-        size_t tamanho = strlen(linhas[count]);
-        if (tamanho > 0 && linhas[count][tamanho - 1] == '\n') {
-            linhas[count][tamanho - 1] = '\0';
+    char linha[TAMANHO_LINHA_HISTORICO];
+    while (fgets(linha, TAMANHO_LINHA_HISTORICO, arquivo) != NULL) {
+        size_t tamanho = strlen(linha);
+        if (tamanho > 0 && linha[tamanho - 1] == '\n') {
+            linha[tamanho - 1] = '\0';
         }
-        count++;
+
+        int destino = count;
+        if (destino >= maxLinhas) {
+            memmove(linhas[0], linhas[1], sizeof(linhas[0]) * (size_t)(maxLinhas - 1));
+            destino = maxLinhas - 1;
+        } else {
+            count++;
+        }
+
+        strncpy(linhas[destino], linha, TAMANHO_LINHA_HISTORICO - 1);
+        linhas[destino][TAMANHO_LINHA_HISTORICO - 1] = '\0';
     }
     fclose(arquivo);
     return count;

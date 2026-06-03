@@ -176,11 +176,21 @@ static HistoricoRegistro parseLinhaHistorico(const char* linha) {
         &registro.arcadeBuffs
     );
 
-    if (lidosArcade >= 10) {
+    if (lidosArcade >= 11) {
         trimTexto(registro.dataHora);
         trimTexto(registro.motivo);
         registro.modoLogico = (strcmp(registro.modo, "LOGICO") == 0);
         registro.valido = true;
+        return registro;
+    }
+
+    /* Compatibilidade com histórico antigo sem campo de buffs */
+    if (lidosArcade == 10) {
+        trimTexto(registro.dataHora);
+        trimTexto(registro.motivo);
+        registro.modoLogico = (strcmp(registro.modo, "LOGICO") == 0);
+        registro.valido = true;
+        registro.arcadeBuffs = 0;
         return registro;
     }
 
@@ -615,7 +625,7 @@ int main () {
                     historicoSelecionado = totalHistorico > 0 ? 0 : -1;
                     historicoExpandido = -1;
                     for (int i = 0; i < totalHistorico; i++) {
-                        registrosHistorico[i] = parseLinhaHistorico(linhasHistorico[i]);
+                        registrosHistorico[i] = parseLinhaHistorico(linhasHistorico[totalHistorico - 1 - i]);
                     }
                     telaAtual = TELA_HISTORICO;
                 } else if (opcaoMenu == 2) {
