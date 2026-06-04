@@ -144,21 +144,33 @@ outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sp
 <details>
   <summary>[UH6] Sistema de Advinhação (Mecânica específica)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/021d4c0f-eb63-45b8-9b92-a7eecf4e2f4b" />
+
+  https://github.com/user-attachments/assets/4610009e-cabe-4864-855d-02ba4a03fdca
+
 </details>
 
 <details>
   <summary>[UH7] Regras de Tentativa (Controle da mecânica)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d7fc5581-c036-4c9f-a050-d3f302324b48" />
+
+  https://github.com/user-attachments/assets/2cd42207-76b5-4562-9675-27aeeff8bc88
+
 </details>
 
 <details>
   <summary>[UH8] Drop de Atributos (Recompensa/Progressão)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b2120d64-e3d0-4aa7-9292-8ace5483c959" />
+
+  https://github.com/user-attachments/assets/4a16a774-ce65-4b83-86e4-c1f44c1fdf60
+  
 </details>
 
 <details>
   <summary>[UH9] Aplicação de Buffs (Efeito dos drops)</summary>
   <img width="655" height="412" alt="image" src="https://github.com/user-attachments/assets/5884a30b-f8b8-453a-9f47-a55a412ac026" />
+
+  https://github.com/user-attachments/assets/d4f3d3bb-a7c7-4cc6-bff2-a84e3bdade65
+
 </details>
 
 <details>
