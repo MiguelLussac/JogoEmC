@@ -208,7 +208,7 @@ Durante o desenvolvimento, a equipe identificou e corrigiu os seguintes problema
 
 ## 🎥 Screencast
 
-https://github.com/user-attachments/assets/197476c7-a136-4e49-b57c-ce4a7ccc36d7
+https://github.com/user-attachments/assets/16e04ba7-db7c-431d-b559-b4bea3de63e6
 
 ---
 
