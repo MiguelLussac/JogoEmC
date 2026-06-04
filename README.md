@@ -104,26 +104,41 @@ outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sp
 <details>
   <summary>[UH1] Movimentação (Base essencial)</summary>
   <img width="1535" height="1024" alt="image" src="https://github.com/user-attachments/assets/44784067-98fd-4562-bc89-a39a38212d9a" />
+  
+  https://github.com/user-attachments/assets/5bb0b310-bd51-45e4-b018-b2a005043705
+  
 </details>
 
 <details>
   <summary>[UH2] Disparo de Projéteis (Interação principal)</summary>
   <img width="1535" height="1024" alt="image" src="https://github.com/user-attachments/assets/da935e4e-ea50-49d3-b1ae-e8d50aa6a2b9" />
+
+  https://github.com/user-attachments/assets/4af2258e-7847-4851-94d2-a9d6195d88a4
+
 </details>
 
 <details>
   <summary>[UH3] Sistema de Vidas (Estado do jogador)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/a4d5e108-14e3-4dc6-adf1-bec800510df7" />
+
+  https://github.com/user-attachments/assets/420a8bcd-2deb-42c5-ab94-56ac1ba3b7e5
+
 </details>
 
 <details>
   <summary>[UH4] Boss/Vilão Principal</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/af8ee370-d0fb-4268-92f4-a40d037c0d46" />
+
+  https://github.com/user-attachments/assets/105c4c23-512f-44b0-8fef-fd71507647f1
+
 </details>
 
 <details>
   <summary>[UH5] Sistema de Dano ao Boss (Objetivo de combate)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/562d2961-41b0-4e1d-80a0-b39926abcf17" />
+
+  https://github.com/user-attachments/assets/b46b356c-cb24-4294-ad86-4ac342ebb3c4
+
 </details>
 
 <details>
