@@ -170,9 +170,9 @@ outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sp
 
 ---
 
-## 🎥 Demo
+## 🎥 Screencast
 
-https://github.com/user-attachments/assets/a79b4fae-119b-4530-aed5-d6dbb97d5350
+https://github.com/user-attachments/assets/197476c7-a136-4e49-b57c-ce4a7ccc36d7
 
 ---
 
