@@ -157,7 +157,7 @@ outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sp
 
 <div align="center">
 
-<img width="1910" height="786" alt="image" src="https://github.com/user-attachments/assets/78fa20ae-4eaa-4425-b599-b8022b91e339" />
+<img width="1139" height="621" alt="Captura de tela 2026-06-04 130330" src="https://github.com/user-attachments/assets/ef694b7f-e1cc-4265-9f42-cfc910559c3e" />
 
 ## </div>
 
