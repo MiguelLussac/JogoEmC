@@ -144,33 +144,21 @@ outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sp
 <details>
   <summary>[UH6] Sistema de Advinhação (Mecânica específica)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/021d4c0f-eb63-45b8-9b92-a7eecf4e2f4b" />
-
-  https://github.com/user-attachments/assets/4610009e-cabe-4864-855d-02ba4a03fdca
-
 </details>
 
 <details>
   <summary>[UH7] Regras de Tentativa (Controle da mecânica)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d7fc5581-c036-4c9f-a050-d3f302324b48" />
-
-  https://github.com/user-attachments/assets/2cd42207-76b5-4562-9675-27aeeff8bc88
-
 </details>
 
 <details>
   <summary>[UH8] Drop de Atributos (Recompensa/Progressão)</summary>
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b2120d64-e3d0-4aa7-9292-8ace5483c959" />
-
-  https://github.com/user-attachments/assets/4a16a774-ce65-4b83-86e4-c1f44c1fdf60
-  
 </details>
 
 <details>
   <summary>[UH9] Aplicação de Buffs (Efeito dos drops)</summary>
   <img width="655" height="412" alt="image" src="https://github.com/user-attachments/assets/5884a30b-f8b8-453a-9f47-a55a412ac026" />
-
-  https://github.com/user-attachments/assets/d4f3d3bb-a7c7-4cc6-bff2-a84e3bdade65
-
 </details>
 
 <details>
@@ -194,6 +182,27 @@ outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sp
   <img width="543" height="898" alt="image" src="https://github.com/user-attachments/assets/6e439fc7-cb4d-4a33-8126-c64436384351" />
 
 </div>
+
+---
+
+## 🐛 Bug Tracking
+
+Durante o desenvolvimento, a equipe identificou e corrigiu os seguintes problemas críticos do sistema:
+
+### 1. Limites de Tela do Jogador (Commit `3cf03bd`)
+* **Problema:** O jogador conseguia "fugir" da tela na lateral direita ou ficava invisível, limitando sua área útil a apenas uma parte da janela do jogo.
+* **Causa:** A janela oficial do jogo foi atualizada para a resolução `1280x720`. No entanto, a lógica de restrição de movimento em `src/player/player.c` continuava usando constantes estáticas baseadas no layout antigo de `800x600` (`SCREEN_WIDTH = 800`), impedindo o jogador de aproveitar os novos 480 pixels à direita.
+* **Solução:** Substituição das constantes físicas no cálculo de limites por chamadas dinâmicas a `GetScreenWidth()` e `GetScreenHeight()` da biblioteca Raylib. Isso corrigiu tanto a área de movimentação quanto o posicionamento proporcional da barra de vida.
+
+### 2. Contador de Buffs no Histórico (Commit `bd63632`)
+* **Problema:** Mesmo após coletar múltiplos power-ups/buffs na partida, o feed de histórico no painel do jogo sempre exibia o valor de buffs como zero.
+* **Causa:** O parser em `src/main.c` (`parseLinhaHistorico`) usava a expressão `lidosArcade >= 10` para validar se a leitura do arquivo tinha sido correta. Porém, o campo que continha os buffs era o 11º parâmetro adicionado na evolução do projeto, fazendo com que ele nunca fosse considerado na verificação principal de sucesso do parser. O histórico também ordenava os dados incorretamente, jogando as partidas mais recentes no fundo da pilha.
+* **Solução:** Correção do limitador de leitura para exigir pelo menos 11 campos e implementação de um fallback que define buffs como `0` em arquivos de histórico antigos. A ordenação também foi corrigida para exibir o histórico em formato decrescente (partidas mais recentes no topo).
+
+### 3. Exibição de Estatísticas no Relatório Analítico (Commit `044ba22`)
+* **Problema:** O relatório analítico de desempenho exibia apenas traços estáticos (`"--"`) e heurísticas genéricas de placeholder, não refletindo o real histórico do jogador.
+* **Causa:** A função `renderizarRelatorioAnalitico` era alimentada com o valor `NULL` em `src/main.c` (fazendo com que a tela nunca recebesse a struct de dados). Além disso, a implementação interna em `src/analysis/analise.c` utilizava um array estático de strings e heurísticas pré-definidas para renderização, em vez de tratar as variáveis numéricas processadas do jogador.
+* **Solução:** Criação da rotina `recarregarAnaliseHistorico()` no fluxo principal do jogo para compilar as estatísticas em tempo de execução, passagem do ponteiro do relatório estruturado à tela e reformulação da renderização em `src/analysis/analise.c` para mapear dinamicamente as métricas com `snprintf` e processar a lista de heurísticas inteligentes geradas a partir do comportamento do usuário.
 
 ---
 
