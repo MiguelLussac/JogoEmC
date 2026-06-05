@@ -94,12 +94,21 @@ Todas as histórias de usuário de `UH1` a `UH10` foram incluídas e associadas 
 Na Entrega 03 a equipe trabalhou em duplas, com uma pessoa codando (*driver*) e a
 outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sprint.
 
+<details>
+  <summary>Programando em par</summary>
+
+  https://github.com/user-attachments/assets/004eabb1-de91-4398-83bb-431249215578
+
+</details>
+
 | Dupla | Funcionalidades em par | Como foi |
 |-------|------------------------|----------|
 | **Luan & Pedro** | [UH4] Boss · [UH5] Dano ao Boss · [UH10] Tempo e Vitória | Luan focou no boss e no dano, Pedro no tempo e na vitória. O difícil foi acertar a hitbox e parar o cronômetro na hora certa. Aprendemos a usar struct e checar colisão. |
 | **Allan & Boniek** | [UH1] Movimentação · [UH2] Disparo · [UH7] Regras de Tentativa · [UH8] Drop | Allan na movimentação e nas regras de tentativa, Boniek nos tiros e nos drops. O chato foi controlar vários tiros sem travar. Aprendemos a usar vetor pros projéteis. |
 | **Caio & Miguel** | [UH3] Vidas · [UH6] Adivinhação · [UH9] Buffs | Miguel na adivinhação, Caio nas vidas e buffs. Confundiu ligar o palpite ao buff e à vida. Aprendemos a comparar o palpite com o número sorteado e aplicar o efeito. |
 
+
+---
 
 <details>
   <summary>[UH1] Movimentação (Base essencial)</summary>
