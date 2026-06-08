@@ -3,7 +3,7 @@
 
 #include "partida.h"
 
-#define MAX_HISTORICO_LINHAS 22
+#define MAX_HISTORICO_LINHAS 128
 #define TAMANHO_LINHA_HISTORICO 180
 #define CAMINHO_HISTORICO "historico_relatorios.txt"
 

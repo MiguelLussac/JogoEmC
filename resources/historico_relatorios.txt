@@ -1,0 +1,120 @@
+[01/03/2026 08:00] [LOGICO] Player derrotado | tempo: 131.3s | expressoes: 8/21 (38.1%) | combo max: 6 | powerups: 1 | buffs: 1
+[03/03/2026 11:07] [ARCADE] Boss derrotado | tempo: 61.9s | tiros: 41 | acertos boss: 39 | precisao: 95.1% | desafios: 1/1 (100.0%) | buffs: 0
+[05/03/2026 14:14] [ARCADE] Player derrotado | tempo: 28.9s | tiros: 70 | acertos boss: 34 | precisao: 48.6% | desafios: 0/8 (0.0%) | buffs: 4
+[07/03/2026 17:21] [ARCADE] Player derrotado | tempo: 79.7s | tiros: 181 | acertos boss: 74 | precisao: 40.9% | desafios: 1/6 (16.7%) | buffs: 3
+[09/03/2026 20:28] [ARCADE] Player derrotado | tempo: 196.8s | tiros: 16 | acertos boss: 7 | precisao: 43.8% | desafios: 2/6 (33.3%) | buffs: 2
+[11/03/2026 09:35] [LOGICO] Boss derrotado | tempo: 66.0s | expressoes: 32/39 (82.1%) | combo max: 3 | powerups: 0 | buffs: 3
+[13/03/2026 12:42] [ARCADE] Player derrotado | tempo: 49.0s | tiros: 103 | acertos boss: 38 | precisao: 36.9% | desafios: 0/0 (0.0%) | buffs: 5
+[15/03/2026 15:49] [ARCADE] Player derrotado | tempo: 157.8s | tiros: 46 | acertos boss: 29 | precisao: 63.0% | desafios: 1/1 (100.0%) | buffs: 6
+[17/03/2026 18:56] [ARCADE] Player derrotado | tempo: 208.6s | tiros: 107 | acertos boss: 78 | precisao: 72.9% | desafios: 0/3 (0.0%) | buffs: 0
+[19/03/2026 21:03] [ARCADE] Boss derrotado | tempo: 218.4s | tiros: 89 | acertos boss: 15 | precisao: 16.9% | desafios: 0/3 (0.0%) | buffs: 3
+[21/03/2026 10:10] [LOGICO] Player derrotado | tempo: 82.5s | expressoes: 28/43 (65.1%) | combo max: 7 | powerups: 1 | buffs: 2
+[23/03/2026 13:17] [ARCADE] Player derrotado | tempo: 126.6s | tiros: 186 | acertos boss: 39 | precisao: 21.0% | desafios: 0/1 (0.0%) | buffs: 4
+[25/03/2026 16:24] [ARCADE] Player derrotado | tempo: 238.7s | tiros: 56 | acertos boss: 34 | precisao: 60.7% | desafios: 2/6 (33.3%) | buffs: 5
+[27/03/2026 19:31] [ARCADE] Boss derrotado | tempo: 226.4s | tiros: 71 | acertos boss: 46 | precisao: 64.8% | desafios: 0/0 (0.0%) | buffs: 1
+[01/03/2026 08:38] [ARCADE] Player derrotado | tempo: 266.5s | tiros: 95 | acertos boss: 56 | precisao: 58.9% | desafios: 0/4 (0.0%) | buffs: 1
+[03/03/2026 11:45] [LOGICO] Player derrotado | tempo: 168.3s | expressoes: 26/39 (66.7%) | combo max: 7 | powerups: 1 | buffs: 3
+[05/03/2026 14:52] [ARCADE] Player derrotado | tempo: 138.7s | tiros: 179 | acertos boss: 63 | precisao: 35.2% | desafios: 1/2 (50.0%) | buffs: 1
+[07/03/2026 17:59] [ARCADE] Boss derrotado | tempo: 94.0s | tiros: 158 | acertos boss: 73 | precisao: 46.2% | desafios: 4/4 (100.0%) | buffs: 3
+[09/03/2026 20:06] [ARCADE] Player derrotado | tempo: 289.3s | tiros: 117 | acertos boss: 51 | precisao: 43.6% | desafios: 1/3 (33.3%) | buffs: 4
+[11/03/2026 09:13] [ARCADE] Player derrotado | tempo: 168.1s | tiros: 27 | acertos boss: 8 | precisao: 29.6% | desafios: 2/2 (100.0%) | buffs: 1
+[13/03/2026 12:20] [LOGICO] Player derrotado | tempo: 151.9s | expressoes: 21/32 (65.6%) | combo max: 3 | powerups: 3 | buffs: 3
+[15/03/2026 15:27] [ARCADE] Boss derrotado | tempo: 198.8s | tiros: 134 | acertos boss: 72 | precisao: 53.7% | desafios: 4/4 (100.0%) | buffs: 6
+[17/03/2026 18:34] [ARCADE] Player derrotado | tempo: 302.7s | tiros: 189 | acertos boss: 19 | precisao: 10.1% | desafios: 4/8 (50.0%) | buffs: 6
+[19/03/2026 21:41] [ARCADE] Player derrotado | tempo: 212.3s | tiros: 43 | acertos boss: 23 | precisao: 53.5% | desafios: 1/6 (16.7%) | buffs: 3
+[21/03/2026 10:48] [ARCADE] Player derrotado | tempo: 21.0s | tiros: 199 | acertos boss: 38 | precisao: 19.1% | desafios: 2/8 (25.0%) | buffs: 4
+[23/03/2026 13:55] [LOGICO] Boss derrotado | tempo: 168.2s | expressoes: 35/47 (74.5%) | combo max: 6 | powerups: 5 | buffs: 4
+[25/03/2026 16:02] [ARCADE] Player derrotado | tempo: 202.7s | tiros: 54 | acertos boss: 28 | precisao: 51.9% | desafios: 2/2 (100.0%) | buffs: 6
+[27/03/2026 19:09] [ARCADE] Player derrotado | tempo: 296.7s | tiros: 15 | acertos boss: 14 | precisao: 93.3% | desafios: 3/5 (60.0%) | buffs: 0
+[01/04/2026 08:16] [ARCADE] Player derrotado | tempo: 53.6s | tiros: 107 | acertos boss: 44 | precisao: 41.1% | desafios: 0/3 (0.0%) | buffs: 1
+[03/04/2026 11:23] [ARCADE] Boss derrotado | tempo: 283.4s | tiros: 35 | acertos boss: 7 | precisao: 20.0% | desafios: 1/7 (14.3%) | buffs: 6
+[05/04/2026 14:30] [LOGICO] Player derrotado | tempo: 116.9s | expressoes: 12/16 (75.0%) | combo max: 12 | powerups: 3 | buffs: 4
+[07/04/2026 17:37] [ARCADE] Player derrotado | tempo: 69.5s | tiros: 150 | acertos boss: 59 | precisao: 39.3% | desafios: 1/3 (33.3%) | buffs: 5
+[09/04/2026 20:44] [ARCADE] Player derrotado | tempo: 113.5s | tiros: 186 | acertos boss: 52 | precisao: 28.0% | desafios: 7/7 (100.0%) | buffs: 0
+[11/04/2026 09:51] [ARCADE] Boss derrotado | tempo: 94.4s | tiros: 31 | acertos boss: 15 | precisao: 48.4% | desafios: 0/0 (0.0%) | buffs: 4
+[13/04/2026 12:58] [ARCADE] Player derrotado | tempo: 186.2s | tiros: 165 | acertos boss: 33 | precisao: 20.0% | desafios: 0/0 (0.0%) | buffs: 0
+[15/04/2026 15:05] [LOGICO] Player derrotado | tempo: 140.6s | expressoes: 9/14 (64.3%) | combo max: 3 | powerups: 0 | buffs: 2
+[17/04/2026 18:12] [ARCADE] Player derrotado | tempo: 41.3s | tiros: 75 | acertos boss: 40 | precisao: 53.3% | desafios: 3/7 (42.9%) | buffs: 4
+[19/04/2026 21:19] [ARCADE] Boss derrotado | tempo: 59.7s | tiros: 161 | acertos boss: 78 | precisao: 48.4% | desafios: 3/7 (42.9%) | buffs: 6
+[21/04/2026 10:26] [ARCADE] Player derrotado | tempo: 161.9s | tiros: 119 | acertos boss: 29 | precisao: 24.4% | desafios: 0/1 (0.0%) | buffs: 5
+[23/04/2026 13:33] [ARCADE] Player derrotado | tempo: 149.3s | tiros: 123 | acertos boss: 57 | precisao: 46.3% | desafios: 0/7 (0.0%) | buffs: 5
+[25/04/2026 16:40] [LOGICO] Player derrotado | tempo: 133.2s | expressoes: 28/31 (90.3%) | combo max: 2 | powerups: 3 | buffs: 2
+[27/04/2026 19:47] [ARCADE] Boss derrotado | tempo: 260.2s | tiros: 42 | acertos boss: 20 | precisao: 47.6% | desafios: 1/3 (33.3%) | buffs: 4
+[01/04/2026 08:54] [ARCADE] Player derrotado | tempo: 154.6s | tiros: 123 | acertos boss: 28 | precisao: 22.8% | desafios: 3/4 (75.0%) | buffs: 1
+[03/04/2026 11:01] [ARCADE] Player derrotado | tempo: 282.3s | tiros: 34 | acertos boss: 19 | precisao: 55.9% | desafios: 1/8 (12.5%) | buffs: 0
+[05/04/2026 14:08] [ARCADE] Player derrotado | tempo: 215.6s | tiros: 153 | acertos boss: 6 | precisao: 3.9% | desafios: 0/1 (0.0%) | buffs: 1
+[07/04/2026 17:15] [LOGICO] Boss derrotado | tempo: 99.9s | expressoes: 23/28 (82.1%) | combo max: 8 | powerups: 0 | buffs: 1
+[09/04/2026 20:22] [ARCADE] Player derrotado | tempo: 133.7s | tiros: 114 | acertos boss: 38 | precisao: 33.3% | desafios: 4/7 (57.1%) | buffs: 3
+[11/04/2026 09:29] [ARCADE] Player derrotado | tempo: 229.0s | tiros: 157 | acertos boss: 67 | precisao: 42.7% | desafios: 0/2 (0.0%) | buffs: 2
+[13/04/2026 12:36] [ARCADE] Player derrotado | tempo: 85.3s | tiros: 29 | acertos boss: 23 | precisao: 79.3% | desafios: 0/8 (0.0%) | buffs: 5
+[15/04/2026 15:43] [ARCADE] Boss derrotado | tempo: 114.1s | tiros: 27 | acertos boss: 23 | precisao: 85.2% | desafios: 2/7 (28.6%) | buffs: 0
+[17/04/2026 18:50] [LOGICO] Player derrotado | tempo: 174.7s | expressoes: 10/25 (40.0%) | combo max: 4 | powerups: 0 | buffs: 4
+[19/04/2026 21:57] [ARCADE] Player derrotado | tempo: 40.4s | tiros: 75 | acertos boss: 56 | precisao: 74.7% | desafios: 0/1 (0.0%) | buffs: 4
+[21/04/2026 10:04] [ARCADE] Player derrotado | tempo: 198.4s | tiros: 173 | acertos boss: 15 | precisao: 8.7% | desafios: 5/6 (83.3%) | buffs: 4
+[23/04/2026 13:11] [ARCADE] Boss derrotado | tempo: 189.6s | tiros: 95 | acertos boss: 38 | precisao: 40.0% | desafios: 2/3 (66.7%) | buffs: 1
+[25/04/2026 16:18] [ARCADE] Player derrotado | tempo: 99.7s | tiros: 48 | acertos boss: 47 | precisao: 97.9% | desafios: 3/4 (75.0%) | buffs: 2
+[27/04/2026 19:25] [LOGICO] Player derrotado | tempo: 170.4s | expressoes: 10/12 (83.3%) | combo max: 9 | powerups: 4 | buffs: 4
+[01/05/2026 08:32] [ARCADE] Player derrotado | tempo: 318.8s | tiros: 33 | acertos boss: 22 | precisao: 66.7% | desafios: 2/3 (66.7%) | buffs: 1
+[03/05/2026 11:39] [ARCADE] Boss derrotado | tempo: 300.0s | tiros: 32 | acertos boss: 12 | precisao: 37.5% | desafios: 2/5 (40.0%) | buffs: 1
+[05/05/2026 14:46] [ARCADE] Player derrotado | tempo: 151.5s | tiros: 154 | acertos boss: 43 | precisao: 27.9% | desafios: 0/8 (0.0%) | buffs: 5
+[07/05/2026 17:53] [ARCADE] Player derrotado | tempo: 265.1s | tiros: 91 | acertos boss: 18 | precisao: 19.8% | desafios: 1/2 (50.0%) | buffs: 0
+[09/05/2026 20:00] [LOGICO] Player derrotado | tempo: 165.1s | expressoes: 31/41 (75.6%) | combo max: 4 | powerups: 2 | buffs: 2
+[11/05/2026 09:07] [ARCADE] Boss derrotado | tempo: 201.4s | tiros: 198 | acertos boss: 48 | precisao: 24.2% | desafios: 2/3 (66.7%) | buffs: 4
+[13/05/2026 12:14] [ARCADE] Player derrotado | tempo: 166.6s | tiros: 28 | acertos boss: 7 | precisao: 25.0% | desafios: 6/6 (100.0%) | buffs: 2
+[15/05/2026 15:21] [ARCADE] Player derrotado | tempo: 33.2s | tiros: 100 | acertos boss: 21 | precisao: 21.0% | desafios: 1/4 (25.0%) | buffs: 5
+[17/05/2026 18:28] [ARCADE] Player derrotado | tempo: 152.6s | tiros: 195 | acertos boss: 59 | precisao: 30.3% | desafios: 0/8 (0.0%) | buffs: 0
+[19/05/2026 21:35] [LOGICO] Boss derrotado | tempo: 55.2s | expressoes: 30/34 (88.2%) | combo max: 10 | powerups: 0 | buffs: 2
+[21/05/2026 10:42] [ARCADE] Player derrotado | tempo: 194.8s | tiros: 52 | acertos boss: 32 | precisao: 61.5% | desafios: 0/2 (0.0%) | buffs: 2
+[23/05/2026 13:49] [ARCADE] Player derrotado | tempo: 129.4s | tiros: 25 | acertos boss: 16 | precisao: 64.0% | desafios: 1/3 (33.3%) | buffs: 5
+[25/05/2026 16:56] [ARCADE] Player derrotado | tempo: 50.8s | tiros: 158 | acertos boss: 57 | precisao: 36.1% | desafios: 0/2 (0.0%) | buffs: 6
+[27/05/2026 19:03] [ARCADE] Boss derrotado | tempo: 68.8s | tiros: 60 | acertos boss: 31 | precisao: 51.7% | desafios: 0/0 (0.0%) | buffs: 1
+[01/05/2026 08:10] [LOGICO] Player derrotado | tempo: 144.4s | expressoes: 18/32 (56.2%) | combo max: 8 | powerups: 5 | buffs: 1
+[03/05/2026 11:17] [ARCADE] Player derrotado | tempo: 100.0s | tiros: 194 | acertos boss: 18 | precisao: 9.3% | desafios: 6/6 (100.0%) | buffs: 0
+[05/05/2026 14:24] [ARCADE] Player derrotado | tempo: 277.6s | tiros: 71 | acertos boss: 30 | precisao: 42.3% | desafios: 5/7 (71.4%) | buffs: 2
+[07/05/2026 17:31] [ARCADE] Boss derrotado | tempo: 266.2s | tiros: 73 | acertos boss: 33 | precisao: 45.2% | desafios: 0/0 (0.0%) | buffs: 5
+[09/05/2026 20:38] [ARCADE] Player derrotado | tempo: 77.9s | tiros: 99 | acertos boss: 40 | precisao: 40.4% | desafios: 1/1 (100.0%) | buffs: 2
+[11/05/2026 09:45] [LOGICO] Player derrotado | tempo: 131.6s | expressoes: 20/32 (62.5%) | combo max: 10 | powerups: 2 | buffs: 0
+[13/05/2026 12:52] [ARCADE] Player derrotado | tempo: 54.6s | tiros: 81 | acertos boss: 27 | precisao: 33.3% | desafios: 0/4 (0.0%) | buffs: 0
+[15/05/2026 15:59] [ARCADE] Boss derrotado | tempo: 199.0s | tiros: 103 | acertos boss: 45 | precisao: 43.7% | desafios: 4/6 (66.7%) | buffs: 4
+[17/05/2026 18:06] [ARCADE] Player derrotado | tempo: 54.7s | tiros: 162 | acertos boss: 29 | precisao: 17.9% | desafios: 0/4 (0.0%) | buffs: 5
+[19/05/2026 21:13] [ARCADE] Player derrotado | tempo: 150.8s | tiros: 148 | acertos boss: 73 | precisao: 49.3% | desafios: 2/3 (66.7%) | buffs: 3
+[21/05/2026 10:20] [LOGICO] Player derrotado | tempo: 54.4s | expressoes: 29/36 (80.6%) | combo max: 11 | powerups: 2 | buffs: 0
+[23/05/2026 13:27] [ARCADE] Boss derrotado | tempo: 235.9s | tiros: 91 | acertos boss: 69 | precisao: 75.8% | desafios: 3/4 (75.0%) | buffs: 2
+[25/05/2026 16:34] [ARCADE] Player derrotado | tempo: 140.7s | tiros: 90 | acertos boss: 75 | precisao: 83.3% | desafios: 0/2 (0.0%) | buffs: 3
+[27/05/2026 19:41] [ARCADE] Player derrotado | tempo: 219.5s | tiros: 112 | acertos boss: 27 | precisao: 24.1% | desafios: 3/4 (75.0%) | buffs: 4
+[01/06/2026 08:48] [ARCADE] Player derrotado | tempo: 270.1s | tiros: 92 | acertos boss: 41 | precisao: 44.6% | desafios: 3/3 (100.0%) | buffs: 6
+[03/06/2026 11:55] [LOGICO] Boss derrotado | tempo: 123.3s | expressoes: 28/35 (80.0%) | combo max: 9 | powerups: 3 | buffs: 3
+[05/06/2026 14:02] [ARCADE] Player derrotado | tempo: 222.7s | tiros: 145 | acertos boss: 65 | precisao: 44.8% | desafios: 2/2 (100.0%) | buffs: 0
+[07/06/2026 17:09] [ARCADE] Player derrotado | tempo: 105.1s | tiros: 184 | acertos boss: 47 | precisao: 25.5% | desafios: 0/1 (0.0%) | buffs: 5
+[09/06/2026 20:16] [ARCADE] Player derrotado | tempo: 113.1s | tiros: 65 | acertos boss: 14 | precisao: 21.5% | desafios: 0/0 (0.0%) | buffs: 0
+[11/06/2026 09:23] [ARCADE] Boss derrotado | tempo: 93.5s | tiros: 136 | acertos boss: 14 | precisao: 10.3% | desafios: 6/7 (85.7%) | buffs: 5
+[13/06/2026 12:30] [LOGICO] Player derrotado | tempo: 122.7s | expressoes: 30/43 (69.8%) | combo max: 8 | powerups: 3 | buffs: 3
+[15/06/2026 15:37] [ARCADE] Player derrotado | tempo: 93.2s | tiros: 182 | acertos boss: 5 | precisao: 2.7% | desafios: 1/1 (100.0%) | buffs: 1
+[17/06/2026 18:44] [ARCADE] Player derrotado | tempo: 72.8s | tiros: 193 | acertos boss: 71 | precisao: 36.8% | desafios: 0/7 (0.0%) | buffs: 4
+[19/06/2026 21:51] [ARCADE] Boss derrotado | tempo: 94.8s | tiros: 46 | acertos boss: 34 | precisao: 73.9% | desafios: 1/2 (50.0%) | buffs: 5
+[21/06/2026 10:58] [ARCADE] Player derrotado | tempo: 179.3s | tiros: 158 | acertos boss: 45 | precisao: 28.5% | desafios: 6/7 (85.7%) | buffs: 6
+[23/06/2026 13:05] [LOGICO] Player derrotado | tempo: 167.4s | expressoes: 22/26 (84.6%) | combo max: 9 | powerups: 3 | buffs: 2
+[25/06/2026 16:12] [ARCADE] Player derrotado | tempo: 245.5s | tiros: 178 | acertos boss: 40 | precisao: 22.5% | desafios: 7/8 (87.5%) | buffs: 5
+[27/06/2026 19:19] [ARCADE] Boss derrotado | tempo: 91.8s | tiros: 127 | acertos boss: 14 | precisao: 11.0% | desafios: 1/4 (25.0%) | buffs: 2
+[01/06/2026 08:26] [ARCADE] Player derrotado | tempo: 120.8s | tiros: 153 | acertos boss: 15 | precisao: 9.8% | desafios: 0/2 (0.0%) | buffs: 1
+[03/06/2026 11:33] [ARCADE] Player derrotado | tempo: 134.9s | tiros: 54 | acertos boss: 50 | precisao: 92.6% | desafios: 0/3 (0.0%) | buffs: 3
+[05/06/2026 14:40] [LOGICO] Player derrotado | tempo: 100.0s | expressoes: 25/34 (73.5%) | combo max: 8 | powerups: 0 | buffs: 1
+[07/06/2026 17:47] [ARCADE] Boss derrotado | tempo: 269.9s | tiros: 114 | acertos boss: 79 | precisao: 69.3% | desafios: 0/0 (0.0%) | buffs: 6
+[09/06/2026 20:54] [ARCADE] Player derrotado | tempo: 284.2s | tiros: 162 | acertos boss: 53 | precisao: 32.7% | desafios: 0/7 (0.0%) | buffs: 2
+[11/06/2026 09:01] [ARCADE] Player derrotado | tempo: 109.6s | tiros: 114 | acertos boss: 58 | precisao: 50.9% | desafios: 8/8 (100.0%) | buffs: 6
+[13/06/2026 12:08] [ARCADE] Player derrotado | tempo: 201.0s | tiros: 71 | acertos boss: 67 | precisao: 94.4% | desafios: 2/3 (66.7%) | buffs: 3
+[15/06/2026 15:15] [LOGICO] Boss derrotado | tempo: 110.6s | expressoes: 20/27 (74.1%) | combo max: 12 | powerups: 5 | buffs: 3
+[17/06/2026 18:22] [ARCADE] Player derrotado | tempo: 237.3s | tiros: 134 | acertos boss: 21 | precisao: 15.7% | desafios: 0/8 (0.0%) | buffs: 3
+[19/06/2026 21:29] [ARCADE] Player derrotado | tempo: 197.6s | tiros: 184 | acertos boss: 8 | precisao: 4.3% | desafios: 1/1 (100.0%) | buffs: 1
+[21/06/2026 10:36] [ARCADE] Player derrotado | tempo: 280.1s | tiros: 61 | acertos boss: 8 | precisao: 13.1% | desafios: 3/4 (75.0%) | buffs: 2
+[23/06/2026 13:43] [ARCADE] Boss derrotado | tempo: 83.5s | tiros: 98 | acertos boss: 48 | precisao: 49.0% | desafios: 2/6 (33.3%) | buffs: 6
+[25/06/2026 16:50] [LOGICO] Player derrotado | tempo: 173.4s | expressoes: 21/27 (77.8%) | combo max: 3 | powerups: 3 | buffs: 0
+[27/06/2026 19:57] [ARCADE] Player derrotado | tempo: 244.7s | tiros: 28 | acertos boss: 16 | precisao: 57.1% | desafios: 0/3 (0.0%) | buffs: 6
+[01/03/2026 08:04] [ARCADE] Player derrotado | tempo: 307.2s | tiros: 25 | acertos boss: 5 | precisao: 20.0% | desafios: 1/3 (33.3%) | buffs: 6
+[03/03/2026 11:11] [ARCADE] Boss derrotado | tempo: 26.1s | tiros: 54 | acertos boss: 20 | precisao: 37.0% | desafios: 1/2 (50.0%) | buffs: 5
+[05/03/2026 14:18] [ARCADE] Player derrotado | tempo: 54.3s | tiros: 70 | acertos boss: 64 | precisao: 91.4% | desafios: 2/4 (50.0%) | buffs: 1
+[07/03/2026 17:25] [LOGICO] Player derrotado | tempo: 126.8s | expressoes: 31/44 (70.5%) | combo max: 3 | powerups: 1 | buffs: 2
+[09/03/2026 20:32] [ARCADE] Player derrotado | tempo: 52.4s | tiros: 21 | acertos boss: 14 | precisao: 66.7% | desafios: 3/6 (50.0%) | buffs: 5
+[11/03/2026 09:39] [ARCADE] Boss derrotado | tempo: 79.5s | tiros: 166 | acertos boss: 36 | precisao: 21.7% | desafios: 1/1 (100.0%) | buffs: 6
+[13/03/2026 12:46] [ARCADE] Player derrotado | tempo: 225.3s | tiros: 45 | acertos boss: 41 | precisao: 91.1% | desafios: 0/0 (0.0%) | buffs: 2
+[15/03/2026 15:53] [ARCADE] Player derrotado | tempo: 179.8s | tiros: 184 | acertos boss: 52 | precisao: 28.3% | desafios: 1/1 (100.0%) | buffs: 0
