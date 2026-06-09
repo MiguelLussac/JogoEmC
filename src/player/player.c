@@ -6,8 +6,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#define PLAYER_RADIUS 20
-
 // Move o jogador no eixo X e limita a posicao dentro da largura da tela.
 void moverEsquerdaDireita(Player* player, float deltaTime) {
     float limiteEsquerda = PLAYER_RADIUS;
@@ -210,12 +208,17 @@ bool aplicarBoostAleatorioPlayer(Player* player, char* mensagem, int tamMensagem
     return false;
 }
 
-// Atualiza as balas do jogador e desativa as que saem pelo topo da tela.
+// Atualiza as balas do jogador e desativa as que saem por qualquer borda da tela.
 void moverBalas(Bullet bullets[], int count, float deltaTime) {
+    float limiteX = (float)GetScreenWidth();
+    float limiteY = (float)GetScreenHeight();
     for (int i = 0; i < count; i++) {
         if (bullets[i].ativa) {
             bullets[i].posicaoY -= bullets[i].velocidade * deltaTime;
-            if (bullets[i].posicaoY < 0) {
+            if (bullets[i].posicaoY < 0 ||
+                bullets[i].posicaoY > limiteY ||
+                bullets[i].posicaoX < 0 ||
+                bullets[i].posicaoX > limiteX) {
                 bullets[i].ativa = false;
             }
         }
@@ -257,7 +260,7 @@ void atirar(Player* player, Bullet bullets[], int count, float deltaTime) {
         if (!bullets[i].ativa) {
             bullets[i].posicaoX = player->posicaoX;
             bullets[i].posicaoY = player->posicaoY - PLAYER_RADIUS;
-            bullets[i].velocidade = 500.0f;
+            bullets[i].velocidade = PLAYER_BULLET_SPEED;
             bullets[i].dano = player->danoTiro > 0 ? player->danoTiro : PLAYER_BASE_BULLET_DAMAGE;
             bullets[i].ativa = true;
             player->tempoCooldownTiro = PLAYER_FIRE_COOLDOWN;
