@@ -78,7 +78,7 @@ function Start-TrilhaHost {
             return $false
         }
 
-        [void](Invoke-MciCommand -Command "setaudio trilha volume to 450")
+        [void](Invoke-MciCommand -Command "setaudio trilha volume to 150")
         if (-not (Invoke-MciCommand -Command "play trilha repeat")) {
             [void](Invoke-MciCommand -Command "close trilha" -SilentError)
             Write-Output "Aviso: nao foi possivel iniciar reproducao da trilha no host."
@@ -118,7 +118,7 @@ function Play-TiroHost {
         $sfxPath = (Resolve-Path $sfx).Path
         [void](Invoke-MciCommand -Command "close sfx_tiro" -SilentError)
         if (-not (Invoke-MciCommand -Command ('open "' + $sfxPath + '" type mpegvideo alias sfx_tiro'))) { return }
-        [void](Invoke-MciCommand -Command "setaudio sfx_tiro volume to 550")
+        [void](Invoke-MciCommand -Command "setaudio sfx_tiro volume to 400")
         [void](Invoke-MciCommand -Command "play sfx_tiro" -SilentError)
     }
     catch { }
