@@ -1,9 +1,15 @@
 #include "partida.h"
 #include "screen_config.h"
 
-void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, BossBullet balasBoss[],
-                        Estrela* estrela, DesafioPergunta* desafio, bool* perguntaAtiva,
-                        bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, EstatisticasPartida* stats) {
+void inicializarPartida(ContextoPartida* ctx) {
+    Player*              jogador       = ctx->jogador;
+    Bullet*              balasJogador  = ctx->balasJogador;
+    Boss*                boss          = ctx->boss;
+    BossBullet*          balasBoss     = ctx->balasBoss;
+    Estrela*             estrela       = ctx->estrela;
+    DesafioPergunta*     desafio       = ctx->desafio;
+    EstatisticasPartida* stats         = ctx->stats;
+
     jogador->posicaoX = SCREEN_WIDTH / 2.0f;
     jogador->posicaoY = SCREEN_HEIGHT - 100.0f;
     jogador->velocidade = PLAYER_BASE_SPEED;
@@ -18,11 +24,11 @@ void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, Boss
     jogador->tempoCooldownTiro = 0.0f;
 
     for (int i = 0; i < MAX_BULLETS; i++) {
-        balasJogador[i].posicaoX = SCREEN_WIDTH / 2.0f;
-        balasJogador[i].posicaoY = SCREEN_HEIGHT - 100.0f;
-        balasJogador[i].velocidade = 500.0f;
-        balasJogador[i].dano = PLAYER_BASE_BULLET_DAMAGE;
-        balasJogador[i].ativa = false;
+        balasJogador[i].posicaoX  = SCREEN_WIDTH / 2.0f;
+        balasJogador[i].posicaoY  = SCREEN_HEIGHT - 100.0f;
+        balasJogador[i].velocidade = PLAYER_BULLET_SPEED;
+        balasJogador[i].dano      = PLAYER_BASE_BULLET_DAMAGE;
+        balasJogador[i].ativa     = false;
     }
 
     inicializarBoss(boss);
@@ -30,21 +36,21 @@ void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, Boss
     inicializarEstrela(estrela);
     inicializarDesafio(desafio);
 
-    *perguntaAtiva = false;
-    *jogoEncerrado = false;
-    *motivoFimJogo = FIM_JOGO_NENHUM;
+    *ctx->perguntaAtiva  = false;
+    *ctx->jogoEncerrado  = false;
+    *ctx->motivoFimJogo  = FIM_JOGO_NENHUM;
 
-    stats->tirosAtirados = 0;
-    stats->acertosNoBoss = 0;
-    stats->desafiosIniciados = 0;
-    stats->desafiosVencidos = 0;
-    stats->tempoPartida = 0.0f;
-    stats->logicAcertos = 0;
-    stats->logicErros = 0;
-    stats->logicComboMax = 0;
-    stats->logicPowerUps = 0;
-    stats->logicBuffs = 0;
-    stats->arcadeBuffs = 0;
+    stats->tirosAtirados      = 0;
+    stats->acertosNoBoss      = 0;
+    stats->desafiosIniciados  = 0;
+    stats->desafiosVencidos   = 0;
+    stats->tempoPartida       = 0.0f;
+    stats->logicAcertos       = 0;
+    stats->logicErros         = 0;
+    stats->logicComboMax      = 0;
+    stats->logicPowerUps      = 0;
+    stats->logicBuffs         = 0;
+    stats->arcadeBuffs        = 0;
 }
 
 const char* textoMotivoFimJogo(MotivoFimJogo motivoFimJogo) {

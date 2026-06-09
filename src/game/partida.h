@@ -6,7 +6,7 @@
 #include "../boss/boss.h"
 #include "questions.h"
 
-#define MAX_BULLETS 10
+#define MAX_BULLETS 20
 #define MAX_BOSS_BULLETS 96
 
 typedef enum {
@@ -44,9 +44,20 @@ typedef struct {
     int arcadeBuffs;
 } EstatisticasPartida;
 
-void inicializarPartida(Player* jogador, Bullet balasJogador[], Boss* boss, BossBullet balasBoss[],
-                        Estrela* estrela, DesafioPergunta* desafio, bool* perguntaAtiva,
-                        bool* jogoEncerrado, MotivoFimJogo* motivoFimJogo, EstatisticasPartida* stats);
+typedef struct {
+    Player*              jogador;
+    Bullet*              balasJogador;
+    Boss*                boss;
+    BossBullet*          balasBoss;
+    Estrela*             estrela;
+    DesafioPergunta*     desafio;
+    bool*                perguntaAtiva;
+    bool*                jogoEncerrado;
+    MotivoFimJogo*       motivoFimJogo;
+    EstatisticasPartida* stats;
+} ContextoPartida;
+
+void inicializarPartida(ContextoPartida* ctx);
 
 const char* textoMotivoFimJogo(MotivoFimJogo motivoFimJogo);
 

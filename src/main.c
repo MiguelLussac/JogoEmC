@@ -595,7 +595,19 @@ int main () {
     ModoJogo modoAtual = MODO_ARCADE;
     int opcaoModo = 0;
 
-    inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
+    ContextoPartida ctx = {
+        .jogador      = &jogador,
+        .balasJogador = bala,
+        .boss         = &boss,
+        .balasBoss    = balasBoss,
+        .estrela      = &estrela,
+        .desafio      = &desafio,
+        .perguntaAtiva = &perguntaAtiva,
+        .jogoEncerrado = &jogoEncerrado,
+        .motivoFimJogo = &motivoFimJogo,
+        .stats         = &stats
+    };
+    inicializarPartida(&ctx);
     inicializarAudio();
     vfxInicializar();
 
@@ -645,7 +657,19 @@ int main () {
             }
             if (IsKeyPressed(KEY_ENTER)) {
                 modoAtual = (opcaoModo == 0) ? MODO_ARCADE : MODO_LOGICO;
-                inicializarPartida(&jogador, bala, &boss, balasBoss, &estrela, &desafio, &perguntaAtiva, &jogoEncerrado, &motivoFimJogo, &stats);
+                ContextoPartida ctxReinicio = {
+                    .jogador      = &jogador,
+                    .balasJogador = bala,
+                    .boss         = &boss,
+                    .balasBoss    = balasBoss,
+                    .estrela      = &estrela,
+                    .desafio      = &desafio,
+                    .perguntaAtiva = &perguntaAtiva,
+                    .jogoEncerrado = &jogoEncerrado,
+                    .motivoFimJogo = &motivoFimJogo,
+                    .stats         = &stats
+                };
+                inicializarPartida(&ctxReinicio);
                 stats.modo = modoAtual;
                 relatorioSalvo = false;
                 if (modoAtual == MODO_LOGICO) {

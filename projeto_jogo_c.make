@@ -122,14 +122,24 @@ GENERATED += $(OBJDIR)/boss.o
 GENERATED += $(OBJDIR)/game.o
 GENERATED += $(OBJDIR)/history.o
 GENERATED += $(OBJDIR)/main.o
+GENERATED += $(OBJDIR)/partida.o
 GENERATED += $(OBJDIR)/player.o
 GENERATED += $(OBJDIR)/questions.o
+GENERATED += $(OBJDIR)/analise.o
+GENERATED += $(OBJDIR)/audio.o
+GENERATED += $(OBJDIR)/logic_phase.o
+GENERATED += $(OBJDIR)/vfx.o
 OBJECTS += $(OBJDIR)/boss.o
 OBJECTS += $(OBJDIR)/game.o
 OBJECTS += $(OBJDIR)/history.o
 OBJECTS += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/partida.o
 OBJECTS += $(OBJDIR)/player.o
 OBJECTS += $(OBJDIR)/questions.o
+OBJECTS += $(OBJDIR)/analise.o
+OBJECTS += $(OBJDIR)/audio.o
+OBJECTS += $(OBJDIR)/logic_phase.o
+OBJECTS += $(OBJDIR)/vfx.o
 
 # Rules
 # #############################################
@@ -209,6 +219,21 @@ $(OBJDIR)/main.o: src/main.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/player.o: src/player/player.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/partida.o: src/game/partida.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/analise.o: src/analysis/analise.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/audio.o: src/audio/audio.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/logic_phase.o: src/logic/logic_phase.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/vfx.o: src/visual/vfx.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

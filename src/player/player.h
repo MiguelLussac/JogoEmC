@@ -19,6 +19,7 @@
 #define PLAYER_SPEED_BOOST_MULTIPLIER 1.5f
 #define PLAYER_SPEED_BOOST_DURATION 10.0f
 #define PLAYER_FIRE_COOLDOWN 0.32f
+#define PLAYER_BULLET_SPEED  500.0f
 
 // Estado principal do jogador usado por movimento, vida e feedback visual.
 typedef struct {
