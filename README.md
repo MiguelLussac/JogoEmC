@@ -106,7 +106,12 @@ outra revisando e dando ideia (*navigator*), revezando os papéis ao longo da sp
 | **Luan & Pedro** | [UH4] Boss · [UH5] Dano ao Boss · [UH10] Tempo e Vitória | Luan focou no boss e no dano, Pedro no tempo e na vitória. O difícil foi acertar a hitbox e parar o cronômetro na hora certa. Aprendemos a usar struct e checar colisão. |
 | **Allan & Boniek** | [UH1] Movimentação · [UH2] Disparo · [UH7] Regras de Tentativa · [UH8] Drop | Allan na movimentação e nas regras de tentativa, Boniek nos tiros e nos drops. O chato foi controlar vários tiros sem travar. Aprendemos a usar vetor pros projéteis. |
 | **Caio & Miguel** | [UH3] Vidas · [UH6] Adivinhação · [UH9] Buffs | Miguel na adivinhação, Caio nas vidas e buffs. Confundiu ligar o palpite ao buff e à vida. Aprendemos a comparar o palpite com o número sorteado e aplicar o efeito. |
-
+| **Luan & Pedro** | [UH4] Boss · [UH2] Disparo de Projéteis | Luan trabalhou no design do boss e do cenário enquanto Pedro ajustou os visuais dos projéteis. O desafio foi manter uma identidade visual consistente entre os elementos do jogo. Aprendemos a integrar melhor os assets gráficos ao projeto. |
+| **Allan & Boniek** | [UH4] Boss · [UH2] Disparo de Projéteis | Allan focou na movimentação do boss e Boniek nos padrões de disparo. O difícil foi equilibrar o comportamento do inimigo para deixá-lo desafiador sem ficar injusto. Aprendemos a estruturar comportamentos mais complexos utilizando condições e estados. |
+| **Caio & Miguel** | [UH8] Drop de Atributos · [UH9] Aplicação de Buffs | Caio implementou melhorias no sistema de drops enquanto Miguel realizou testes e ajustes nos efeitos recebidos pelo jogador. O desafio foi manter uma distribuição equilibrada dos atributos durante a partida. Aprendemos a validar mecânicas de recompensa e progressão. |
+| **Luan & Pedro** | [UH10] Sistema de Tempo e Vitória | Luan ajustou os controles de áudio enquanto Pedro revisou os testes. O desafio foi garantir que o volume da música fosse aplicado corretamente durante toda a partida. Aprendemos a organizar melhor as configurações de som do jogo. |
+| **Allan & Boniek** | [UH1] Movimentação | Allan trabalhou na movimentação e Boniek ajudou na validação dos cenários. O difícil foi identificar por que o personagem não conseguia alcançar um dos cantos da tela. Aprendemos a revisar os limites de movimentação e as condições aplicadas ao jogador. |
+| **Caio & Miguel** | [UH6] Sistema de Adivinhação · [UH7] Regras de Tentativa | Miguel revisou as condições existentes e Caio implementou os ajustes necessários. O desafio foi encontrar expressões lógicas que não representavam corretamente as regras do jogo. Aprendemos a simplificar condições para deixar o código mais claro e confiável. |
 
 ---
 
