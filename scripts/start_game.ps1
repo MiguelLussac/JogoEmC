@@ -24,7 +24,13 @@ function Start-VcXsrv {
 # Se o script estiver em scripts/, sobe um nível para a raiz do projeto
 $scriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 $projectRoot = Resolve-Path (Join-Path $scriptDir "..")
+$composeFile = Join-Path $projectRoot "docker\docker-compose.yml"
 Set-Location $projectRoot
+
+function Invoke-DockerCompose {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
+    docker compose -f $composeFile @Args
+}
 
 function Ensure-MciApi {
     if ("WinMci" -as [type]) { return }
@@ -58,13 +64,9 @@ function Invoke-MciCommand {
 }
 
 function Start-TrilhaHost {
-    $candidatos = @(
-        (Join-Path $projectRoot "resources\musica\trilha.mp3"),
-        (Join-Path $projectRoot "musica\THE FLIPSIDE - boggio (youtube).mp3")
-    )
-    $trilha = $candidatos | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if (-not $trilha) {
-        Write-Output "Aviso: nenhum arquivo de trilha encontrado em resources/musica ou musica/."
+    $trilha = Join-Path $projectRoot "resources\musica\trilha.mp3"
+    if (-not (Test-Path $trilha)) {
+        Write-Output "Aviso: nenhum arquivo de trilha encontrado em resources/musica."
         return $false
     }
 
@@ -106,12 +108,8 @@ function Stop-TrilhaHost($trilhaAtiva) {
 }
 
 function Play-TiroHost {
-    $candidatos = @(
-        (Join-Path $projectRoot "musica\freesound_community-shoot-5-102360.mp3"),
-        (Join-Path $projectRoot "resources\musica\freesound_community-shoot-5-102360.mp3")
-    )
-    $sfx = $candidatos | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if (-not $sfx) { return }
+    $sfx = Join-Path $projectRoot "resources\musica\freesound_community-shoot-5-102360.mp3"
+    if (-not (Test-Path $sfx)) { return }
 
     try {
         Ensure-MciApi
@@ -127,12 +125,12 @@ function Play-TiroHost {
 if (-not $Headless) {
     Start-VcXsrv
     Write-Output "Atualizando imagem Docker com o codigo atual..."
-    docker compose build minddrop
+    Invoke-DockerCompose build minddrop
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     Write-Output "Iniciando o jogo (GUI). Pressione Ctrl+C para sair..."
     $trilhaHost = $false
     try {
-        docker compose run --rm -e DISPLAY=host.docker.internal:0.0 minddrop 2>&1 | ForEach-Object {
+        Invoke-DockerCompose run --rm -e DISPLAY=host.docker.internal:0.0 minddrop 2>&1 | ForEach-Object {
             $line = $_.ToString()
             Write-Output $line
             if ($line -match '\[MINDDROP\] MUSIC:START') {
@@ -155,7 +153,7 @@ if (-not $Headless) {
 }
 else {
     Write-Output "Executando teste headless (xvfb-run)..."
-    docker compose build minddrop
+    Invoke-DockerCompose build minddrop
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    docker compose run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
+    Invoke-DockerCompose run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
 }

@@ -49,28 +49,24 @@ Ao final, o jogo gera um relatório com médias de acertos e sugestões de estra
 
 ```text
 MindDrop/
-├── src/
-│   ├── main.c                   # Ponto de entrada e loop principal do jogo
-│   ├── application.rc           # Recursos da aplicação no Windows
-│   └── icon.ico                 # Ícone da aplicação
-├── include/
-│   └── resource_dir.h           # Utilitário para localizar a pasta de recursos
-├── resources/
-│   ├── coracao.png              # Recurso gráfico adicional
-│   ├── heart.png                # Sprite carregada no projeto
-│   └── wabbit_alpha.png         # Imagem de exemplo do template
-├── build/
-│   ├── premake5                 # Binário/script de build
-│   ├── premake5.exe             # Executável do Premake para Windows
-│   ├── premake5.lua             # Configuração de geração de projeto
-│   ├── premake5.osx             # Script de build para macOS
-│   └── ecc/                     # Dependências auxiliares do sistema de build
-├── build-MinGW-W64.bat          # Build para MinGW no Windows
-├── build-VisualStudio2022.bat   # Build para Visual Studio 2022
-├── build-VisualStudio2026.bat   # Build para Visual Studio 2026
-├── Makefile                     # Orquestra a build completa do workspace
-├── raylib.make                  # Configuração de build da biblioteca raylib
-├── MindDrop.make                # Makefile gerado para o executável do jogo
+├── src/                         # Código-fonte do jogo
+├── include/                     # Headers compartilhados
+├── resources/                   # Assets (sprites, áudio, histórico)
+├── build/                       # Premake, ECC e artefatos de build
+├── docker/                      # Dockerfile e docker-compose.yml
+├── docs/                        # Documentação do projeto
+│   ├── CONTRIBUTING.md.docx
+│   └── DOCUMENTACAO_DESIGN_FASE_LOGICA.md
+├── scripts/                     # Automação (build, execução, Docker)
+│   ├── build-MinGW-W64.bat
+│   ├── build-VisualStudio2022.bat
+│   ├── build-VisualStudio2026.bat
+│   ├── run-docker.bat
+│   ├── run-game.bat
+│   ├── run-headless.bat
+│   ├── stop-vcxsrv.bat
+│   ├── start_game.ps1
+│   └── stop_vcxsrv.ps1
 └── README.md
 ```
 
@@ -239,13 +235,13 @@ Para evitar problemas de ambiente local (compilador, dependências gráficas, PA
 #### 1) Build da imagem
 
 ```bash
-docker compose build
+docker compose -f docker/docker-compose.yml build
 ```
 
 #### 2) Rodar o jogo
 
 ```bash
-docker compose run --rm minddrop
+docker compose -f docker/docker-compose.yml run --rm minddrop
 ```
 
 ### Executar com interface gráfica no Windows (passo a passo completo)
@@ -289,7 +285,7 @@ Se listar processo, está ativo.
 #### Passo 5) Rodar o jogo via Docker com GUI
 
 ```bash
-docker compose run --rm minddrop
+docker compose -f docker/docker-compose.yml run --rm minddrop
 ```
 
 #### Passo 6) Se der erro de display
@@ -304,7 +300,7 @@ Se aparecer `Failed to open display host.docker.internal:0.0`:
 Se quiser validar rapidamente que o jogo iniciou no container:
 
 ```bash
-docker compose run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
+docker compose -f docker/docker-compose.yml run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
 ```
 
 Procure no log: `INFO: Initializing raylib`.
@@ -312,7 +308,7 @@ Procure no log: `INFO: Initializing raylib`.
 #### 2.1) Atalho para Windows (build + teste + run)
 
 ```bat
-run-docker.bat
+scripts\run-docker.bat
 ```
 
 O script executa automaticamente:
@@ -328,7 +324,7 @@ vai concluir com sucesso caso build + teste headless estejam OK.
 Esse teste confirma que o binário inicia corretamente sem depender de janela interativa:
 
 ```bash
-docker compose run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
+docker compose -f docker/docker-compose.yml run --rm minddrop bash -lc "timeout 5s xvfb-run -a ./bin/Debug/JogoEmC || true"
 ```
 
 > Procure no log mensagens como `INFO: Initializing raylib` para confirmar que o jogo iniciou no container.

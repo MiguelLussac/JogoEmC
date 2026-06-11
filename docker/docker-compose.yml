@@ -1,13 +1,13 @@
 services:
   minddrop:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     image: minddrop:latest
     container_name: minddrop_game
     environment:
       DISPLAY: ${DISPLAY:-host.docker.internal:0.0}
     volumes:
-      - ./resources:/app/resources
+      - ../resources:/app/resources
     stdin_open: true
     tty: true
