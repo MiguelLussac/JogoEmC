@@ -7,6 +7,9 @@
       "label": "build debug",
       "type": "process",
       "command": "make",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "windows": {
         "command": "mingw32-make"
       },
@@ -24,6 +27,9 @@
       "label": "build debug no premake",
       "type": "process",
       "command": "make",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "windows": {
         "command": "mingw32-make.exe"
       },
@@ -40,6 +46,9 @@
       "label": "build release",
       "type": "process",
       "command": "make",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "windows": {
         "command": "mingw32-make.exe",
         "args": ["config=release_x64"]
@@ -61,6 +70,9 @@
       "label": "Clean",
       "type": "process",
       "command": "make",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "windows": {
         "command": "mingw32-make.exe",
         "args": ["clean"]
