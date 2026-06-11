@@ -37,6 +37,9 @@ Ao final, o jogo gera um relatório com médias de acertos e sugestões de estra
 
 ---
 
+
+
+---
 ## 🛠️ Tecnologias Utilizadas
 
 - **Linguagem:** C
@@ -218,7 +221,13 @@ Durante o desenvolvimento, a equipe identificou e corrigiu os seguintes problema
 
 ## 🎥 Screencast
 
-https://github.com/user-attachments/assets/16e04ba7-db7c-431d-b559-b4bea3de63e6
+https://github.com/user-attachments/assets/3c0d756f-70e4-45d3-825e-4c217d2ece6c
+
+---
+
+# Vem testar o MindDrop!
+
+https://mind-drop.netlify.app/
 
 ---
 
