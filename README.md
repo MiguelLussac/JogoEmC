@@ -37,9 +37,6 @@ Ao final, o jogo gera um relatório com médias de acertos e sugestões de estra
 
 ---
 
-
-
----
 ## 🛠️ Tecnologias Utilizadas
 
 - **Linguagem:** C
@@ -222,6 +219,12 @@ Durante o desenvolvimento, a equipe identificou e corrigiu os seguintes problema
 ## 🎥 Screencast
 
 https://github.com/user-attachments/assets/3c0d756f-70e4-45d3-825e-4c217d2ece6c
+
+---
+
+## Apresentação MindDrop!
+
+https://canva.link/j5a81oh0nxyvdzt
 
 ---
 
